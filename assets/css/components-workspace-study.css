@@ -639,11 +639,8 @@
     280px,
     calc(var(--das-composer-width, 100%) - (var(--das-composer-gutter) * 2))
   );
-  /* move composer above keyboard when --das-keyboard-offset is set by JS */
-  bottom: var(
-    --das-keyboard-offset,
-    calc(var(--das-composer-bottom) + env(safe-area-inset-bottom, 0px))
-  );
+  /* Use fixed bottom position, JS will override with top when keyboard is active */
+  bottom: 16px;
 
   box-sizing: border-box;
   margin: 0;
@@ -673,11 +670,10 @@
   }
 
   /* When keyboard is active, JS will position the composer using inline styles
-     (visualViewport). Avoid forcing `top`/`transform` here so JS can set exact coords. */
+  (visualViewport). Avoid forcing `top`/`transform` here so JS can set exact coords. */
   .page-study .study-chat-composer.keyboard-active {
-    position: fixed;
-    bottom: auto;
-    /* no top/transform here — computed by JS for accurate placement */
+    position: fixed !important;
+    transition: top 0.2s ease-out;
   }
 }
 
@@ -1033,8 +1029,8 @@
   /* KEEP your existing left/width logic */
   left: var(--das-composer-left);
   width: var(--das-composer-width);
-  /* allow JS to override bottom via --das-keyboard-offset */
-  bottom: var(--das-keyboard-offset, 16px);
+  /* Use fixed bottom position, JS will override with top when keyboard is active */
+  bottom: 16px;
 
   display: flex;
   flex-direction: column; /* ✅ KEY FIX */
