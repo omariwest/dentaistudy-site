@@ -16,6 +16,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const composerMenu = document.getElementById("study-composer-menu");
   const attachActionBtn = document.getElementById("study-attach-action");
 
+  const isTouchDevice =
+    window.matchMedia?.("(hover: none) and (pointer: coarse)")?.matches ||
+    window.innerWidth <= 1024;
+
   // -----------------------------
   // Fixed composer alignment (respect sidebar width)
   // -----------------------------
@@ -110,89 +114,89 @@ document.addEventListener("DOMContentLoaded", () => {
   requestSyncFixedComposer();
   window.addEventListener("resize", requestSyncFixedComposer);
   window.addEventListener("load", requestSyncFixedComposer);
-  window.addEventListener("scroll", requestSyncFixedComposer);
+  // Desktop only: on mobile, scroll events fire during iOS keyboard animation and cause jumps.
+  if (!isTouchDevice) {
+    window.addEventListener("scroll", requestSyncFixedComposer);
+  }
 
   // -----------------------------
-  // MOBILE KEYBOARD DETECTION (fix composer above keyboard)
+  // MOBILE KEYBOARD (ChatGPT-like): bottom inset via CSS vars
   // -----------------------------
   function setupMobileKeyboardDetection() {
     const composer = document.querySelector(".study-chat-composer");
     const textarea = document.querySelector(".study-chat-input#study-topic");
 
-    if (!composer || !textarea || window.innerWidth > 1024) return;
+    if (!composer || !textarea) return;
+    if (!document.body.classList.contains("page-study")) return;
 
-    // Only use visualViewport API, don't mix with CSS variables
+    if (!isTouchDevice) return;
+
+    const rootStyle = document.documentElement.style;
+
+    function setInsetVars() {
+      const vv = window.visualViewport;
+      if (!vv) return;
+
+      // Keyboard inset (px): how much of layout viewport is covered from bottom
+      const bottomInset = Math.max(
+        0,
+        window.innerHeight - (vv.height + vv.offsetTop)
+      );
+      rootStyle.setProperty("--das-vv-bottom", `${Math.round(bottomInset)}px`);
+
+      // Clamp textarea height to a safe fraction of visible viewport
+      // (prevents actions row from being pushed under keyboard)
+      const maxInput = Math.max(
+        120,
+        Math.min(240, Math.round(vv.height * 0.35))
+      );
+      rootStyle.setProperty("--das-vv-input-max-h", `${maxInput}px`);
+    }
+
+    function clearInsetVars() {
+      rootStyle.removeProperty("--das-vv-bottom");
+      rootStyle.removeProperty("--das-vv-input-max-h");
+      rootStyle.removeProperty("--das-keyboard-offset");
+    }
+
+    function onFocus() {
+      composer.classList.add("keyboard-active");
+      // Delay helps iOS settle keyboard animation
+      setTimeout(() => {
+        setInsetVars();
+        scheduleScrollToBottom();
+      }, 60);
+    }
+
+    function onBlur() {
+      composer.classList.remove("keyboard-active");
+      clearInsetVars();
+    }
+
     if (window.visualViewport && window.visualViewport.addEventListener) {
-      let isKeyboardActive = false;
+      const updateIfActive = () => {
+        if (document.activeElement !== textarea) return;
+        setInsetVars();
 
-      function updateComposerPosition() {
-        const vv = window.visualViewport;
+        // Keep the latest message visible while keyboard animates
+        scheduleScrollToBottom();
+      };
 
-        if (document.activeElement === textarea) {
-          // Keyboard is likely active
-          const composerHeight = composer.offsetHeight || 64;
-          const margin = 8; // Small margin above keyboard
+      window.visualViewport.addEventListener("resize", updateIfActive);
+      window.visualViewport.addEventListener("scroll", updateIfActive);
 
-          // Position composer above keyboard using visualViewport coordinates
-          const targetTop = Math.max(
-            4, // Minimum top margin
-            vv.height - composerHeight - margin + vv.offsetTop
-          );
+      textarea.addEventListener("focus", onFocus);
+      textarea.addEventListener("blur", onBlur);
 
-          composer.style.top = `${Math.round(targetTop)}px`;
-          composer.style.bottom = "auto";
-          composer.classList.add("keyboard-active");
-          isKeyboardActive = true;
-        } else if (isKeyboardActive) {
-          // Keyboard closed, reset position
-          composer.style.top = "";
-          composer.style.bottom = "";
-          composer.classList.remove("keyboard-active");
-          isKeyboardActive = false;
-        }
-      }
-
-      // Listen for visual viewport changes
-      window.visualViewport.addEventListener("resize", updateComposerPosition);
-      window.visualViewport.addEventListener("scroll", updateComposerPosition);
-
-      // Also handle focus/blur events
-      textarea.addEventListener("focus", () => {
-        setTimeout(updateComposerPosition, 100); // Slight delay for keyboard animation
-      });
-
-      textarea.addEventListener("blur", () => {
-        composer.style.top = "";
-        composer.style.bottom = "";
-        composer.classList.remove("keyboard-active");
-        isKeyboardActive = false;
-      });
-
-      // Initial update
-      updateComposerPosition();
+      // Init once
+      if (document.activeElement === textarea) onFocus();
     } else {
-      // Fallback for browsers without visualViewport
-      const rootStyle = document.documentElement.style;
-
-      function fallbackKeyboardDetection() {
-        if (document.activeElement === textarea) {
-          const keyboardHeight = 300; // Approximate keyboard height
-          rootStyle.setProperty(
-            "--das-keyboard-offset",
-            `${keyboardHeight + 20}px`
-          );
-          composer.classList.add("keyboard-active");
-        } else {
-          rootStyle.removeProperty("--das-keyboard-offset");
-          composer.classList.remove("keyboard-active");
-        }
-      }
-
-      textarea.addEventListener("focus", fallbackKeyboardDetection);
-      textarea.addEventListener("blur", () => {
-        rootStyle.removeProperty("--das-keyboard-offset");
-        composer.classList.remove("keyboard-active");
+      // Fallback (older browsers): approximate inset
+      textarea.addEventListener("focus", () => {
+        composer.classList.add("keyboard-active");
+        rootStyle.setProperty("--das-keyboard-offset", "320px");
       });
+      textarea.addEventListener("blur", onBlur);
     }
   }
 
@@ -223,6 +227,53 @@ document.addEventListener("DOMContentLoaded", () => {
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;");
+  }
+
+  // -----------------------------
+  // SCROLL (ChatGPT-like)
+  // - Desktop: scroll the chat shell container
+  // - Mobile: scroll the window (chat log is overflow: visible)
+  // -----------------------------
+  function getChatScrollContainer() {
+    // Desktop: your CSS makes .study-chat-shell scrollable (overflow-y: auto)
+    const shell = document.querySelector(".page-study .study-chat-shell");
+    if (!shell) return null;
+
+    const style = window.getComputedStyle(shell);
+    const isScrollable =
+      style.overflowY === "auto" || style.overflowY === "scroll";
+    return isScrollable ? shell : null;
+  }
+
+  function scrollChatToBottom({ smooth = false } = {}) {
+    const container = getChatScrollContainer();
+
+    // If desktop scroll container exists, scroll it
+    if (container) {
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: smooth ? "smooth" : "auto",
+      });
+      return;
+    }
+
+    // Mobile: scroll the page (window)
+    window.scrollTo({
+      top: document.documentElement.scrollHeight,
+      behavior: smooth ? "smooth" : "auto",
+    });
+  }
+
+  function scheduleScrollToBottom() {
+    // iOS Safari often needs delayed + rAF scrolling to reliably reach the latest bubble.
+    scrollChatToBottom();
+
+    requestAnimationFrame(() => {
+      scrollChatToBottom();
+      requestAnimationFrame(() => scrollChatToBottom());
+    });
+
+    setTimeout(() => scrollChatToBottom(), 60);
   }
 
   function appendChatBubble(role, html) {
@@ -277,8 +328,8 @@ document.addEventListener("DOMContentLoaded", () => {
       answerEl.appendChild(wrapper);
     }
 
-    // Keep newest in view
-    answerEl.scrollTop = answerEl.scrollHeight;
+    // Keep newest in view (works on both desktop + mobile)
+    scheduleScrollToBottom();
   }
 
   // Per-bubble copy (copies only the clicked AI answer)
@@ -289,7 +340,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const wrapper = btn.closest(".study-ai-message-wrapper");
       const contentEl = wrapper?.querySelector(".study-bubble-content");
-      const feedbackEl = btn.querySelector(".study-copy-feedback");
 
       const textToCopy = (contentEl?.innerText || "").trim();
       if (!textToCopy) return;
@@ -510,43 +560,66 @@ document.addEventListener("DOMContentLoaded", () => {
   initUserTier();
 
   // -----------------------------
-  // Composer UX: Enter-to-send (single-line pill)
+  // Composer UX (ChatGPT-like): auto-grow + Enter-to-send (iOS-safe)
   // -----------------------------
-  function lockToSingleLinePill(el) {
-    if (!el) return;
-
-    const maxHeight = 240;
-
-    // Set initial styles
-    el.style.height = "auto";
-    el.style.maxHeight = `${maxHeight}px`;
-    el.style.overflowY = "auto";
-
-    // Auto-expand handler
-    function autoGrow() {
-      el.style.height = "auto";
-      const newHeight = Math.min(el.scrollHeight, maxHeight);
-      el.style.height = newHeight + "px";
-      el.style.overflowY = el.scrollHeight > maxHeight ? "auto" : "hidden";
-    }
-
-    el.addEventListener("input", autoGrow);
-
-    // Trigger initial expansion
-    el.dispatchEvent(new Event("input"));
+  function getMaxHeightPx(el, fallback = 240) {
+    const mh = getComputedStyle(el).maxHeight;
+    const px = Number.parseFloat(mh);
+    return Number.isFinite(px) ? px : fallback;
   }
 
-  if (topicInput) {
-    lockToSingleLinePill(topicInput);
+  function autoGrowTextarea(el) {
+    if (!el) return;
+
+    // Allow JS to follow CSS clamp (including --das-vv-input-max-h)
+    const maxHeight = getMaxHeightPx(el, 240);
+
+    el.style.height = "auto";
+    const next = Math.min(el.scrollHeight, maxHeight);
+    el.style.height = `${next}px`;
+    el.style.overflowY = el.scrollHeight > maxHeight ? "auto" : "hidden";
+  }
+
+  function setupComposerInputBehavior() {
+    if (!topicInput || !form) return;
+
+    // Initial sizing
+    autoGrowTextarea(topicInput);
+
+    topicInput.addEventListener("input", () => {
+      autoGrowTextarea(topicInput);
+    });
 
     topicInput.addEventListener("keydown", (e) => {
       if (e.key !== "Enter") return;
+      if (e.shiftKey) return; // keep option if you ever allow multiline
+      if (e.isComposing) return; // IME/predictive text safety
 
-      // Always send. No multi-line.
       e.preventDefault();
-      if (form) form.requestSubmit();
+
+      // iOS Safari can be flaky: requestSubmit + fallback click
+      if (typeof form.requestSubmit === "function") {
+        try {
+          form.requestSubmit();
+          return;
+        } catch {
+          // fall through
+        }
+      }
+
+      if (submitBtn) {
+        submitBtn.click();
+        return;
+      }
+
+      // last-resort: dispatch submit
+      form.dispatchEvent(
+        new Event("submit", { bubbles: true, cancelable: true })
+      );
     });
   }
+
+  setupComposerInputBehavior();
 
   // -----------------------------
   // UI HELPERS
@@ -584,7 +657,7 @@ document.addEventListener("DOMContentLoaded", () => {
     wrapper.appendChild(bubble);
 
     answerEl.appendChild(wrapper);
-    answerEl.scrollTop = answerEl.scrollHeight;
+    scheduleScrollToBottom();
 
     loadingBubbleWrapper = wrapper;
   }
@@ -985,12 +1058,18 @@ document.addEventListener("DOMContentLoaded", () => {
     if (topicInput) {
       topicInput.value = "";
       topicInput.style.height = "38px"; // Reset to initial height
-      topicInput.focus();
+
+      // Your requirement: send + keyboard goes down on mobile
+      if (isTouchDevice) topicInput.blur();
+      else topicInput.focus();
     }
 
     // Reset UI
     setLoading(true);
     updateCopyVisibility();
+
+    // Clear the submitting flag once loading starts
+    form.isSubmitting = false;
 
     let topic = baseTopic;
 
