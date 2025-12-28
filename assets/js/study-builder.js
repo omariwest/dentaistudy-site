@@ -121,70 +121,73 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!composer || !textarea || window.innerWidth > 1024) return;
 
-    let originalViewportHeight = window.innerHeight;
-    let keyboardVisible = false;
-    let resizeTimeout;
+    const rootStyle = document.documentElement.style;
+    let keyboardActive = false;
 
-    function updateComposerForKeyboard() {
-      const currentViewportHeight = window.innerHeight;
-      const keyboardHeight = originalViewportHeight - currentViewportHeight;
-
-      if (keyboardHeight > 100 && document.activeElement === textarea) {
-        // Keyboard is visible
+    function applyKeyboardOffset(offsetPx) {
+      if (typeof offsetPx === "number" && offsetPx > 0) {
+        rootStyle.setProperty("--das-keyboard-offset", `${offsetPx}px`);
         composer.classList.add("keyboard-active");
-
-        // Calculate position above keyboard
-        const composerTop = Math.max(
-          50,
-          currentViewportHeight - keyboardHeight - 80
-        );
-        composer.style.top = composerTop + "px";
-
-        keyboardVisible = true;
-      } else if (keyboardVisible) {
-        // Keyboard closed
+        keyboardActive = true;
+      } else {
+        rootStyle.removeProperty("--das-keyboard-offset");
         composer.classList.remove("keyboard-active");
-        composer.style.top = "";
-        keyboardVisible = false;
+        keyboardActive = false;
       }
-
-      // Update for next check
-      originalViewportHeight = Math.max(
-        originalViewportHeight,
-        currentViewportHeight
-      );
     }
 
-    // Check on focus
+    function computeAndApply() {
+      const vv = window.visualViewport;
+
+      // visualViewport is the most reliable way to detect the on-screen keyboard
+      // on modern mobile browsers. Fallback to window.innerHeight when unavailable.
+      const visualHeight = vv ? vv.height : window.innerHeight;
+
+      // Estimated keyboard height (difference between layout viewport and visual viewport)
+      const estimatedKeyboard = Math.max(0, window.innerHeight - visualHeight);
+
+      // Heuristic: treat small differences as no keyboard
+      if (document.activeElement === textarea && estimatedKeyboard > 80) {
+        // Add a small margin so composer isn't flush to keyboard
+        const offset = estimatedKeyboard + 12;
+        applyKeyboardOffset(offset);
+
+        // Keep composer visible in the visual viewport (helpful on iOS)
+        try {
+          textarea.scrollIntoView({ block: "center", behavior: "smooth" });
+        } catch (e) {
+          /* noop */
+        }
+      } else {
+        applyKeyboardOffset(0);
+      }
+    }
+
+    // Run immediately on focus so composer moves before typing
     textarea.addEventListener("focus", () => {
-      setTimeout(() => {
-        updateComposerForKeyboard();
-        // Force re-check after a short delay
-        setTimeout(updateComposerForKeyboard, 300);
-      }, 100);
+      // small delay allows visualViewport to update on some devices
+      setTimeout(computeAndApply, 50);
+      // ensure another check after keyboard animation
+      setTimeout(computeAndApply, 350);
     });
 
-    // Check on blur
     textarea.addEventListener("blur", () => {
-      setTimeout(() => {
-        updateComposerForKeyboard();
-        // Wait for keyboard to fully hide
-        setTimeout(() => {
-          composer.classList.remove("keyboard-active");
-          composer.style.top = "";
-          keyboardVisible = false;
-        }, 200);
-      }, 100);
+      // clear any offset when input loses focus
+      setTimeout(() => applyKeyboardOffset(0), 80);
     });
 
-    // Check on resize (keyboard triggers resize on mobile)
-    window.addEventListener("resize", () => {
-      clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(updateComposerForKeyboard, 100);
-    });
+    // Update on visualViewport resize (preferred) and window resize fallback
+    if (window.visualViewport && window.visualViewport.addEventListener) {
+      window.visualViewport.addEventListener("resize", computeAndApply);
+      window.visualViewport.addEventListener("scroll", computeAndApply);
+    }
 
-    // Initial check
-    updateComposerForKeyboard();
+    window.addEventListener("resize", computeAndApply);
+    // also update while typing (some keyboards expand)
+    textarea.addEventListener("input", computeAndApply);
+
+    // Initial probe
+    computeAndApply();
   }
 
   // -----------------------------
