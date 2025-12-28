@@ -81,11 +81,6 @@
     padding: 0;
   }
 
-  /* One scroll area: the page (no inner chat scroll box) */
-  .page-study .study-chat-body {
-    padding: 12px; /* single padding layer */
-  }
-
   .page-study .study-chat-log {
     padding: 0;
     max-height: none;
@@ -612,25 +607,32 @@
 }
 
 /* ==============================
-   Study chat "one-box" composer (v1)
+   Study chat composer (ChatGPT-like) — CLEAN
+   - Desktop: aligned to workspace-main using --das-composer-left/width (keeps sidebar layout)
+   - Mobile/iPad: full width with gutters
+   - Keyboard-safe: bottom-anchored using --das-vv-bottom (set by JS)
+   - Textarea grows UP, then scrolls (max-height is dynamic via --das-vv-input-max-h)
    ============================== */
 
-.study-chat-card {
-  padding-bottom: 12px;
+/* Make room so the last message isn't hidden behind the fixed composer */
+.page-study .study-chat-body {
+  padding-bottom: calc(160px + env(safe-area-inset-bottom, 0px));
 }
 
-.study-chat-body {
-  padding: 10px 11px;
-}
-
-/* Study page: fixed composer aligned to workspace-main via CSS vars (ChatGPT-like) */
+/* Fixed composer aligned to workspace-main via CSS vars */
 .page-study .study-chat-composer {
+  /* Desktop alignment (JS sets these vars via syncFixedComposer) */
   --das-composer-gutter: 16px;
-  --das-composer-bottom: 12px;
   --das-composer-radius: 18px;
+  --das-composer-bottom-gap: 16px;
+
+  /* Mobile keyboard vars (JS sets these; safe defaults for desktop) */
+  --das-vv-bottom: 0px;
+  --das-vv-input-max-h: 240px;
 
   position: fixed;
   z-index: 50;
+
   left: max(
     0px,
     calc(var(--das-composer-left, 0px) + var(--das-composer-gutter))
@@ -639,148 +641,86 @@
     280px,
     calc(var(--das-composer-width, 100%) - (var(--das-composer-gutter) * 2))
   );
-  /* Use fixed bottom position, JS will override with top when keyboard is active */
-  bottom: 16px;
+
+  bottom: calc(
+    var(--das-composer-bottom-gap) + env(safe-area-inset-bottom, 0px) +
+      var(--das-vv-bottom)
+  );
 
   box-sizing: border-box;
   margin: 0;
-  padding: 10px 12px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
 
-  border-radius: var(--das-composer-radius);
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-  backdrop-filter: blur(10px);
-}
-
-/* Tablet/Mobile: pin composer to viewport gutters (prevents edge-sticking + overflow) */
-@media (max-width: 1024px) {
-  .page-study .study-chat-composer {
-    left: var(--das-composer-gutter, 12px) !important;
-    right: var(--das-composer-gutter, 12px) !important;
-
-    width: auto !important; /* left + right define width */
-    max-width: calc(100vw - (var(--das-composer-gutter, 12px) * 2)) !important;
-
-    /* New: Dynamic positioning for keyboard */
-    transition: transform 0.3s ease;
-  }
-
-  /* When keyboard is active, JS will position the composer using inline styles
-  (visualViewport). Avoid forcing `top`/`transform` here so JS can set exact coords. */
-  .page-study .study-chat-composer.keyboard-active {
-    position: fixed !important;
-    transition: top 0.2s ease-out;
-  }
-}
-
-/* Make room so the last message isn't hidden behind the sticky composer */
-.page-study .study-chat-body {
-  padding-bottom: calc(128px + env(safe-area-inset-bottom, 0px));
-}
-
-/* Composer internal layout (ChatGPT-like):
-   - form is a column
-   - row 1 is buttons + textarea + send
-   - row 2 is file summary (full width)
-*/
-.page-study .study-chat-composer {
   display: flex;
   flex-direction: column;
-  align-items: stretch;
   gap: 8px;
+
+  padding: 10px 12px;
+
+  background: #ffffff;
+  border: 1px solid rgba(229, 231, 235, 0.8);
+  border-radius: var(--das-composer-radius);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+
+  overscroll-behavior: contain;
+  -webkit-tap-highlight-color: transparent;
+  transition: bottom 140ms ease-out;
 }
 
-/* Row 1: + / textarea / send */
-.page-study .study-chat-composer .das-composer-row {
+.page-study .study-chat-composer.keyboard-active {
+  transition: bottom 120ms ease-out;
+}
+
+/* Optional: if your markup has an inner row wrapper */
+.page-study .study-chat-composer .das-composer-row,
+.page-study .study-composer-actions {
   display: flex;
   align-items: flex-end;
+  justify-content: space-between;
   gap: 10px;
   min-width: 0;
 }
 
 /* Keep buttons from stretching */
-.page-study .study-chat-composer .study-composer-left,
-.page-study .study-chat-composer .study-chat-send {
-  flex: 0 0 auto;
-}
-
-/* Textarea grows like ChatGPT */
-.page-study .study-chat-composer .study-chat-input#study-topic {
-  flex: 1 1 auto;
-  min-width: 0;
-
-  resize: none;
-  padding: 10px 12px;
-  min-height: 38px;
-  max-height: 240px;
-  overflow-y: auto;
-
-  background: transparent;
-  border: 0;
-  border-radius: 14px;
-
-  font-family: inherit;
-  font-size: 0.95rem;
-  line-height: 1.5;
-  color: inherit;
-}
-
-.page-study .study-chat-composer .study-chat-input#study-topic:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(10, 61, 98, 0.12);
-}
-
-/* Row 2: file summary is truly on its own line */
-.page-study .study-chat-composer .study-file-summary {
-  width: 100%;
-  margin: 0;
-}
-
-/* keep buttons from stretching */
 .page-study .study-composer-left,
 .page-study .study-chat-send {
   flex: 0 0 auto;
 }
 
-/* Bar children layout */
-.study-chat-attach {
-  white-space: nowrap;
-  border-radius: 12px;
-}
+/* Textarea: embedded (no inner pill), grows like ChatGPT */
+.page-study .study-chat-input,
+.page-study .study-chat-input#study-topic {
+  width: 100%;
+  min-height: 44px;
+  max-height: var(--das-vv-input-max-h, 240px);
+  padding: 12px 14px;
 
-/* Composer textarea grows with text (ChatGPT embedded style) */
-.study-chat-input#study-topic {
-  flex: 1 1 auto;
-  min-height: 38px;
-  max-height: 240px;
-  height: auto;
   resize: none;
   overflow-y: auto;
-  box-sizing: border-box;
-  padding: 10px 12px;
 
-  border-radius: 14px;
-  border: 0;
-
-  /* ✅ remove the silver fill */
-  background: transparent;
+  background: transparent !important;
+  border: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
 
   font-family: inherit;
-  font-size: 0.95rem;
+  font-size: 15px;
   line-height: 1.5;
   color: inherit;
 }
 
-/* Optional: focus ring very subtle (ChatGPT-like) */
-.study-chat-input#study-topic:focus {
+.page-study .study-chat-input#study-topic:focus {
   outline: none;
   box-shadow: none;
 }
 
+/* File summary should live above actions when present */
+.page-study .study-file-summary {
+  width: 100%;
+  margin: 0;
+}
+
+/* Send button (keep your existing behavior/spinner) */
 .study-chat-send {
   width: 36px;
   height: 36px;
@@ -794,6 +734,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .study-chat-send svg {
@@ -833,59 +776,18 @@
   cursor: not-allowed;
 }
 
-/* Mobile: make Study Builder chat full-width inside the main card (no inner scroll box) */
-@media (max-width: 520px) {
-  /* 1) Remove the “card inside card” effect */
-  .study-chat-body {
-    padding: 10px 12px; /* keep one padding layer only */
-  }
-
-  .study-chat-log {
-    padding: 0; /* remove inner padding */
-    max-height: none; /* remove inner height cap */
-    overflow-y: visible; /* remove inner scrollbar */
-    background: transparent;
-    border-radius: 0;
-  }
-
-  /* 2) Let bubbles breathe (more words per line) */
-  .study-chat-bubble {
-    max-width: 100%;
-  }
-
-  /* 3) Composer stays ChatGPT-like on mobile too (row + summary below) */
-  .study-chat-composer {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
-  }
-
-  .study-composer-left {
-    flex: 0 0 auto;
-  }
-
-  .study-chat-input#study-topic {
-    flex: 1 1 auto;
-    min-width: 0;
-
-    height: auto;
-    min-height: 38px;
-    max-height: 200px;
-
-    overflow-y: auto;
-
-    padding-top: 12px;
-    padding-bottom: 12px;
-  }
-
-  .study-chat-send {
-    flex: 0 0 auto;
-    margin-left: 0;
+/* Mobile/iPad: full width composer with gutters (keeps desktop sidebar alignment intact) */
+@media (max-width: 1024px) {
+  .page-study .study-chat-composer {
+    left: 12px !important;
+    right: 12px !important;
+    width: auto !important;
+    max-width: calc(100vw - 24px) !important;
   }
 }
 
-/* Composer: icon button + popover menu */
+/* ===== Composer: + icon + popover menu (keep your existing UX) ===== */
+
 .study-composer-left {
   position: relative;
   display: inline-flex;
@@ -905,6 +807,9 @@
   align-items: center;
   justify-content: center;
   transition: transform 120ms ease;
+
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .study-chat-iconbtn svg {
@@ -928,7 +833,6 @@
   background: #ffffff;
   box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
 
-  /* animation-friendly hidden state (instead of display:none) */
   opacity: 0;
   transform: translateY(10px) scale(0.98);
   transform-origin: bottom left;
@@ -936,7 +840,6 @@
   visibility: hidden;
 
   transition: opacity 140ms ease, transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
-
   z-index: 20;
 }
 
@@ -961,7 +864,7 @@
 }
 
 .study-composer-menu-item-icon {
-  color: rgba(15, 23, 42, 0.45); /* premium silver */
+  color: rgba(15, 23, 42, 0.45);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -996,6 +899,7 @@
   border-color: rgba(10, 61, 98, 0.35);
   background: rgba(10, 61, 98, 0.06);
 }
+
 /* Study Builder: hide left sidebar on mobile/tablet (same breakpoint as hamburger) */
 @media (max-width: 900px) {
   body.page-study-builder .workspace-sidebar {
@@ -1016,77 +920,5 @@
   to {
     opacity: 0.9;
     transform: translateY(0);
-  }
-}
-
-/* ===============================
-   ChatGPT-like Composer Override
-   =============================== */
-
-.page-study .study-chat-composer {
-  position: fixed;
-
-  /* KEEP your existing left/width logic */
-  left: var(--das-composer-left);
-  width: var(--das-composer-width);
-  /* Use fixed bottom position, JS will override with top when keyboard is active */
-  bottom: 16px;
-
-  display: flex;
-  flex-direction: column; /* ✅ KEY FIX */
-  gap: 8px;
-
-  padding: 10px 12px;
-  border-radius: 18px;
-  background: #ffffff;
-  border: 1px solid rgba(229, 231, 235, 0.7);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
-
-  z-index: 20;
-}
-
-/* TEXTAREA (embedded: NO inner box, ChatGPT style) */
-.page-study .study-chat-input,
-.page-study .study-chat-input#study-topic {
-  width: 100%;
-  min-height: 44px;
-  max-height: 240px;
-  padding: 12px 14px;
-
-  resize: none;
-
-  /* ✅ remove the inner “pill” completely */
-  background: transparent !important;
-  border: 0 !important;
-  outline: none !important;
-  box-shadow: none !important;
-  border-radius: 0 !important;
-
-  font-size: 15px;
-  line-height: 1.5;
-
-  overflow-y: auto;
-}
-
-/* ACTION ROW (BOTTOM) */
-.page-study .study-composer-actions {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-/* Prevent icons from stretching */
-.page-study .study-composer-left,
-.page-study .study-chat-send {
-  flex: 0 0 auto;
-}
-
-/* MOBILE: FULL WIDTH */
-@media (max-width: 1024px) {
-  .page-study .study-chat-composer {
-    left: 12px;
-    right: 12px;
-    width: auto;
   }
 }
