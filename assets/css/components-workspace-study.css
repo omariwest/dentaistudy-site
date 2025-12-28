@@ -672,12 +672,12 @@
     transition: transform 0.3s ease;
   }
 
-  /* When keyboard is active, composer moves up */
+  /* When keyboard is active, JS will position the composer using inline styles
+     (visualViewport). Avoid forcing `top`/`transform` here so JS can set exact coords. */
   .page-study .study-chat-composer.keyboard-active {
-    position: fixed !important;
-    bottom: auto !important;
-    top: calc(100vh - 350px) !important; /* Will be set by JS */
-    transform: translateY(-100%) !important;
+    position: fixed;
+    bottom: auto;
+    /* no top/transform here — computed by JS for accurate placement */
   }
 }
 
