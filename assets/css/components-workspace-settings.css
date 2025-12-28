@@ -9,7 +9,7 @@
   align-items: center;
 
   flex-wrap: nowrap; /* ✅ prevents checkbox + text from stacking */
-  gap: 14px;
+  gap: 18px; /* slightly more space between checkbox and label */
   white-space: nowrap; /* ✅ keeps phrase on same line */
 
   padding: 12px 14px;
@@ -35,7 +35,10 @@
   flex: 0 1 auto; /* ✅ prevents it from taking 100% width */
   min-width: 0;
 
-  line-height: 1.4;
+  /* keep a compact line-height so text visually centers with the checkbox */
+  line-height: 1.2;
+  /* nudge the label down a couple pixels to match checkbox rendering */
+  transform: translateY(1px);
 }
 
 .settings-checkbox-row:hover {
@@ -54,6 +57,12 @@
   flex-shrink: 0;
 
   accent-color: #0a3d62;
+}
+
+/* Ensure checkbox glyph is vertically centered next to the label */
+.settings-checkbox-row input {
+  align-self: center;
+  vertical-align: middle;
 }
 
 .settings-checkbox-row input:focus-visible {
