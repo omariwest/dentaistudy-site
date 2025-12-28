@@ -121,100 +121,79 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!composer || !textarea || window.innerWidth > 1024) return;
 
-    const rootStyle = document.documentElement.style;
-    let keyboardActive = false;
+    // Only use visualViewport API, don't mix with CSS variables
+    if (window.visualViewport && window.visualViewport.addEventListener) {
+      let isKeyboardActive = false;
 
-    function applyKeyboardOffset(offsetPx) {
-      if (typeof offsetPx === "number" && offsetPx > 0) {
-        rootStyle.setProperty("--das-keyboard-offset", `${offsetPx}px`);
-        composer.classList.add("keyboard-active");
-        keyboardActive = true;
-      } else {
-        rootStyle.removeProperty("--das-keyboard-offset");
-        composer.classList.remove("keyboard-active");
-        keyboardActive = false;
-      }
-    }
+      function updateComposerPosition() {
+        const vv = window.visualViewport;
 
-    function computeAndApply() {
-      const vv = window.visualViewport;
+        if (document.activeElement === textarea) {
+          // Keyboard is likely active
+          const composerHeight = composer.offsetHeight || 64;
+          const margin = 8; // Small margin above keyboard
 
-      // visualViewport is the most reliable way to detect the on-screen keyboard
-      // on modern mobile browsers. Fallback to window.innerHeight when unavailable.
-      const visualHeight = vv ? vv.height : window.innerHeight;
-
-      // Estimated keyboard height (difference between layout viewport and visual viewport)
-      const estimatedKeyboard = Math.max(0, window.innerHeight - visualHeight);
-
-      // Heuristic: treat small differences as no keyboard
-      if (document.activeElement === textarea && estimatedKeyboard > 80) {
-        // If visualViewport is available, compute a top position so the
-        // composer sits immediately above the keyboard (uses visual coords).
-        if (vv) {
-          // Reduce margin so composer sits closer above keyboard
-          const margin = 6;
-          const visualTop = vv.offsetTop || 0;
-          const visualBottom = visualTop + vv.height;
-          const composerHeight =
-            composer.getBoundingClientRect().height ||
-            composer.offsetHeight ||
-            64;
-
-          // Place composer so its bottom is `margin` pixels above visualBottom
+          // Position composer above keyboard using visualViewport coordinates
           const targetTop = Math.max(
-            visualTop + 6,
-            visualBottom - composerHeight - margin
+            4, // Minimum top margin
+            vv.height - composerHeight - margin + vv.offsetTop
           );
 
-          // Apply the top directly (position: fixed), clear bottom so CSS doesn't conflict
           composer.style.top = `${Math.round(targetTop)}px`;
           composer.style.bottom = "auto";
           composer.classList.add("keyboard-active");
-
-          // Ensure textarea is visible inside visual viewport (iOS Safari helpful)
-          try {
-            textarea.scrollIntoView({ block: "center", behavior: "smooth" });
-          } catch (e) {
-            /* noop */
-          }
-        } else {
-          // Fallback: set CSS var (bottom offset) like before
-          const offset = estimatedKeyboard + 12;
-          applyKeyboardOffset(offset);
+          isKeyboardActive = true;
+        } else if (isKeyboardActive) {
+          // Keyboard closed, reset position
+          composer.style.top = "";
+          composer.style.bottom = "";
+          composer.classList.remove("keyboard-active");
+          isKeyboardActive = false;
         }
-      } else {
-        // Keyboard not visible: clear any inline top/bottom and CSS var
+      }
+
+      // Listen for visual viewport changes
+      window.visualViewport.addEventListener("resize", updateComposerPosition);
+      window.visualViewport.addEventListener("scroll", updateComposerPosition);
+
+      // Also handle focus/blur events
+      textarea.addEventListener("focus", () => {
+        setTimeout(updateComposerPosition, 100); // Slight delay for keyboard animation
+      });
+
+      textarea.addEventListener("blur", () => {
         composer.style.top = "";
         composer.style.bottom = "";
-        applyKeyboardOffset(0);
+        composer.classList.remove("keyboard-active");
+        isKeyboardActive = false;
+      });
+
+      // Initial update
+      updateComposerPosition();
+    } else {
+      // Fallback for browsers without visualViewport
+      const rootStyle = document.documentElement.style;
+
+      function fallbackKeyboardDetection() {
+        if (document.activeElement === textarea) {
+          const keyboardHeight = 300; // Approximate keyboard height
+          rootStyle.setProperty(
+            "--das-keyboard-offset",
+            `${keyboardHeight + 20}px`
+          );
+          composer.classList.add("keyboard-active");
+        } else {
+          rootStyle.removeProperty("--das-keyboard-offset");
+          composer.classList.remove("keyboard-active");
+        }
       }
+
+      textarea.addEventListener("focus", fallbackKeyboardDetection);
+      textarea.addEventListener("blur", () => {
+        rootStyle.removeProperty("--das-keyboard-offset");
+        composer.classList.remove("keyboard-active");
+      });
     }
-
-    // Run immediately on focus so composer moves before typing
-    textarea.addEventListener("focus", () => {
-      // small delay allows visualViewport to update on some devices
-      setTimeout(computeAndApply, 50);
-      // ensure another check after keyboard animation
-      setTimeout(computeAndApply, 350);
-    });
-
-    textarea.addEventListener("blur", () => {
-      // clear any offset when input loses focus
-      setTimeout(() => applyKeyboardOffset(0), 80);
-    });
-
-    // Update on visualViewport resize (preferred) and window resize fallback
-    if (window.visualViewport && window.visualViewport.addEventListener) {
-      window.visualViewport.addEventListener("resize", computeAndApply);
-      window.visualViewport.addEventListener("scroll", computeAndApply);
-    }
-
-    window.addEventListener("resize", computeAndApply);
-    // also update while typing (some keyboards expand)
-    textarea.addEventListener("input", computeAndApply);
-
-    // Initial probe
-    computeAndApply();
   }
 
   // -----------------------------
