@@ -148,17 +148,40 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Heuristic: treat small differences as no keyboard
       if (document.activeElement === textarea && estimatedKeyboard > 80) {
-        // Add a small margin so composer isn't flush to keyboard
-        const offset = estimatedKeyboard + 12;
-        applyKeyboardOffset(offset);
+        // If visualViewport is available, compute a top position so the
+        // composer sits immediately above the keyboard (uses visual coords).
+        if (vv) {
+          const margin = 12;
+          const visualTop = vv.offsetTop || 0;
+          const visualBottom = visualTop + vv.height;
+          const composerHeight = composer.offsetHeight || 64;
 
-        // Keep composer visible in the visual viewport (helpful on iOS)
-        try {
-          textarea.scrollIntoView({ block: "center", behavior: "smooth" });
-        } catch (e) {
-          /* noop */
+          // Place composer so its bottom is `margin` pixels above visualBottom
+          const targetTop = Math.max(
+            visualTop + 8,
+            visualBottom - composerHeight - margin
+          );
+
+          // Apply the top directly (position: fixed), clear bottom so CSS doesn't conflict
+          composer.style.top = `${Math.round(targetTop)}px`;
+          composer.style.bottom = "auto";
+          composer.classList.add("keyboard-active");
+
+          // Ensure textarea is visible inside visual viewport (iOS Safari helpful)
+          try {
+            textarea.scrollIntoView({ block: "center", behavior: "smooth" });
+          } catch (e) {
+            /* noop */
+          }
+        } else {
+          // Fallback: set CSS var (bottom offset) like before
+          const offset = estimatedKeyboard + 12;
+          applyKeyboardOffset(offset);
         }
       } else {
+        // Keyboard not visible: clear any inline top/bottom and CSS var
+        composer.style.top = "";
+        composer.style.bottom = "";
         applyKeyboardOffset(0);
       }
     }
