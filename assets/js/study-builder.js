@@ -151,14 +151,18 @@ document.addEventListener("DOMContentLoaded", () => {
         // If visualViewport is available, compute a top position so the
         // composer sits immediately above the keyboard (uses visual coords).
         if (vv) {
-          const margin = 12;
+          // Reduce margin so composer sits closer above keyboard
+          const margin = 6;
           const visualTop = vv.offsetTop || 0;
           const visualBottom = visualTop + vv.height;
-          const composerHeight = composer.offsetHeight || 64;
+          const composerHeight =
+            composer.getBoundingClientRect().height ||
+            composer.offsetHeight ||
+            64;
 
           // Place composer so its bottom is `margin` pixels above visualBottom
           const targetTop = Math.max(
-            visualTop + 8,
+            visualTop + 6,
             visualBottom - composerHeight - margin
           );
 
