@@ -34,69 +34,33 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!form) return;
     if (!document.body.classList.contains("page-study")) return;
 
-    console.log("==== DEBUG: syncFixedComposer called ====");
-
     const mainCol = document.querySelector(".page-study .workspace-main");
     const sideCol = document.querySelector(".page-study .workspace-sidebar");
 
-    console.log("Found mainCol:", !!mainCol);
-    console.log("Found sideCol:", !!sideCol);
-
     // If structure is missing, fallback safely.
     if (!mainCol) {
-      console.log("No main column, fallback to full width");
       setComposerVars(0, document.documentElement.clientWidth);
       return;
     }
 
     const mainRect = mainCol.getBoundingClientRect();
-    console.log("mainRect:", {
-      left: mainRect.left,
-      top: mainRect.top,
-      width: mainRect.width,
-      right: mainRect.right,
-    });
 
-    // Detect whether sidebar + main are side-by-side (desktop)
-    // or stacked vertically (mobile/tablet OR devtools-docked narrow viewport).
+    // Detect whether sidebar + main are side-by-side (desktop) or stacked (mobile/tablet).
     let isStacked = false;
 
     if (!sideCol) {
-      // If no sidebar exists, treat as stacked (full width).
       isStacked = true;
-      console.log("No sidebar, using stacked layout");
     } else {
       const sideRect = sideCol.getBoundingClientRect();
-      console.log("sideRect:", {
-        left: sideRect.left,
-        top: sideRect.top,
-        width: sideRect.width,
-        right: sideRect.right,
-      });
-
-      // If their top positions are not roughly aligned, sidebar is stacked above.
       const sameRow = Math.abs(sideRect.top - mainRect.top) < 24;
       isStacked = !sameRow;
-
-      console.log("sameRow check:", sameRow, "isStacked:", isStacked);
     }
 
     if (isStacked) {
-      console.log("Using STACKED layout (mobile) - full width");
       setComposerVars(0, window.innerWidth);
     } else {
-      // Side-by-side: align composer to the main column (respects sidebar width)
       const left = Math.max(0, Math.round(mainRect.left));
       const width = Math.max(320, Math.round(mainRect.width));
-
-      console.log("Using SIDE-BY-SIDE layout (desktop)", { left, width });
-      console.log(
-        "Setting CSS variables: --das-composer-left:",
-        left + "px",
-        "--das-composer-width:",
-        width + "px"
-      );
-
       setComposerVars(left, width);
     }
   }
@@ -137,15 +101,17 @@ document.addEventListener("DOMContentLoaded", () => {
       const vv = window.visualViewport;
       if (!vv) return;
 
-      // Keyboard inset (px): how much of layout viewport is covered from bottom
-      const bottomInset = Math.max(
-        0,
-        window.innerHeight - (vv.height + vv.offsetTop)
-      );
+      // Android/iOS differ here. Compute several candidates and take the max.
+      const insetA = window.innerHeight - (vv.height + vv.offsetTop);
+      const insetB =
+        (document.documentElement?.clientHeight || window.innerHeight) -
+        (vv.height + vv.offsetTop);
+      const insetC = window.innerHeight - vv.height;
+
+      const bottomInset = Math.max(0, insetA, insetB, insetC);
+
       rootStyle.setProperty("--das-vv-bottom", `${Math.round(bottomInset)}px`);
 
-      // Clamp textarea height to a safe fraction of visible viewport
-      // (prevents actions row from being pushed under keyboard)
       const maxInput = Math.max(
         120,
         Math.min(240, Math.round(vv.height * 0.35))
@@ -161,11 +127,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function onFocus() {
       composer.classList.add("keyboard-active");
-      // Delay helps iOS settle keyboard animation
+
+      // Run a few times to catch Android keyboard animation frames.
+      setInsetVars();
+      scheduleScrollToBottom();
+
       setTimeout(() => {
         setInsetVars();
         scheduleScrollToBottom();
       }, 60);
+
+      setTimeout(() => {
+        setInsetVars();
+        scheduleScrollToBottom();
+      }, 250);
+
+      setTimeout(() => {
+        setInsetVars();
+        scheduleScrollToBottom();
+      }, 500);
     }
 
     function onBlur() {
@@ -194,7 +174,9 @@ document.addEventListener("DOMContentLoaded", () => {
       // Fallback (older browsers): approximate inset
       textarea.addEventListener("focus", () => {
         composer.classList.add("keyboard-active");
-        rootStyle.setProperty("--das-keyboard-offset", "320px");
+        rootStyle.setProperty("--das-vv-bottom", "320px");
+        rootStyle.setProperty("--das-vv-input-max-h", "200px");
+        scheduleScrollToBottom();
       });
       textarea.addEventListener("blur", onBlur);
     }
