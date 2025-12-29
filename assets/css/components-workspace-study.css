@@ -567,7 +567,7 @@
 .study-copy-feedback {
   position: absolute;
   top: -28px;
-  right: -4;
+  right: -4px;
 
   font-size: 0.7rem;
   padding: 2px 6px;
@@ -591,7 +591,7 @@
 @media (max-width: 1024px) {
   .page-study .study-ai-actions {
     opacity: 1;
-    margin-left: 8;
+    margin-left: 8px;
     justify-content: flex-end;
     margin-top: 4px;
   }
