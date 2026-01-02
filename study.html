@@ -1,21 +1,387 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Study Builder – DentAIstudy</title>
-    <link rel="icon" href="/favicon.ico" sizes="any" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
-    <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/favicon-512.png" />
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Study builder – DentAIstudy</title>
 
-    <!-- Main CSS -->
-    <link rel="stylesheet" href="assets/css/style-v3.css" />
+    <link rel="stylesheet" href="assets/css/study-builder/base.css" />
+    <link rel="stylesheet" href="assets/css/study-builder/shell.css" />
+    <link rel="stylesheet" href="assets/css/study-builder/sidebar.css" />
+    <link rel="stylesheet" href="assets/css/study-builder/topbar.css" />
+    <link rel="stylesheet" href="assets/css/study-builder/thread.css" />
+    <link rel="stylesheet" href="assets/css/study-builder/composer.css" />
+    <link rel="stylesheet" href="assets/css/study-builder/responsive.css" />
+    <link rel="stylesheet" href="assets/css/study-builder/markdown.css" />
+    <link rel="stylesheet" href="assets/css/hamburger-legacy.css" />
+  </head>
 
-    <!-- PDF.js for reading uploaded PDFs -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <body>
+    <div class="app" data-theme="light">
+      <aside class="sidebar" id="sidebar" aria-label="Sidebar">
+        <div class="sb-top">
+          <div class="sb-title">
+            <a class="brand" href="index.html" aria-label="DentAIstudy home">
+              <span>Dent</span><span>AIstudy</span>
+            </a>
+            <div class="sb-plan" aria-label="Plan">Free</div>
+          </div>
+        </div>
 
-    <!-- JS: Supabase + Auth client + Guard + Main -->
+        <div class="userchip">
+          <div class="avatar" aria-hidden="true">AO</div>
+          <div class="user-meta">
+            <div class="user-name">Ammar Omer</div>
+            <div class="user-plan">Plus</div>
+          </div>
+        </div>
+
+        <nav class="sb-nav" aria-label="Account">
+          <a class="sb-btn" href="profile.html" data-action="profile">
+            <span class="ico" aria-hidden="true">
+              <svg
+                viewBox="0 0 24 24"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M20 21a8 8 0 0 0-16 0" />
+                <circle cx="12" cy="8" r="4" />
+              </svg>
+            </span>
+            My Profile
+          </a>
+
+          <a class="sb-btn" href="settings.html" data-action="settings">
+            <span class="ico" aria-hidden="true">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <!-- Top slider -->
+                <line x1="4" y1="6" x2="6.8" y2="6" />
+                <line x1="11.2" y1="6" x2="20" y2="6" />
+                <circle cx="9" cy="6" r="2.2" fill="none" />
+
+                <!-- Middle slider -->
+                <line x1="4" y1="12" x2="12.8" y2="12" />
+                <line x1="17.2" y1="12" x2="20" y2="12" />
+                <circle cx="15" cy="12" r="2.2" fill="none" />
+
+                <!-- Bottom slider -->
+                <line x1="4" y1="18" x2="6.8" y2="18" />
+                <line x1="11.2" y1="18" x2="20" y2="18" />
+                <circle cx="9" cy="18" r="2.2" fill="none" />
+              </svg>
+            </span>
+            Account Settings
+          </a>
+        </nav>
+
+        <nav class="sb-nav" aria-label="Primary">
+          <button class="sb-btn" type="button" data-action="newChat">
+            <span class="ico" aria-hidden="true">
+              <svg
+                viewBox="0 0 24 24"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              >
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+            </span>
+            New chat
+          </button>
+
+          <button class="sb-btn" type="button" data-action="search">
+            <span class="ico" aria-hidden="true">
+              <svg
+                viewBox="0 0 24 24"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              >
+                <circle cx="11" cy="11" r="7"></circle>
+                <path d="M20 20l-3.2-3.2"></path>
+              </svg>
+            </span>
+            Search chats
+          </button>
+        </nav>
+
+        <div id="sbChatsSlot">
+          <div class="sb-section">
+            <div class="sb-section-title">Your chats</div>
+            <div class="sb-chatlist" id="chatList" role="list">
+              <button class="sb-chat active" type="button" role="listitem">
+                Cloning UI Guidelines
+              </button>
+              <button class="sb-chat" type="button" role="listitem">
+                Static UI Conversion Plan
+              </button>
+              <button class="sb-chat" type="button" role="listitem">
+                GitHub Website Preview
+              </button>
+            </div>
+          </div>
+        </div>
+      </aside>
+      <main class="main" aria-label="Chat">
+        <header class="topbar site-header">
+          <button class="menu-toggle" type="button" aria-label="Open menu">
+            <span></span><span></span><span></span>
+          </button>
+
+          <div class="topbar-title">
+            <div class="topbar-page" aria-label="Page">Study Builder</div>
+
+            <a
+              class="brand topbar-brand"
+              href="index.html"
+              aria-label="DentAIstudy home"
+            >
+              <span>Dent</span><span>AIstudy</span>
+            </a>
+          </div>
+
+          <div class="topbar-actions">
+            <button
+              class="iconbtn"
+              type="button"
+              aria-label="New chat"
+              data-action="newChat"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="20"
+                height="20"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              >
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+            </button>
+            <button
+              class="iconbtn"
+              id="btnMore"
+              type="button"
+              aria-label="Chats"
+              aria-controls="chatsPanel"
+              aria-expanded="false"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="20"
+                height="20"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              >
+                <path d="M6 12h.01M12 12h.01M18 12h.01" />
+              </svg>
+            </button>
+          </div>
+          <div class="header-right">
+            <a href="login.html" class="header-login">Log in</a>
+            <a href="signup.html" class="header-signup">Sign up</a>
+          </div>
+        </header>
+        <div
+          class="chats-panel"
+          id="chatsPanel"
+          role="dialog"
+          aria-label="Chats"
+          aria-modal="true"
+          hidden
+        >
+          <div class="chats-panel-head">
+            <div class="chats-panel-title">Chats</div>
+            <button
+              class="iconbtn"
+              id="chatsPanelClose"
+              type="button"
+              aria-label="Close chats"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="20"
+                height="20"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              >
+                <path d="M6 6l12 12M18 6L6 18" />
+              </svg>
+            </button>
+          </div>
+          <div class="chats-panel-body" id="chatsPanelBody">
+            <input
+              class="chats-search"
+              id="chatsSearch"
+              type="search"
+              placeholder="Search chats…"
+              aria-label="Search chats"
+              autocomplete="off"
+            />
+            <div id="chatsPanelContent"></div>
+          </div>
+        </div>
+
+        <section class="thread" id="thread" aria-label="Messages">
+          <div class="thread-inner" id="messages"></div>
+
+          <button
+            class="jump"
+            id="jump"
+            type="button"
+            aria-label="Jump to latest"
+            hidden
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="20"
+              height="20"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M12 5v14" />
+              <path d="m19 12-7 7-7-7" />
+            </svg>
+          </button>
+        </section>
+
+        <footer class="composer-wrap" aria-label="Composer">
+          <form class="composer" id="composer" autocomplete="off">
+            <button class="roundbtn" type="button" aria-label="Add" id="btnAdd">
+              <span aria-hidden="true">+</span>
+            </button>
+            <div
+              class="addmenu"
+              id="addMenu"
+              role="dialog"
+              aria-label="Add menu"
+              hidden
+            >
+              <button class="addmenu-item" type="button" data-add="pdf">
+                <span class="addmenu-ico" aria-hidden="true">
+                  <!-- paperclip icon -->
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="20"
+                    height="20"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path
+                      d="M21.44 11.05 12.2 20.29a5 5 0 0 1-7.07-7.07l9.2-9.2a3.5 3.5 0 1 1 4.95 4.95l-9.2 9.2a2 2 0 0 1-2.83-2.83l8.49-8.49"
+                    />
+                  </svg>
+                </span>
+                <span class="addmenu-label">Add PDF</span>
+              </button>
+
+              <div class="addmenu-title">Output style</div>
+
+              <div class="addmenu-pills" role="group" aria-label="Output style">
+                <button
+                  class="addpill is-active"
+                  type="button"
+                  data-style="notes"
+                >
+                  Notes
+                </button>
+                <button class="addpill" type="button" data-style="flashcards">
+                  Flashcards
+                </button>
+                <button class="addpill" type="button" data-style="mcqs">
+                  MCQs
+                </button>
+                <button class="addpill" type="button" data-style="compare">
+                  Compare table
+                </button>
+              </div>
+            </div>
+
+            <div class="input-shell">
+              <div class="attachbar" id="attachBar" hidden></div>
+
+              <textarea
+                id="prompt"
+                class="prompt"
+                rows="1"
+                placeholder="Ask anything…"
+                aria-label="Ask anything"
+              ></textarea>
+
+              <input
+                type="file"
+                id="pdfInput"
+                accept="application/pdf"
+                multiple
+                hidden
+              />
+
+              <div class="input-actions">
+                <button
+                  class="sendbtn"
+                  id="send"
+                  type="submit"
+                  aria-label="Send"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="20"
+                    height="20"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M12 5v14"></path>
+                    <path d="M6.5 10.5 12 5l5.5 5.5"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </form>
+        </footer>
+      </main>
+    </div>
+
+    <!-- Supabase + Auth -->
     <script
       src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
       defer
@@ -23,287 +389,48 @@
     <script src="assets/js/auth-client.js" defer></script>
     <script src="assets/js/auth-guard.js" defer></script>
     <script src="assets/js/auth-logout.js" defer></script>
-    <script defer src="assets/js/main.js"></script>
-    <script defer src="assets/js/study-builder.js"></script>
-  </head>
 
-  <body class="page-study page-study-builder">
-    <div class="main-wrapper">
-      <!-- HEADER -->
-      <header class="site-header">
-        <div class="container header-inner">
-          <button class="menu-toggle" aria-label="Open menu">
-            <span></span><span></span><span></span>
-          </button>
-          <a class="brand" href="index.html">
-            <span>Dent</span><span>AIstudy</span>
-          </a>
+    <!-- Legacy hamburger -->
+    <script src="assets/js/hamburger-legacy.js" defer></script>
 
-          <nav class="header-nav">
-            <a href="subjects.html">Subjects</a>
-            <a href="study.html">Study builder</a>
-            <a href="blogs.html">Blogs</a>
-            <a href="pricing.html">Pricing</a>
-            <a href="contact.html">Contact</a>
-          </nav>
+    <!-- Services + adapters (old study-builder.js trimmed) -->
+    <script src="assets/js/study-builder.js" defer></script>
 
-          <div class="header-right">
-            <a href="login.html" class="btn btn-outline header-login">Log in</a>
-            <a href="signup.html" class="btn btn-primary header-signup"
-              >Sign up</a
-            >
-          </div>
-        </div>
-      </header>
+    <!-- New UI (untouched) -->
+    <script src="assets/js/study-builder/core.js" defer></script>
+    <script src="assets/js/study-builder/sidebar.js" defer></script>
+    <script src="assets/js/study-builder/composer.js" defer></script>
 
-      <!-- Mobile nav -->
-      <div class="slide-nav-backdrop"></div>
-      <nav class="slide-nav">
-        <div class="slide-nav-header">
-          <h3>Menu</h3>
-        </div>
-        <div class="slide-nav-links">
-          <a href="study.html">Study builder</a>
-          <a href="subjects.html">Subjects</a>
-          <a href="blogs.html">Blogs</a>
-          <a href="pricing.html">Pricing</a>
-          <a href="contact.html">Contact</a>
+    <!-- Mobile nav (legacy) -->
+    <div class="slide-nav-backdrop"></div>
+    <nav class="slide-nav" aria-label="Mobile menu">
+      <div class="slide-nav-header">
+        <h3>Menu</h3>
+      </div>
+      <div class="slide-nav-links">
+        <a href="study.html">Study builder</a>
+        <a href="subjects.html">Subjects</a>
+        <a href="blogs.html">Blogs</a>
+        <a href="pricing.html">Pricing</a>
+        <a href="contact.html">Contact</a>
 
-          <div
-            class="slide-nav-divider"
-            role="separator"
-            aria-hidden="true"
-          ></div>
+        <div
+          class="slide-nav-divider"
+          role="separator"
+          aria-hidden="true"
+        ></div>
 
-          <a href="profile.html">My profile</a>
-          <a href="settings.html">Account settings</a>
+        <a href="profile.html">My profile</a>
+        <a href="settings.html">Account settings</a>
 
-          <div
-            class="slide-nav-divider"
-            role="separator"
-            aria-hidden="true"
-          ></div>
-
-          <a href="login.html" class="slide-login-link">Log in</a>
-        </div>
-      </nav>
-
-      <main>
-        <div class="container">
-          <div class="workspace-shell">
-            <!-- SIDEBAR -->
-            <aside class="workspace-sidebar">
-              <div class="sidebar-card">
-                <div class="sidebar-card-header">
-                  <div class="sidebar-avatar">
-                    <img
-                      src="assets/img/default-avatar.png"
-                      alt="Your avatar"
-                      data-das-avatar
-                    />
-                  </div>
-                  <div>
-                    <div class="workspace-card-title">
-                      <span id="das-user-name">Your workspace</span>
-                    </div>
-                    <div class="sidebar-card-subtitle">Study tools & packs</div>
-                  </div>
-                </div>
-
-                <div class="sidebar-tags">
-                  <span class="sidebar-tag" id="das-identity-level"
-                    >Undergraduate</span
-                  >
-                  <span class="sidebar-tag" id="das-identity-plan"
-                    >Free plan</span
-                  >
-                  <span class="sidebar-tag" id="das-identity-activity"
-                    >Active today</span
-                  >
-                </div>
-
-                <nav class="sidebar-nav">
-                  <a href="study.html" class="sidebar-nav-item is-active"
-                    ><strong>Study builder</strong></a
-                  >
-                  <a href="profile.html" class="sidebar-nav-item">Profile</a>
-                  <a href="settings.html" class="sidebar-nav-item">Settings</a>
-                </nav>
-              </div>
-            </aside>
-
-            <!-- MAIN AREA -->
-            <section class="workspace-main">
-              <div class="study-chat-shell">
-                <div class="study-chat-grid">
-                  <div class="study-answer-card study-chat-card">
-                    <div class="study-answer-header">
-                      <div class="study-answer-title">
-                        <strong>Study builder</strong>
-                      </div>
-                    </div>
-
-                    <div class="study-answer-body-wrapper study-chat-body">
-                      <p
-                        class="study-answer-placeholder page-study-placeholder"
-                      >
-                        Start with a topic or question
-                      </p>
-
-                      <div
-                        id="study-chat"
-                        class="study-chat-log"
-                        aria-live="polite"
-                      ></div>
-                    </div>
-
-                    <!-- Composer (same IDs so JS keeps working) -->
-                    <form
-                      id="study-form"
-                      class="study-chat-composer"
-                      novalidate
-                    >
-                      <!-- TEXTAREA (TOP, grows like ChatGPT) -->
-                      <textarea
-                        id="study-topic"
-                        name="topic"
-                        class="study-chat-input"
-                        placeholder="Ask anything…"
-                        rows="1"
-                      ></textarea>
-
-                      <!-- FILE SUMMARY (BOTTOM LINE) -->
-                      <div
-                        id="study-file-summary"
-                        class="study-file-summary"
-                        aria-live="polite"
-                      ></div>
-
-                      <!-- ACTION ROW (BOTTOM) -->
-                      <div class="study-composer-actions">
-                        <!-- LEFT: PLUS + MENU -->
-                        <div class="study-composer-left">
-                          <button
-                            type="button"
-                            id="study-add-file"
-                            class="study-chat-iconbtn"
-                            aria-label="Attachments and output style"
-                            title="Attachments and output style"
-                          >
-                            <svg viewBox="0 0 24 24" aria-hidden="true">
-                              <path
-                                d="M12 5v14M5 12h14"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                              />
-                            </svg>
-                          </button>
-
-                          <div
-                            id="study-composer-menu"
-                            class="study-composer-menu"
-                            aria-hidden="true"
-                          >
-                            <!-- Attach -->
-                            <button
-                              type="button"
-                              id="study-attach-action"
-                              class="study-composer-menu-item"
-                            >
-                              <span
-                                class="study-composer-menu-item-icon"
-                                aria-hidden="true"
-                              >
-                                <svg
-                                  viewBox="0 0 24 24"
-                                  width="22"
-                                  height="22"
-                                  aria-hidden="true"
-                                >
-                                  <path
-                                    d="M21.44 11.05l-8.49 8.49a5.5 5.5 0 0 1-7.78-7.78l9.19-9.19a3.5 3.5 0 0 1 4.95 4.95l-9.19 9.19a1.5 1.5 0 0 1-2.12-2.12l8.49-8.49"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="1.8"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                  />
-                                </svg>
-                              </span>
-                              Add PDF
-                            </button>
-
-                            <!-- Output style -->
-                            <div class="study-composer-menu-section">
-                              <div class="study-composer-menu-label">
-                                Output style
-                              </div>
-                              <div class="study-output-chips">
-                                <button
-                                  type="button"
-                                  class="study-output-chip"
-                                  data-output="notes"
-                                >
-                                  Notes
-                                </button>
-                                <button
-                                  type="button"
-                                  class="study-output-chip"
-                                  data-output="flashcards"
-                                >
-                                  Flashcards
-                                </button>
-                                <button
-                                  type="button"
-                                  class="study-output-chip"
-                                  data-output="mcq"
-                                >
-                                  MCQs
-                                </button>
-                                <button
-                                  type="button"
-                                  class="study-output-chip"
-                                  data-output="table"
-                                >
-                                  Compare table
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        <!-- HIDDEN FILE INPUT (JS triggers it) -->
-                        <input
-                          type="file"
-                          id="study-file-input"
-                          class="study-file-input"
-                          multiple
-                          accept=".pdf"
-                        />
-
-                        <!-- RIGHT: SEND BUTTON (keep your site style) -->
-                        <button
-                          class="study-chat-send"
-                          type="submit"
-                          aria-label="Send"
-                        >
-                          <svg viewBox="0 0 24 24" aria-hidden="true">
-                            <path
-                              d="M12 5l7 7-1.4 1.4L13 8.8V20h-2V8.8L6.4 13.4 5 12l7-7z"
-                            ></path>
-                          </svg>
-                        </button>
-                      </div>
-                    </form>
-                  </div>
-                </div>
-              </div>
-            </section>
-          </div>
-        </div>
-      </main>
-    </div>
+        <div
+          class="slide-nav-divider"
+          role="separator"
+          aria-hidden="true"
+        ></div>
+        <a href="login.html" class="slide-login-link">Log in</a>
+      </div>
+    </nav>
+    <div class="backdrop" id="backdrop" hidden></div>
   </body>
 </html>
