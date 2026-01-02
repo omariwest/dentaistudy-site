@@ -1,0 +1,150 @@
+/* sidebar.css
+   Sidebar structure + items (no media queries)
+*/
+.sidebar {
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+  background: #e8f1fb;
+  color: #0b0f19;
+
+  font-family: Arial, Helvetica, sans-serif;
+
+  border-right: 1px solid rgba(15, 76, 129, 0.16);
+  display: flex;
+  flex-direction: column;
+  padding: 14px 14px 12px;
+  gap: 14px;
+}
+
+.sb-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 3px 15px; /* gives the brand the same comfortable inset */
+}
+
+.sb-logo {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.sb-title {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sb-appname {
+  font-weight: 650;
+  font-size: 14px;
+  letter-spacing: 0.2px;
+  opacity: 0.95;
+}
+.sb-plan {
+  font-size: 13px;
+  color: rgba(11, 15, 25, 0.62);
+}
+
+.sb-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sb-btn {
+  width: 100%;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #0b0f19;
+  border-radius: 12px;
+  padding: 10px 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  font-size: 14px;
+}
+.sb-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.ico {
+  width: 20px;
+  display: grid;
+  place-items: center;
+  opacity: 0.95;
+}
+
+.sb-section {
+  margin-top: 6px;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.sb-section-title {
+  font-size: 12px;
+  color: #0b0f19;
+  padding: 0 6px;
+}
+
+.sb-chatlist {
+  min-height: 0;
+  overflow: auto;
+  padding-right: 6px;
+}
+.sb-chat {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  color: #0b0f19;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  padding: 10px 10px;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+.sb-chat:hover {
+  background: rgba(15, 76, 129, 0.08);
+}
+.sb-chat.active {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(15, 76, 129, 0.12);
+}
+
+.userchip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 8px;
+  border-radius: 14px;
+}
+.avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 12px;
+}
+.user-name {
+  font-size: 13px;
+  font-weight: 650;
+}
+.user-plan {
+  font-size: 12px;
+  color: rgba(11, 15, 25, 0.55);
+  margin-top: 2px;
+}
+
+.sidebar svg {
+  stroke: currentColor;
+}

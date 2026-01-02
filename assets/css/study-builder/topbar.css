@@ -1,0 +1,60 @@
+/* topbar.css
+   Header/topbar + icon buttons (no media queries)
+*/
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  height: var(--topbar-h);
+  padding: calc(8px + var(--safe-top)) 12px 8px;
+  display: flex;
+  align-items: center;
+  gap: 0px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+}
+.topbar-title {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  justify-content: flex-start;
+}
+.topbar-page {
+  font-weight: 700;
+  font-size: 16px;
+  color: #0f4c81;
+}
+
+/* Desktop default: show title, hide logo */
+.topbar-brand {
+  display: none;
+}
+
+.topbar-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.iconbtn {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  display: grid;
+  place-items: center;
+  color: var(--accent);
+  box-shadow: 0 1px 0 rgba(2, 6, 23, 0.03);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.iconbtn:hover {
+  box-shadow: 0 10px 24px rgba(2, 6, 23, 0.1);
+  transform: translateY(-0.5px);
+}
+.iconbtn:active {
+  transform: translateY(0);
+}
+.iconbtn.muted {
+  color: rgba(15, 23, 42, 0.7);
+}

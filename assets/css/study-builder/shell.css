@@ -1,0 +1,18 @@
+/* shell.css
+   App + main layout wrappers (no media queries)
+*/
+.app{
+  height: 100dvh;
+  display: grid;
+  grid-template-columns: var(--sb-w) minmax(0, 1fr);
+  background: var(--bg);
+}
+
+/* ===== Main wrapper ===== */
+.main{
+  min-width: 0;
+  height: 100dvh;
+  display: grid;
+  grid-template-rows: var(--topbar-h) minmax(0, 1fr) auto;
+  background: var(--bg);
+}

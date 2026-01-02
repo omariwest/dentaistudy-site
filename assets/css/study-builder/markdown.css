@@ -1,0 +1,36 @@
+/* assets/css/study-builder/markdown.css
+   Uses your old Markdown renderer output (tables/bold) inside new chat bubbles.
+*/
+.msg .msg-text{ line-height: 1.55; }
+.msg .msg-text p{ margin: 0 0 10px; }
+.msg .msg-text p:last-child{ margin-bottom: 0; }
+.msg .msg-text ul,
+.msg .msg-text ol{ margin: 8px 0 10px; padding-left: 1.25rem; }
+.msg .msg-text li{ margin: 4px 0; }
+.msg .msg-text strong{ font-weight: 750; }
+.msg .msg-text a{ text-decoration: underline; }
+
+.msg .study-ai-table-wrap{
+  margin: 10px 0;
+  overflow: auto;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 12px;
+}
+.msg .study-ai-table{
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 560px;
+}
+.msg .study-ai-table th,
+.msg .study-ai-table td{
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.10);
+  vertical-align: top;
+  font-size: 13px;
+}
+.msg .study-ai-table th{
+  font-weight: 750;
+  background: rgba(2, 6, 23, 0.03);
+}
+.msg .study-ai-table tr:last-child td{ border-bottom: none; }
