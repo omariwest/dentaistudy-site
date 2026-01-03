@@ -244,6 +244,15 @@
       const text = (ta.value || "").trim();
       if (!text) return;
 
+      // If PDFs are still being processed, stop *all* submit listeners
+      if (window.DentAIPDF?.hasPending?.()) {
+        e.stopImmediatePropagation();
+        window.ChatUI?.addAI?.(
+          "Still reading your PDF… try again in a moment."
+        );
+        return;
+      }
+
       thread.push({ role: "user", content: text });
       saveThread(thread);
 
@@ -266,15 +275,27 @@
 
       try {
         const headers = buildEdgeHeaders(accessToken);
+
+        // Build request messages without polluting the visible chat/thread
+        const pdfContext = window.DentAIPDF?.getActiveContext?.(120000) || "";
+        const requestMessages = thread.map((m) => ({
+          role: m.role,
+          content: m.content,
+        }));
+
+        if (pdfContext) {
+          requestMessages.unshift({
+            role: "user",
+            content: pdfContext,
+          });
+        }
+
         const response = await fetch(AI_ENDPOINT, {
           method: "POST",
           headers,
           body: JSON.stringify({
             topic: text,
-            messages: thread.map((m) => ({
-              role: m.role,
-              content: m.content,
-            })),
+            messages: requestMessages,
           }),
         });
 
