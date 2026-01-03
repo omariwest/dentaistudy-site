@@ -98,6 +98,200 @@
   let attached = [];
   const MAX_PDFS = 5;
 
+  // Sticky PDF context cache (no visible chat pollution)
+  const PDF_CACHE_KEY = "dentai_pdf_cache_v1";
+
+  /** @type {{ activeIds: string[], docs: Record<string, { name: string, size: number, lastModified: number, text: string, pages?: number, updatedAt: number }> }} */
+  let pdfCache = { activeIds: [], docs: {} };
+
+  /** @type {Map<string, Promise<void>>} */
+  const pdfPending = new Map();
+
+  function safeLoadPdfCache() {
+    try {
+      const raw = localStorage.getItem(PDF_CACHE_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (
+        parsed &&
+        Array.isArray(parsed.activeIds) &&
+        parsed.docs &&
+        typeof parsed.docs === "object"
+      ) {
+        pdfCache = parsed;
+      }
+    } catch {
+      // ignore (storage may be blocked / full)
+    }
+  }
+
+  function safeSavePdfCache() {
+    try {
+      localStorage.setItem(PDF_CACHE_KEY, JSON.stringify(pdfCache));
+    } catch {
+      // ignore (storage may be blocked / full)
+    }
+  }
+
+  function pdfFileId(file) {
+    return `${file.name}|${file.size}|${file.lastModified}`;
+  }
+
+  function setPdfActive(id, on) {
+    const set = new Set(pdfCache.activeIds || []);
+    if (on) set.add(id);
+    else set.delete(id);
+    pdfCache.activeIds = Array.from(set);
+    safeSavePdfCache();
+  }
+
+  function getPdfStatus(id) {
+    if (pdfPending.has(id)) return "reading";
+    const doc = pdfCache.docs[id];
+    if (!doc) return "empty";
+    if (doc.text) return "ready";
+    return "empty";
+  }
+
+  function clampText(text, maxChars) {
+    if (!text) return "";
+    if (text.length <= maxChars) return text;
+    return text.slice(0, maxChars);
+  }
+
+  async function extractPdfTextWithPdfjs(file, opts) {
+    const pdfjsLib = window.pdfjsLib;
+    if (!pdfjsLib || typeof pdfjsLib.getDocument !== "function") {
+      throw new Error("PDFJS_NOT_LOADED");
+    }
+
+    const arrayBuffer = await file.arrayBuffer();
+    const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+    const pdf = await loadingTask.promise;
+
+    const maxPages = opts?.maxPages ?? 20;
+    const maxChars = opts?.maxChars ?? 120000;
+
+    const pagesToRead = Math.min(pdf.numPages, maxPages);
+
+    let out = "";
+    for (let pageNum = 1; pageNum <= pagesToRead; pageNum++) {
+      const page = await pdf.getPage(pageNum);
+      const content = await page.getTextContent();
+      const strings = (content.items || [])
+        .map((it) => (it && it.str ? String(it.str) : ""))
+        .filter(Boolean);
+
+      if (strings.length) {
+        out += strings.join(" ") + "\n";
+      }
+
+      if (out.length >= maxChars) break;
+    }
+
+    return {
+      text: clampText(out.trim(), maxChars),
+      pages: pdf.numPages,
+    };
+  }
+
+  function ensurePdfParsedAndCached(file) {
+    const id = pdfFileId(file);
+
+    // mark active immediately (sticky across follow-ups)
+    setPdfActive(id, true);
+
+    // already cached
+    if (pdfCache.docs[id]?.text) return;
+
+    // already parsing
+    if (pdfPending.has(id)) return;
+
+    // start parsing
+    const p = (async () => {
+      try {
+        const res = await extractPdfTextWithPdfjs(file, {
+          maxPages: 20,
+          maxChars: 120000,
+        });
+
+        pdfCache.docs[id] = {
+          name: file.name,
+          size: file.size,
+          lastModified: file.lastModified,
+          text: res.text || "",
+          pages: res.pages,
+          updatedAt: Date.now(),
+        };
+        safeSavePdfCache();
+      } catch (err) {
+        // keep a stub so we don't loop forever on failing files
+        pdfCache.docs[id] = {
+          name: file.name,
+          size: file.size,
+          lastModified: file.lastModified,
+          text: "",
+          updatedAt: Date.now(),
+        };
+        safeSavePdfCache();
+      }
+    })();
+
+    pdfPending.set(id, p);
+    p.finally(() => {
+      pdfPending.delete(id);
+      renderAttachments();
+    });
+
+    renderAttachments();
+  }
+
+  // API used by study-builder.js (network layer)
+  window.DentAIPDF = window.DentAIPDF || {};
+  window.DentAIPDF.hasPending = () => pdfPending.size > 0;
+  window.DentAIPDF.getActiveContext = (maxChars = 120000) => {
+    safeLoadPdfCache();
+
+    const ids = Array.isArray(pdfCache.activeIds) ? pdfCache.activeIds : [];
+    const docs = pdfCache.docs || {};
+
+    let out =
+      "PDF context (use as reference; do not mention this block unless the user asks):\n";
+
+    for (const id of ids) {
+      const d = docs[id];
+      if (!d || !d.text) continue;
+
+      const header = `\n--- PDF: ${d.name}${
+        d.pages ? ` (${d.pages} pages)` : ""
+      } ---\n`;
+
+      // stop if would exceed
+      if (out.length + header.length + d.text.length > maxChars) {
+        const room = Math.max(0, maxChars - out.length - header.length);
+        if (room > 500) {
+          out += header + d.text.slice(0, room);
+        }
+        break;
+      }
+
+      out += header + d.text + "\n";
+    }
+
+    // if nothing usable, return empty so we don't send noise
+    return out.trim() ===
+      "PDF context (use as reference; do not mention this block unless the user asks):"
+      ? ""
+      : out.trim();
+  };
+  window.DentAIPDF.setActiveByFile = (file, on) => {
+    const id = pdfFileId(file);
+    setPdfActive(id, !!on);
+  };
+
+  // init cache once
+  safeLoadPdfCache();
+
   function isPdf(file) {
     const name = (file.name || "").toLowerCase();
     return file.type === "application/pdf" || name.endsWith(".pdf");
@@ -144,6 +338,15 @@
     attachBar.hidden = false;
 
     attached.forEach((file, idx) => {
+      const id = pdfFileId(file);
+      const status = getPdfStatus(id);
+      const suffix =
+        status === "reading"
+          ? " (reading…)"
+          : status === "ready"
+          ? ""
+          : " (failed)";
+
       const chip = document.createElement("div");
       chip.className = "attachchip";
 
@@ -153,7 +356,7 @@
 
       const name = document.createElement("div");
       name.className = "name";
-      name.textContent = file.name;
+      name.textContent = file.name + suffix;
 
       const x = document.createElement("button");
       x.type = "button";
@@ -161,7 +364,10 @@
       x.setAttribute("aria-label", "Remove file");
       x.appendChild(iconX());
       x.addEventListener("click", () => {
+        // remove from visible list
         attached.splice(idx, 1);
+        // deactivate from sticky context too
+        setPdfActive(id, false);
         renderAttachments();
       });
 
@@ -182,8 +388,16 @@
     for (const f of incoming) {
       if (attached.length >= MAX_PDFS) break;
 
-      const dup = attached.some((x) => x.name === f.name && x.size === f.size);
+      const dup = attached.some(
+        (x) =>
+          x.name === f.name &&
+          x.size === f.size &&
+          x.lastModified === f.lastModified
+      );
       if (!dup) attached.push(f);
+
+      // parse + sticky cache
+      ensurePdfParsedAndCached(f);
     }
 
     renderAttachments();
@@ -242,8 +456,7 @@
     autoGrow();
     setSendState();
 
-    // optional: clear attachments after send (ChatGPT-like)
-    attached = [];
+    // Keep attachments active for follow-up questions (sticky PDF context)
     renderAttachments();
 
     closeAddMenu();
