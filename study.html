@@ -394,6 +394,15 @@
     <script src="assets/js/hamburger-legacy.js" defer></script>
 
     <!-- Services + adapters (old study-builder.js trimmed) -->
+
+    <!-- PDF.js (local, v5.x ESM build) -->
+    <script type="module">
+      import * as pdfjsLib from "./assets/vendor/pdfjs/pdf.mjs";
+      pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "./assets/vendor/pdfjs/pdf.worker.mjs";
+      window.pdfjsLib = pdfjsLib;
+    </script>
+
     <script src="assets/js/study-builder.js" defer></script>
 
     <!-- New UI (untouched) -->
