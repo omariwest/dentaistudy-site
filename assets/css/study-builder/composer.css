@@ -49,19 +49,22 @@
 }
 
 .roundbtn > span {
-  display: block;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+
   line-height: 1;
-  font-size: 22px;
+  font-size: 26px;
 
-  /* optical centering (slightly stronger so you can actually see it) */
-  transform: translate(-0.5px, -1.5px);
-
+  transform: none;
+  transform-origin: 50% 50%;
   transition: transform 160ms ease;
 }
 
 /* toggled state */
 .roundbtn.is-open > span {
-  transform: translate(1px, -1.25px) rotate(45deg);
+  transform: rotate(45deg);
 }
 
 .input-shell {

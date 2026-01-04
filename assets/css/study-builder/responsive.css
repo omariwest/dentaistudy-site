@@ -121,6 +121,10 @@
   .chats-panel .sb-section-title {
     display: none;
   }
+
+  .sb-chatmenu-pop {
+    min-width: 200px;
+  }
 }
 
 @media (min-width: 1025px) {
@@ -140,6 +144,13 @@
   /* Desktop: hide + and ... in topbar */
   .topbar-actions {
     display: none;
+  }
+
+  /* Desktop: hide Search chats completely (keep iPad/mobile) */
+  .sb-nav .sb-btn[data-action="search"],
+  #sidebar [data-action="search"],
+  .chats-search {
+    display: none !important;
   }
 
   /* Desktop only: remove underline + subtle hover for Profile/Settings links */
@@ -163,7 +174,27 @@
   }
 }
 
+@media (pointer: fine) {
+  .sb-chatmenu {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(1px);
+  }
+
+  .sb-chatrow:hover .sb-chatmenu,
+  .sb-chatrow:focus-within .sb-chatmenu {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+}
+
 @media (pointer: coarse) {
+  .sb-chatmenu {
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
+  }
   .iconbtn {
     width: 44px;
     height: 44px;

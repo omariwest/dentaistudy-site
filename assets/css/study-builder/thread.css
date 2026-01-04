@@ -37,9 +37,10 @@
 }
 
 .empty-state-title {
-  font-weight: 400;
+  font-weight: 200;
   font-size: clamp(18px, 2.2vw, 26px);
-  color: rgba(15, 23, 42, 0.52);
+  color: rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.35px;
 }
 
 /* Thinking (subtle shimmer) */
