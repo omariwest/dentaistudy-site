@@ -32,10 +32,17 @@
         </div>
 
         <div class="userchip">
-          <div class="avatar" aria-hidden="true">AO</div>
+          <div class="avatar" aria-hidden="true">
+            <img
+              src="assets/img/default-avatar.png"
+              alt="Your avatar"
+              data-das-avatar
+            />
+          </div>
+
           <div class="user-meta">
-            <div class="user-name">Ammar Omer</div>
-            <div class="user-plan">Plus</div>
+            <div class="user-name" id="das-user-name">DentAIstudy User</div>
+            <div class="user-plan" id="das-identity-plan">Plus</div>
           </div>
         </div>
 
@@ -133,16 +140,9 @@
         <div id="sbChatsSlot">
           <div class="sb-section">
             <div class="sb-section-title">Your chats</div>
-            <div class="sb-chatlist" id="chatList" role="list">
-              <button class="sb-chat active" type="button" role="listitem">
-                Cloning UI Guidelines
-              </button>
-              <button class="sb-chat" type="button" role="listitem">
-                Static UI Conversion Plan
-              </button>
-              <button class="sb-chat" type="button" role="listitem">
-                GitHub Website Preview
-              </button>
+            <div class="sb-chatlist" id="chatList" role="list"></div>
+            <div class="sb-chatlist-empty" id="chatListEmpty" hidden>
+              No chats yet
             </div>
           </div>
         </div>
