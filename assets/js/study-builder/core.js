@@ -104,7 +104,23 @@
     newChat() {
       const url = new URL(window.location.href);
       url.searchParams.set("chat", newChatId());
-      window.location.href = url.toString();
+      window.history.pushState({}, "", url.toString());
+      this.clear();
+    },
+    showThinking() {
+      showThinking();
+      scrollToBottom();
+      updateJump();
+    },
+    hideThinking() {
+      hideThinking();
+      updateJump();
+    },
+    clear() {
+      hideThinking();
+      messagesEl.innerHTML = "";
+      syncEmptyState();
+      updateJump();
     },
     addUser(text) {
       renderMessage({ role: "user", text });
@@ -113,6 +129,17 @@
       updateJump();
     },
     addAI(text) {
+      hideThinking();
+      renderMessage({ role: "ai", text });
+      scrollToBottom();
+      updateJump();
+    },
+    addUserStatic(text) {
+      renderMessage({ role: "user", text });
+      scrollToBottom();
+      updateJump();
+    },
+    addAIStatic(text) {
       hideThinking();
       renderMessage({ role: "ai", text });
       scrollToBottom();
