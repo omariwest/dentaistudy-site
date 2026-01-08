@@ -157,15 +157,31 @@ serve(async (req: Request): Promise<Response> => {
       }),
     });
 
-    const aiJson = await aiRes.json();
+    const aiText = await aiRes.text();
 
-    if (!aiRes.ok) {
-      return new Response(JSON.stringify({ error: "AI_ERROR" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    let aiJson: any = null;
+    try {
+      aiJson = aiText ? JSON.parse(aiText) : null;
+    } catch {
+      aiJson = null;
     }
 
+    if (!aiRes.ok) {
+      console.error("OPENAI_ERROR", aiRes.status, aiText);
+      return new Response(
+        JSON.stringify({
+          error: "OPENAI_ERROR",
+          status: aiRes.status,
+          details: aiJson?.error ?? aiText,
+        }),
+        {
+          status: aiRes.status,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    // keep using aiJson below for success path
     const content =
       aiJson?.choices?.[0]?.message?.content?.toString().trim() ?? "";
 
