@@ -666,8 +666,15 @@
 
               const headers = buildEdgeHeaders(accessToken);
 
+              const isMobile =
+                (navigator.userAgentData && navigator.userAgentData.mobile) ||
+                /Android|iPhone|iPad|iPod|Mobi/i.test(navigator.userAgent);
+
+              const pdfMaxChars = isMobile ? 40000 : 120000;
+
               const pdfContext =
-                window.DentAIPDF?.getActiveContext?.(120000) || "";
+                window.DentAIPDF?.getActiveContext?.(pdfMaxChars) || "";
+
               const requestMessages = thread.map((m) => ({
                 role: m.role,
                 content: m.content,
@@ -690,8 +697,10 @@
               });
 
               let data = null;
+              let rawText = "";
               try {
-                data = await response.json();
+                rawText = await response.text();
+                data = rawText ? JSON.parse(rawText) : null;
               } catch {
                 data = null;
               }
@@ -735,8 +744,12 @@
                 return;
               }
 
-              const msg = data?.message
-                ? `Something went wrong: ${data.message}`
+              const backendMsg =
+                (data && (data.message || data.error)) ||
+                (rawText ? rawText.slice(0, 500) : "");
+
+              const msg = backendMsg
+                ? `Something went wrong: ${backendMsg}`
                 : `Something went wrong. Status: ${response.status}`;
               window.ChatUI?.addAI(msg);
               postProcessLastAiBubble(msg);
