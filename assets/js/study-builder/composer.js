@@ -198,9 +198,6 @@
   function ensurePdfParsedAndCached(file) {
     const id = pdfFileId(file);
 
-    // mark active immediately (sticky across follow-ups)
-    setPdfActive(id, true);
-
     // already cached
     if (pdfCache.docs[id]?.text) return;
 
@@ -247,8 +244,46 @@
   }
 
   // API used by study-builder.js (network layer)
+  function resetPdfContext() {
+    attached.length = 0;
+    pdfCache.activeIds = [];
+    safeSavePdfCache();
+
+    if (pdfInput) pdfInput.value = "";
+    renderAttachments();
+  }
+
+  let pendingSendDocs = [];
+
+  function sealForSend() {
+    safeLoadPdfCache();
+    pendingSendDocs = attached
+      .map((f) => {
+        const id = pdfFileId(f);
+        const d = pdfCache.docs?.[id];
+        return d && d.text
+          ? {
+              file_id: id,
+              file_name: d.name || f.name,
+              text: d.text,
+              pages: d.pages || null,
+            }
+          : null;
+      })
+      .filter(Boolean);
+
+    resetPdfContext(); // clears UI chips (your requirement)
+  }
+
   window.DentAIPDF = window.DentAIPDF || {};
+  window.DentAIPDF.reset = resetPdfContext;
   window.DentAIPDF.hasPending = () => pdfPending.size > 0;
+  window.DentAIPDF.consumePending = () => {
+    const out = pendingSendDocs;
+    pendingSendDocs = [];
+    return out;
+  };
+
   window.DentAIPDF.getActiveContext = (maxChars = 120000) => {
     safeLoadPdfCache();
 
@@ -278,11 +313,16 @@
       out += header + d.text + "\n";
     }
 
-    // if nothing usable, return empty so we don't send noise
-    return out.trim() ===
+    const trimmed = out.trim();
+
+    if (
+      trimmed ===
       "PDF context (use as reference; do not mention this block unless the user asks):"
-      ? ""
-      : out.trim();
+    ) {
+      return "";
+    }
+
+    return trimmed.length > maxChars ? trimmed.slice(0, maxChars) : trimmed;
   };
   window.DentAIPDF.setActiveByFile = (file, on) => {
     const id = pdfFileId(file);
@@ -329,6 +369,9 @@
     if (!attachBar) return;
 
     attachBar.innerHTML = "";
+    // Keep active PDF context aligned with what the user actually attached in this chat.
+    pdfCache.activeIds = attached.map((f) => pdfFileId(f));
+    safeSavePdfCache();
 
     if (!attached.length) {
       attachBar.hidden = true;
@@ -456,8 +499,7 @@
     autoGrow();
     setSendState();
 
-    // Keep attachments active for follow-up questions (sticky PDF context)
-    renderAttachments();
+    sealForSend();
 
     closeAddMenu();
 
