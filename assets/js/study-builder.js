@@ -255,6 +255,7 @@
     let userId = null;
     let isAuthed = false;
     let activeConversationId = null;
+    let pdfContextSent = false;
 
     function getUrlChatId() {
       const url = new URL(window.location.href);
@@ -601,10 +602,12 @@
             activeConversationId = null;
             setUrlChatId(null);
             thread.length = 0;
+            pdfContextSent = false;
             await refreshChatList();
           } else {
             window.ChatUI?.newChat?.();
             thread.length = 0;
+            pdfContextSent = false;
             saveThread(thread);
           }
         });
@@ -670,21 +673,27 @@
                 (navigator.userAgentData && navigator.userAgentData.mobile) ||
                 /Android|iPhone|iPad|iPod|Mobi/i.test(navigator.userAgent);
 
-              const pdfMaxChars = isMobile ? 40000 : 120000;
+              // Keep this small to avoid TPM blow-ups.
+              const pdfMaxChars = isMobile ? 8000 : 15000;
 
-              const pdfContext =
-                window.DentAIPDF?.getActiveContext?.(pdfMaxChars) || "";
-
-              const requestMessages = thread.map((m) => ({
+              // Only send recent history (don’t resend the whole chat every time).
+              const historyWindow = 10;
+              const requestMessages = thread.slice(-historyWindow).map((m) => ({
                 role: m.role,
                 content: m.content,
               }));
 
-              if (pdfContext) {
-                requestMessages.unshift({
-                  role: "user",
-                  content: pdfContext,
-                });
+              // Only inject PDF context once per chat session.
+              if (!pdfContextSent) {
+                const pdfContext =
+                  window.DentAIPDF?.getActiveContext?.(pdfMaxChars) || "";
+                if (pdfContext) {
+                  requestMessages.unshift({
+                    role: "user",
+                    content: pdfContext,
+                  });
+                  pdfContextSent = true;
+                }
               }
 
               const response = await fetch(AI_ENDPOINT, {
