@@ -28,6 +28,15 @@
     return `${y}-${m}-${day}`;
   }
 
+  function fnv1aHash(str) {
+    let h = 0x811c9dc5;
+    for (let i = 0; i < str.length; i++) {
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 0x01000193);
+    }
+    return (h >>> 0).toString(16);
+  }
+
   function getAnonUsage() {
     const raw = localStorage.getItem(ANON_USAGE_KEY);
     const obj = safeJsonParse(raw) || {};
@@ -255,7 +264,7 @@
     let userId = null;
     let isAuthed = false;
     let activeConversationId = null;
-    let pdfContextSent = false;
+    let lastPdfContextHash = "";
 
     function getUrlChatId() {
       const url = new URL(window.location.href);
@@ -437,6 +446,8 @@
           activeConversationId = c.id;
           setUrlChatId(activeConversationId);
           await loadConversation(activeConversationId);
+          window.DentAIPDF?.reset?.();
+          lastPdfContextHash = "";
 
           listEl
             .querySelectorAll(".sb-chat")
@@ -602,12 +613,16 @@
             activeConversationId = null;
             setUrlChatId(null);
             thread.length = 0;
-            pdfContextSent = false;
+            lastPdfContextHash = "";
+            window.DentAIPDF?.reset?.();
+
             await refreshChatList();
           } else {
             window.ChatUI?.newChat?.();
             thread.length = 0;
-            pdfContextSent = false;
+            lastPdfContextHash = "";
+            window.DentAIPDF?.reset?.();
+
             saveThread(thread);
           }
         });
@@ -683,24 +698,27 @@
                 content: m.content,
               }));
 
-              // Only inject PDF context once per chat session.
-              if (!pdfContextSent) {
-                const pdfContext =
-                  window.DentAIPDF?.getActiveContext?.(pdfMaxChars) || "";
-                if (pdfContext) {
-                  requestMessages.unshift({
-                    role: "user",
-                    content: pdfContext,
-                  });
-                  pdfContextSent = true;
-                }
+              // Inject PDF context when it changes (fixes wrong answers after switching PDFs).
+              const pdfContext =
+                window.DentAIPDF?.getActiveContext?.(pdfMaxChars) || "";
+              const pdfHash = pdfContext ? fnv1aHash(pdfContext) : "";
+
+              if (pdfHash && pdfHash !== lastPdfContextHash) {
+                requestMessages.unshift({ role: "user", content: pdfContext });
+                lastPdfContextHash = pdfHash;
+              } else if (!pdfHash) {
+                lastPdfContextHash = "";
               }
+
+              const pdfDocs = window.DentAIPDF?.consumePending?.() || [];
 
               const response = await fetch(AI_ENDPOINT, {
                 method: "POST",
                 headers,
                 body: JSON.stringify({
                   topic: text,
+                  conversation_id: activeConversationId,
+                  pdf_docs: pdfDocs,
                   messages: requestMessages,
                 }),
               });
