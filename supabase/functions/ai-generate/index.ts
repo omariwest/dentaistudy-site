@@ -17,8 +17,46 @@ const corsHeaders: Record<string, string> = {
 const FREE_DAILY_LIMIT = 20;
 const PRO_DAILY_LIMIT = 200;
 
+// Safety nets (server-side) to reduce TPM even if client sends too much.
+const HISTORY_WINDOW = 10;
+const MAX_MESSAGE_CHARS = 6000;
+
+// Output cap (prevents huge completions).
+const MAX_OUTPUT_TOKENS = 800;
+
 function getTodayUTC(): string {
   return new Date().toISOString().slice(0, 10);
+}
+
+function truncateText(text: string, maxChars: number): string {
+  if (!text) return "";
+  return text.length > maxChars ? text.slice(0, maxChars) : text;
+}
+
+async function fetchOpenAIWithBackoff(
+  body: unknown,
+  apiKey: string
+): Promise<Response> {
+  let res: Response | null = null;
+
+  for (let attempt = 0; attempt < 4; attempt++) {
+    res = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (res.status !== 429) return res;
+
+    const delayMs = Math.min(8000, 500 * 2 ** attempt);
+    await new Promise((r) => setTimeout(r, delayMs));
+  }
+
+  // If still 429 after retries, return the last response.
+  return res!;
 }
 
 serve(async (req: Request): Promise<Response> => {
@@ -52,9 +90,10 @@ serve(async (req: Request): Promise<Response> => {
           .filter(
             (m: any) => m && (m.role === "user" || m.role === "assistant")
           )
+          .slice(-HISTORY_WINDOW)
           .map((m: any) => ({
             role: m.role,
-            content: String(m.content ?? ""),
+            content: truncateText(String(m.content ?? ""), MAX_MESSAGE_CHARS),
           }))
       : null;
 
@@ -144,18 +183,15 @@ serve(async (req: Request): Promise<Response> => {
           },
         ];
 
-    const aiRes = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${OPENAI_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "gpt-4.1-mini",
-        messages: finalMessages,
-        temperature: 0.3,
-      }),
-    });
+    // ✅ Replace the single fetch with backoff + add max_tokens (output cap).
+    const openAiBody = {
+      model: "gpt-4.1-mini",
+      messages: finalMessages,
+      temperature: 0.3,
+      max_tokens: MAX_OUTPUT_TOKENS,
+    };
+
+    const aiRes = await fetchOpenAIWithBackoff(openAiBody, OPENAI_API_KEY);
 
     const aiText = await aiRes.text();
 
@@ -181,7 +217,6 @@ serve(async (req: Request): Promise<Response> => {
       );
     }
 
-    // keep using aiJson below for success path
     const content =
       aiJson?.choices?.[0]?.message?.content?.toString().trim() ?? "";
 
