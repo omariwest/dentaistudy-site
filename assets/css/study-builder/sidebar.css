@@ -56,6 +56,13 @@
   gap: 6px;
 }
 
+#sbChatsSlot {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 .sb-btn {
   width: 100%;
   border: 1px solid transparent;
@@ -87,6 +94,7 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  flex: 1 1 auto;
 }
 .sb-section-title {
   font-size: 12px;
@@ -98,6 +106,7 @@
   min-height: 0;
   overflow: auto;
   padding-right: 6px;
+  flex: 1 1 auto;
 }
 
 .sb-chatrow {
@@ -244,10 +253,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   position: relative;
-}
-
-.sb-chat[title] {
-  cursor: help;
 }
 
 .sb-chat:hover {
