@@ -411,6 +411,7 @@
         btn.type = "button";
         btn.dataset.chatId = c.id;
         btn.textContent = (c.title || "New chat").trim() || "New chat";
+        btn.title = btn.textContent;
 
         const menuBtn = document.createElement("button");
         menuBtn.className = "sb-chatmenu";
@@ -463,6 +464,8 @@
         menuBtn.addEventListener("click", (e) => {
           e.stopPropagation();
 
+          const wasOpen = !pop.hidden;
+
           const anyOpen = listEl.querySelectorAll(
             ".sb-chatmenu-pop:not([hidden])"
           );
@@ -472,15 +475,10 @@
             el.style.top = "";
           });
 
-          const willOpen = pop.hidden;
-          pop.hidden = !willOpen ? true : false;
+          if (wasOpen) return;
 
-          if (!pop.hidden) {
-            positionMenu(menuBtn, pop);
-          } else {
-            pop.style.left = "";
-            pop.style.top = "";
-          }
+          pop.hidden = false;
+          positionMenu(menuBtn, pop);
         });
 
         popRename.addEventListener("click", async (e) => {
