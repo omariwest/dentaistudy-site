@@ -204,17 +204,10 @@
   }
 
   function loadThread() {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    const data = safeJsonParse(raw);
-    if (!Array.isArray(data)) return [];
-    return data
-      .filter(
-        (m) =>
-          m &&
-          (m.role === "user" || m.role === "assistant") &&
-          typeof m.content === "string"
-      )
-      .map((m) => ({ role: m.role, content: m.content }));
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {}
+    return [];
   }
 
   function saveThread(list) {
