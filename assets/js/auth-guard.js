@@ -25,6 +25,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const fileName = path.split("/").pop() || "index.html";
   const isProfile = fileName === "profile.html";
   const isSettings = fileName === "settings.html";
+  const isStudy = fileName === "study.html";
   const isProtected = isProfile || isSettings;
 
   try {
@@ -170,6 +171,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       workspaceNameEl.textContent = fullName;
     }
 
+    // Study builder sidebar: plan badge under the logo
+    if (isStudy) {
+      const studyPlanBadge = document.getElementById("das-study-plan-badge");
+      if (studyPlanBadge) {
+        studyPlanBadge.textContent = isPaidPlan ? "Pro" : "Free";
+      }
+    }
+
     // -------------------------------------------------------------
     // Profile page: basic info + counters + preferences card
     // -------------------------------------------------------------
@@ -188,13 +197,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         profileEmailEl.textContent = email;
       }
       if (profilePlanBadge) {
-        if (subscriptionTier === "pro_yearly") {
-          profilePlanBadge.textContent = "DentAIstudy Pro yearly plan";
-        } else if (subscriptionTier === "pro") {
-          profilePlanBadge.textContent = "DentAIstudy Pro plan";
-        } else {
-          profilePlanBadge.textContent = "DentAIstudy free plan";
-        }
+        profilePlanBadge.textContent = isPaidPlan ? "Pro plan" : "Free plan";
       }
 
       // Study activity numbers
@@ -478,13 +481,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       );
 
       if (settingsPlanLabel) {
-        if (subscriptionTier === "pro_yearly") {
-          settingsPlanLabel.textContent = "DentAIstudy Pro yearly plan";
-        } else if (subscriptionTier === "pro") {
-          settingsPlanLabel.textContent = "DentAIstudy Pro plan";
-        } else {
-          settingsPlanLabel.textContent = "DentAIstudy free plan";
-        }
+        settingsPlanLabel.textContent = isPaidPlan ? "Pro plan" : "Free plan";
       }
 
       if (settingsPlanNote && settingsPlanUpgrade && settingsPlanManage) {
