@@ -27,6 +27,87 @@ document.addEventListener("DOMContentLoaded", async () => {
   const isSettings = fileName === "settings.html";
   const isStudy = fileName === "study.html";
   const isProtected = isProfile || isSettings;
+  // Desktop-only modal (keeps mobile/iPad using native confirm)
+  function isDesktopModal() {
+    return (
+      window.matchMedia && window.matchMedia("(min-width: 1025px)").matches
+    );
+  }
+
+  function getDasModalEls() {
+    const overlay = document.getElementById("dasModalOverlay");
+    const title = document.getElementById("dasModalTitle");
+    const message = document.getElementById("dasModalMessage");
+    const input = document.getElementById("dasModalInput");
+    const cancelBtn = document.getElementById("dasModalCancelBtn");
+    const okBtn = document.getElementById("dasModalOkBtn");
+
+    if (!overlay || !title || !message || !cancelBtn || !okBtn) return null;
+    return { overlay, title, message, input, cancelBtn, okBtn };
+  }
+
+  function dasConfirm({
+    title,
+    message,
+    okText = "OK",
+    cancelText = "Cancel",
+    danger = false,
+  }) {
+    if (!isDesktopModal()) return Promise.resolve(window.confirm(message));
+    const els = getDasModalEls();
+    if (!els) return Promise.resolve(window.confirm(message));
+
+    const { overlay, title: t, message: msg, input, cancelBtn, okBtn } = els;
+
+    return new Promise((resolve) => {
+      let done = false;
+
+      function cleanup(result) {
+        if (done) return;
+        done = true;
+
+        overlay.hidden = true;
+        if (input) input.hidden = true;
+
+        overlay.removeEventListener("click", onBackdrop);
+        cancelBtn.removeEventListener("click", onCancel);
+        okBtn.removeEventListener("click", onOk);
+        window.removeEventListener("keydown", onKeyDown);
+
+        resolve(result);
+      }
+
+      function onBackdrop(e) {
+        if (e.target === overlay) cleanup(false);
+      }
+      function onCancel() {
+        cleanup(false);
+      }
+      function onOk() {
+        cleanup(true);
+      }
+      function onKeyDown(e) {
+        if (e.key === "Escape") cleanup(false);
+        if (e.key === "Enter") cleanup(true);
+      }
+
+      t.textContent = title || "";
+      msg.textContent = message || "";
+      cancelBtn.textContent = cancelText;
+      okBtn.textContent = okText;
+
+      okBtn.classList.toggle("das-modal__btn--danger", !!danger);
+      okBtn.classList.toggle("das-modal__btn--primary", !danger);
+
+      overlay.hidden = false;
+      okBtn.focus();
+
+      overlay.addEventListener("click", onBackdrop);
+      cancelBtn.addEventListener("click", onCancel);
+      okBtn.addEventListener("click", onOk);
+      window.addEventListener("keydown", onKeyDown);
+    });
+  }
 
   try {
     // -------------------------------------------------------------
@@ -526,9 +607,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         deleteAccountBtn.addEventListener("click", async (event) => {
           event.preventDefault();
 
-          const confirmed = window.confirm(
-            "Are you sure you want to delete your DentAIstudy account? This will permanently remove your study activity and preferences."
-          );
+          const confirmed = await dasConfirm({
+            title: "Delete account",
+            message:
+              "Are you sure you want to delete your DentAIstudy account? This will permanently remove your study activity and preferences.",
+            okText: "Delete",
+            danger: true,
+          });
           if (!confirmed) return;
 
           if (!functionsBase) {

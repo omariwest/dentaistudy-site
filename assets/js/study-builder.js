@@ -282,10 +282,174 @@
       return t.length > 60 ? `${t.slice(0, 60)}…` : t;
     }
 
+    // Desktop-only modal (keeps mobile/iPad using native prompt/confirm)
+    function isDesktopModal() {
+      return (
+        window.matchMedia && window.matchMedia("(min-width: 1025px)").matches
+      );
+    }
+
+    function getDasModalEls() {
+      const overlay = document.getElementById("dasModalOverlay");
+      const title = document.getElementById("dasModalTitle");
+      const message = document.getElementById("dasModalMessage");
+      const input = document.getElementById("dasModalInput");
+      const cancelBtn = document.getElementById("dasModalCancelBtn");
+      const okBtn = document.getElementById("dasModalOkBtn");
+
+      if (!overlay || !title || !message || !input || !cancelBtn || !okBtn) {
+        return null;
+      }
+      return { overlay, title, message, input, cancelBtn, okBtn };
+    }
+
+    function dasConfirm({
+      title,
+      message,
+      okText = "OK",
+      cancelText = "Cancel",
+      danger = false,
+    }) {
+      if (!isDesktopModal()) return Promise.resolve(window.confirm(message));
+      const els = getDasModalEls();
+      if (!els) return Promise.resolve(window.confirm(message));
+
+      const { overlay, title: t, message: msg, input, cancelBtn, okBtn } = els;
+
+      return new Promise((resolve) => {
+        let done = false;
+
+        function cleanup(result) {
+          if (done) return;
+          done = true;
+
+          overlay.hidden = true;
+          input.hidden = true;
+          overlay.removeEventListener("click", onBackdrop);
+          cancelBtn.removeEventListener("click", onCancel);
+          okBtn.removeEventListener("click", onOk);
+          window.removeEventListener("keydown", onKeyDown);
+
+          resolve(result);
+        }
+
+        function onBackdrop(e) {
+          if (e.target === overlay) cleanup(false);
+        }
+        function onCancel() {
+          cleanup(false);
+        }
+        function onOk() {
+          cleanup(true);
+        }
+        function onKeyDown(e) {
+          if (e.key === "Escape") cleanup(false);
+          if (e.key === "Enter") cleanup(true);
+        }
+
+        t.textContent = title || "";
+        msg.textContent = message || "";
+        msg.style.display = message ? "" : "none";
+        input.hidden = true;
+
+        cancelBtn.textContent = cancelText;
+        okBtn.textContent = okText;
+
+        okBtn.classList.toggle("das-modal__btn--danger", !!danger);
+        okBtn.classList.toggle("das-modal__btn--primary", !danger);
+
+        overlay.hidden = false;
+        okBtn.focus();
+
+        overlay.addEventListener("click", onBackdrop);
+        cancelBtn.addEventListener("click", onCancel);
+        okBtn.addEventListener("click", onOk);
+        window.addEventListener("keydown", onKeyDown);
+      });
+    }
+
+    function dasPrompt({
+      title,
+      message = "",
+      defaultValue = "",
+      placeholder = "",
+      okText = "OK",
+      cancelText = "Cancel",
+      maxLength = 80,
+    }) {
+      if (!isDesktopModal())
+        return Promise.resolve(window.prompt(title, defaultValue));
+      const els = getDasModalEls();
+      if (!els) return Promise.resolve(window.prompt(title, defaultValue));
+
+      const { overlay, title: t, message: msg, input, cancelBtn, okBtn } = els;
+
+      return new Promise((resolve) => {
+        let done = false;
+
+        function cleanup(result) {
+          if (done) return;
+          done = true;
+
+          overlay.hidden = true;
+          input.hidden = true;
+          overlay.removeEventListener("click", onBackdrop);
+          cancelBtn.removeEventListener("click", onCancel);
+          okBtn.removeEventListener("click", onOk);
+          window.removeEventListener("keydown", onKeyDown);
+
+          resolve(result);
+        }
+
+        function onBackdrop(e) {
+          if (e.target === overlay) cleanup(null);
+        }
+        function onCancel() {
+          cleanup(null);
+        }
+        function onOk() {
+          cleanup((input.value || "").trim());
+        }
+        function onKeyDown(e) {
+          if (e.key === "Escape") cleanup(null);
+          if (e.key === "Enter") cleanup((input.value || "").trim());
+        }
+
+        t.textContent = title || "";
+        msg.textContent = message || "";
+        msg.style.display = message ? "" : "none";
+
+        input.hidden = false;
+        input.value = (defaultValue || "").toString();
+        input.placeholder = placeholder;
+        input.maxLength = maxLength;
+
+        cancelBtn.textContent = cancelText;
+        okBtn.textContent = okText;
+
+        okBtn.classList.remove("das-modal__btn--danger");
+        okBtn.classList.add("das-modal__btn--primary");
+
+        overlay.hidden = false;
+        input.focus();
+        input.select();
+
+        overlay.addEventListener("click", onBackdrop);
+        cancelBtn.addEventListener("click", onCancel);
+        okBtn.addEventListener("click", onOk);
+        window.addEventListener("keydown", onKeyDown);
+      });
+    }
+
     async function renameConversation(conversationId, currentTitle) {
       if (!isAuthed || !supa || !conversationId) return;
 
-      const next = window.prompt("Rename chat", (currentTitle || "").trim());
+      const next = await dasPrompt({
+        title: "Rename chat",
+        defaultValue: (currentTitle || "").trim(),
+        okText: "Save",
+      });
+
       if (next === null) return;
 
       const cleaned = next.trim().replace(/\s+/g, " ");
@@ -304,7 +468,13 @@
     async function deleteConversation(conversationId) {
       if (!isAuthed || !supa || !conversationId) return;
 
-      const ok = window.confirm("Delete this chat?");
+      const ok = await dasConfirm({
+        title: "Delete chat",
+        message: "Delete this chat? This can’t be undone.",
+        okText: "Delete",
+        danger: true,
+      });
+
       if (!ok) return;
 
       const { error } = await supa
