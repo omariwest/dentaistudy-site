@@ -10,6 +10,101 @@
   z-index: 20;
 }
 
+/* Desktop modal (Chat rename/delete) */
+.das-modal-overlay[hidden] {
+  display: none;
+}
+.das-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(2, 6, 23, 0.35);
+}
+@media (min-width: 1025px) {
+  .das-modal-overlay {
+    backdrop-filter: blur(8px);
+  }
+}
+
+.das-modal {
+  width: min(520px, 100%);
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  padding: 18px 18px 14px;
+}
+
+.das-modal__title {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+.das-modal__message {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.das-modal__input {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 14px;
+  outline: none;
+  background: #fff;
+  color: var(--text);
+}
+.das-modal__input[hidden] {
+  display: none;
+}
+.das-modal__input:focus {
+  box-shadow: 0 0 0 3px rgba(15, 76, 129, 0.18);
+}
+
+.das-modal__actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 14px;
+}
+
+.das-modal__btn {
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 10px 14px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.das-modal__btn--ghost {
+  background: rgba(2, 6, 23, 0.04);
+  border-color: rgba(2, 6, 23, 0.08);
+  color: var(--text);
+}
+
+.das-modal__btn--primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.das-modal__btn--danger {
+  background: #dc2626;
+  border-color: #dc2626;
+  color: #fff;
+}
+
+.das-modal__btn:focus-visible {
+  outline: 3px solid rgba(15, 76, 129, 0.28);
+  outline-offset: 2px;
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .app {
