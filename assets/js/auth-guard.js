@@ -13,8 +13,12 @@ console.log("[auth-guard] LOADED FILE v3.1 on", window.location.href);
 // - Hook into existing logout handler via [data-das-logout]
 // - Handle avatar display + upload (profile photo)
 //
-// This file is written to be easy to read & debug. All important steps
-// have a small comment above them so you can follow what is happening.
+// IMPORTANT FIX:
+// - Prefer provider-neutral avatar keys first so Google OAuth doesn't override the uploaded avatar.
+//   We use:
+//     - user_metadata.custom_avatar_url
+//     - fallback: user_metadata.avatar_url
+//     - fallback: user_metadata.picture
 
 document.addEventListener("DOMContentLoaded", async () => {
   const path = window.location.pathname || "";
@@ -31,7 +35,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.warn("[auth-guard] Supabase client not found on this page");
       updateAuthUI(null);
       if (isProtected) {
-        // Use replace so protected pages don't stay in history for anonymous users
         window.location.replace("login.html");
       }
       return;
@@ -59,8 +62,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // -------------------------------------------------------------
     // Get a FRESH user from Supabase
-    //    This makes sure we see updated metadata after changes,
-    //    Google sign-in, etc.
     // -------------------------------------------------------------
     let freshUserData = null;
     try {
@@ -77,7 +78,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // -------------------------------------------------------------
     // Choose which user object to trust
-    //    Prefer fresh user → fall back to session.user
     // -------------------------------------------------------------
     const effectiveUser = freshUserData?.user || session?.user || null;
 
@@ -98,7 +98,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     // If there is no user and this is a protected page → go to login
     if (!effectiveUser) {
       if (isProtected) {
-        // Replace instead of href so back button can't show profile/settings
         window.location.replace("login.html");
       }
       return;
@@ -117,7 +116,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       (user.email ? user.email.split("@")[0] : "") ||
       "";
     const email = user.email || "";
-    const avatarUrl = meta.avatar_url || meta.picture || "";
+
+    // IMPORTANT: provider-neutral avatar first
+    const avatarUrl =
+      meta.custom_avatar_url || meta.avatar_url || meta.picture || "";
 
     const defaultLevel = meta.default_level || "undergraduate";
 
@@ -137,7 +139,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     const topMode = meta.top_used_category || null;
 
     // Plan / subscription tier (provider-neutral)
-    // Prefer app_metadata, fall back to user_metadata
     const subscriptionTier =
       appMeta.subscription_tier || meta.subscription_tier || "free";
 
@@ -268,13 +269,10 @@ document.addEventListener("DOMContentLoaded", async () => {
           defaultLevelEl.textContent = "Set your level";
         }
 
-        // Chip color: neutral for Free, accent for Pro
         if (isPaidPlan) {
-          // Pro / Pro yearly → accent chip
           defaultLevelEl.style.background = "#eff6ff";
           defaultLevelEl.style.color = "#1d4ed8";
         } else {
-          // Free → neutral grey like the other tags
           defaultLevelEl.style.background = "#f3f4f6";
           defaultLevelEl.style.color = "#4b5563";
         }
@@ -630,11 +628,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       subjectPills.forEach((pill) => {
         const slug = pill.getAttribute("data-das-subject-pill");
 
-        // Base style: neutral pill for everyone
         pill.style.background = "#f3f4f6";
         pill.style.color = "#4b5563";
 
-        // Paid plans only: highlight top 3 favorites
         if (isPaidPlan && topFavorites.includes(slug)) {
           pill.style.background = "#f3f4ff";
           pill.style.color = "#4f46e5";
@@ -647,11 +643,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       outputPills.forEach((pill) => {
         const slug = pill.getAttribute("data-das-output-pill");
 
-        // Base style: neutral for everyone
         pill.style.background = "#f3f4f6";
         pill.style.color = "#4b5563";
 
-        // Paid plans only: highlight saved styles
         if (isPaidPlan && preferredOutputStyles.includes(slug)) {
           pill.style.background = "#eef2ff";
           pill.style.color = "#4338ca";
@@ -680,7 +674,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     updateAuthUI(null);
 
     if (isProtected) {
-      // Safety: also use replace here on any unexpected error
       window.location.replace("login.html");
     }
   }

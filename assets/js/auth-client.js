@@ -15,7 +15,58 @@ const functionsBaseUrl = SUPABASE_URL.replace(
 // Expose URLs for other scripts (read-only)
 window.dasSupabaseUrl = SUPABASE_URL;
 window.dasSupabaseFunctionsBase = functionsBaseUrl;
+// -----------------------------------------------------------
+// Avatar metadata preservation (prevents Google from "winning")
+// Place this right after: window.dasSupabaseFunctionsBase = functionsBaseUrl;
+// -----------------------------------------------------------
+(() => {
+  const sb = window.dasSupabase;
+  if (!sb?.auth) return;
 
+  const isSupabaseAvatarUrl = (url) =>
+    typeof url === "string" &&
+    url.includes(".supabase.co/storage/v1/object/public/profile-pictures/");
+
+  async function ensureCustomAvatarMeta() {
+    const { data, error } = await sb.auth.getUser();
+    if (error || !data?.user) return;
+
+    const meta = data.user.user_metadata || {};
+
+    const customUrl = meta.custom_avatar_url;
+    const legacyUrl = meta.avatar_url;
+
+    // 1) One-time migration: if user already has a Supabase avatar in avatar_url, copy it to custom_avatar_url
+    if (!customUrl && isSupabaseAvatarUrl(legacyUrl)) {
+      await sb.auth.updateUser({
+        data: {
+          ...meta,
+          custom_avatar_url: legacyUrl,
+          custom_avatar_path:
+            meta.avatar_path || meta.custom_avatar_path || null,
+        },
+      });
+      return;
+    }
+
+    // 2) Compatibility: if custom exists, force avatar_url to match it (so any old code still works)
+    if (customUrl && meta.avatar_url !== customUrl) {
+      await sb.auth.updateUser({
+        data: { ...meta, avatar_url: customUrl },
+      });
+    }
+  }
+
+  // Run once on page load
+  ensureCustomAvatarMeta();
+
+  // Run again on sign-in / refresh events (covers mobile login then desktop refresh)
+  sb.auth.onAuthStateChange((event) => {
+    if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
+      ensureCustomAvatarMeta();
+    }
+  });
+})();
 
 // -----------------------------------------------------------
 // Google OAuth sign-in / sign-up (shared for login + signup)
@@ -61,7 +112,6 @@ function dasSetupGoogleAuth() {
 }
 
 document.addEventListener("DOMContentLoaded", dasSetupGoogleAuth);
-
 
 // -----------------------------------------------------------
 // Study Preference Counters (OSCE / Packs / Flashcards / Theory / Viva)
@@ -149,10 +199,7 @@ async function incrementStudyPreference(category) {
     });
 
     if (updateError) {
-      console.error(
-        "incrementStudyPreference updateUser error:",
-        updateError
-      );
+      console.error("incrementStudyPreference updateUser error:", updateError);
     }
   } catch (err) {
     console.error("incrementStudyPreference failed:", err);

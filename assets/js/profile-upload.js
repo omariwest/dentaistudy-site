@@ -1,10 +1,14 @@
 // dentAIstudy-v3/assets/js/profile-upload.js
-// Profile picture upload for Supabase Storage (public bucket) + user_metadata avatar_url persistence.
+// Profile picture upload for Supabase Storage (public bucket) + user_metadata persistence.
 //
-// Requirements in this project:
-// - Supabase client is exposed as `window.dasSupabase` (created in assets/js/auth-client.js).
-// - Auth UI + avatar rendering across pages is handled in assets/js/auth-guard.js via `user.user_metadata.avatar_url`.
-// - This file only handles uploading + saving the avatar_url into user_metadata.
+// Key fix:
+// - Store your uploaded avatar in provider-neutral keys so Google OAuth can't "win" on re-login.
+//   We use:
+//     - user_metadata.custom_avatar_url
+//     - user_metadata.custom_avatar_path
+//
+// Supabase client is exposed as `window.dasSupabase` (created in assets/js/auth-client.js).
+// Avatar rendering across pages is handled in assets/js/auth-guard.js.
 //
 // Bucket convention used here:
 // - bucket: profile-pictures
@@ -63,7 +67,10 @@
 
     window.dispatchEvent(
       new CustomEvent("das:avatar-updated", {
-        detail: { avatar_url: avatarUrl },
+        detail: {
+          custom_avatar_url: avatarUrl,
+          avatar_url: avatarUrl, // compatibility for any existing listeners
+        },
       })
     );
   }
@@ -75,11 +82,16 @@
     return data.user;
   }
 
+  function pickBestAvatarUrl(meta) {
+    // Provider-neutral first, then legacy fields
+    return meta.custom_avatar_url || meta.avatar_url || meta.picture || "";
+  }
+
   async function loadExistingAvatar(supabase) {
     try {
       const user = await getAuthedUser(supabase);
       const meta = user.user_metadata || {};
-      const avatarUrl = meta.avatar_url || meta.picture || "";
+      const avatarUrl = pickBestAvatarUrl(meta);
       if (avatarUrl) applyAvatarEverywhere(avatarUrl);
     } catch (_) {
       // Not logged in; auth-guard will handle redirects for protected pages.
@@ -104,10 +116,7 @@
         cacheControl: "3600",
       });
 
-    if (uploadError) {
-      // Common cause: Storage policy allows INSERT but not UPDATE (needed for upsert).
-      throw uploadError;
-    }
+    if (uploadError) throw uploadError;
 
     const { data: pub } = supabase.storage
       .from(BUCKET)
@@ -118,10 +127,12 @@
 
     const versionedUrl = withCacheBust(publicUrl);
 
+    // IMPORTANT FIX:
+    // Save into provider-neutral keys so OAuth providers don't override it.
     const { error: updateError } = await supabase.auth.updateUser({
       data: {
-        avatar_url: versionedUrl,
-        avatar_path: objectPath,
+        custom_avatar_url: versionedUrl,
+        custom_avatar_path: objectPath,
       },
     });
 
@@ -129,7 +140,11 @@
 
     setStatus(statusEl, "Photo updated.");
     applyAvatarEverywhere(versionedUrl);
-    return { avatar_url: versionedUrl, avatar_path: objectPath };
+
+    return {
+      custom_avatar_url: versionedUrl,
+      custom_avatar_path: objectPath,
+    };
   }
 
   function wireUi({ supabase }) {
