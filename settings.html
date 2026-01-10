@@ -412,6 +412,43 @@
       </main>
     </div>
 
+    <!-- Desktop modal (Delete account) -->
+    <div class="das-modal-overlay" id="dasModalOverlay" hidden>
+      <div
+        class="das-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="dasModalTitle"
+      >
+        <h3 class="das-modal__title" id="dasModalTitle"></h3>
+        <p class="das-modal__message" id="dasModalMessage"></p>
+        <input
+          class="das-modal__input"
+          id="dasModalInput"
+          type="text"
+          autocomplete="off"
+          spellcheck="false"
+          hidden
+        />
+        <div class="das-modal__actions">
+          <button
+            type="button"
+            class="das-modal__btn das-modal__btn--ghost"
+            id="dasModalCancelBtn"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="das-modal__btn das-modal__btn--danger"
+            id="dasModalOkBtn"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+
     <script>
       // Settings billing actions (safe placeholders)
       // Later: replace these with Payoneer + DB subscription actions.

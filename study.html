@@ -441,6 +441,42 @@
         <a href="login.html" class="slide-login-link">Log in</a>
       </div>
     </nav>
+    <!-- Desktop modal (Rename/Delete chat) -->
+    <div class="das-modal-overlay" id="dasModalOverlay" hidden>
+      <div
+        class="das-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="dasModalTitle"
+      >
+        <h3 class="das-modal__title" id="dasModalTitle"></h3>
+        <p class="das-modal__message" id="dasModalMessage"></p>
+        <input
+          class="das-modal__input"
+          id="dasModalInput"
+          type="text"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <div class="das-modal__actions">
+          <button
+            type="button"
+            class="das-modal__btn das-modal__btn--ghost"
+            id="dasModalCancelBtn"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="das-modal__btn das-modal__btn--primary"
+            id="dasModalOkBtn"
+          >
+            OK
+          </button>
+        </div>
+      </div>
+    </div>
+
     <div class="backdrop" id="backdrop" hidden></div>
   </body>
 </html>
