@@ -449,8 +449,26 @@
     if (pdfInput) pdfInput.value = "";
   }
 
-  function triggerPdfPick() {
+  async function triggerPdfPick() {
     if (!pdfInput) return;
+
+    // Check if user is authenticated
+    let isAuthenticated = false;
+    try {
+      if (window.dasSupabase?.auth) {
+        const { data } = await window.dasSupabase.auth.getSession();
+        isAuthenticated = !!data?.session;
+      }
+    } catch {}
+
+    if (!isAuthenticated) {
+      // Professional note for anonymous users
+      alert(
+        "PDF uploads are available to DentAIstudy members. Sign in or create a free account to upload documents and get AI insights from your study materials."
+      );
+      return;
+    }
+
     pdfInput.value = "";
     pdfInput.click();
   }
