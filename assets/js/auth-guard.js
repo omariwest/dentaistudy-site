@@ -559,7 +559,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     // -------------------------------------------------------------
-    // Settings page: plan label + preferences card + delete account
+    // Settings page: plan label + delete account
     // -------------------------------------------------------------
     if (isSettings) {
       const settingsPlanLabel = document.getElementById(
@@ -596,29 +596,6 @@ document.addEventListener("DOMContentLoaded", async () => {
           settingsPlanUpgrade.style.display = "flex";
           settingsPlanManage.style.display = "none";
         }
-      }
-
-      // Settings Study preferences card (lock / unlock)
-      const settingsPrefsCard = document.querySelector(
-        "[data-das-settings-preferences-card]"
-      );
-      const settingsPrefsNote = document.getElementById(
-        "das-settings-preferences-note"
-      );
-
-      if (settingsPrefsCard) {
-        if (isPaidPlan) {
-          settingsPrefsCard.style.opacity = "1";
-          settingsPrefsCard.style.background = "#ffffff";
-          settingsPrefsCard.style.pointerEvents = "auto";
-        } else {
-          settingsPrefsCard.style.opacity = "0.8";
-          settingsPrefsCard.style.background = "#f3f4f6";
-          settingsPrefsCard.style.pointerEvents = "none";
-        }
-      }
-      if (settingsPrefsNote) {
-        settingsPrefsNote.style.display = isPaidPlan ? "none" : "block";
       }
 
       // Delete account → automatic via Supabase Edge Function
