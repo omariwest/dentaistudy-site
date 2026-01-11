@@ -255,11 +255,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       isPaidPlan,
     });
 
-    // Favorites and preferred output styles (arrays of slugs)
+    // Favorite subjects and default formats (arrays of slugs)
     const favoriteSubjects = Array.isArray(meta.favorite_subjects)
       ? meta.favorite_subjects
       : [];
-    const preferredOutputStyles = Array.isArray(meta.preferred_output_styles)
+    const defaultFormats = Array.isArray(meta.preferred_output_styles)
       ? meta.preferred_output_styles
       : [];
 
@@ -739,15 +739,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
     }
 
-    const outputPills = document.querySelectorAll("[data-das-output-pill]");
-    if (outputPills.length) {
-      outputPills.forEach((pill) => {
-        const slug = pill.getAttribute("data-das-output-pill");
+    const formatPills = document.querySelectorAll("[data-das-format-pill]");
+    if (formatPills.length) {
+      formatPills.forEach((pill) => {
+        const slug = pill.getAttribute("data-das-format-pill");
 
         pill.style.background = "#f3f4f6";
         pill.style.color = "#4b5563";
 
-        if (isPaidPlan && preferredOutputStyles.includes(slug)) {
+        if (isPaidPlan && defaultFormats.includes(slug)) {
           pill.style.background = "#eef2ff";
           pill.style.color = "#4338ca";
         }
