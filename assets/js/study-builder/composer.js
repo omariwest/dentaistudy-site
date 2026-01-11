@@ -464,7 +464,7 @@
     if (!isAuthenticated) {
       // Professional note for anonymous users
       alert(
-        "PDF uploads are available to DentAIstudy members. Sign in or create a free account to upload documents and get AI insights from your study materials."
+        "PDF uploads are available to DentAIstudy members. Sign in or create a free account to upload documents."
       );
       return;
     }
