@@ -482,7 +482,7 @@
 
   // ========= Add menu actions =========
   // - click Add PDF: opens picker
-  // - click Output style: set active + close
+  // - click Generate: set active + close
   addMenu?.addEventListener("click", (e) => {
     const styleBtn = e.target.closest ? e.target.closest("[data-style]") : null;
     if (styleBtn) {
