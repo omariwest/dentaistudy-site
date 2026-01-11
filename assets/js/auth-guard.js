@@ -192,6 +192,25 @@ document.addEventListener("DOMContentLoaded", async () => {
     const meta = user.user_metadata || {};
     const appMeta = user.app_metadata || {};
 
+    // Update last_active_at on every protected page load
+    const now = new Date().toISOString();
+    if (isProfile || isSettings) {
+      const needsUpdate =
+        !meta.last_active_at ||
+        new Date(now).getTime() - new Date(meta.last_active_at).getTime() >
+          60000; // 1 minute threshold
+
+      if (needsUpdate) {
+        supabase.auth
+          .updateUser({
+            data: { ...meta, last_active_at: now },
+          })
+          .catch((err) =>
+            console.warn("[auth-guard] Could not update last_active_at:", err)
+          );
+      }
+    }
+
     const fullName =
       meta.full_name ||
       meta.name ||
