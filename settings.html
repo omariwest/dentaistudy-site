@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -12,15 +12,14 @@
     <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/favicon-512.png" />
 
-    <!-- JS: Supabase + client + guard + main -->
-    <script
-      src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
-      defer
-    ></script>
-    <script src="assets/js/auth-client.js" defer></script>
-    <script src="assets/js/auth-guard.js" defer></script>
-    <script src="assets/js/auth-logout.js" defer></script>
-    <script src="assets/js/main.js" defer></script>
+    <script src="https://cdn.paddle.com/paddle/v2/paddle.js" defer></script>
+    <script src="assets/js/paddle-init.js" defer></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/auth-client.js"></script>
+    <script src="assets/js/auth-guard.js"></script>
+    <script src="assets/js/auth-logout.js"></script>
+    <script src="assets/js/main.js"></script>
   </head>
 
   <body class="page-account page-spacing--wide">
@@ -278,6 +277,7 @@
                     Cancel Pro plan
                   </button>
                   <small
+                    id="das-settings-plan-manage-status"
                     style="
                       display: block;
                       margin-top: 6px;
@@ -358,39 +358,5 @@
         </div>
       </div>
     </div>
-
-    <script>
-      // Settings billing actions (safe placeholders)
-      // Later: replace these with Payoneer + DB subscription actions.
-      (function () {
-        const manageBtn = document.getElementById("dasManageBillingBtn");
-        const cancelBtn = document.getElementById("dasCancelPlanBtn");
-
-        if (manageBtn) {
-          // For now, send users to Contact (you can add a billing section there)
-          manageBtn.addEventListener("click", (e) => {
-            // keep as normal link to contact.html
-          });
-        }
-
-        if (cancelBtn) {
-          cancelBtn.addEventListener("click", () => {
-            const ok = confirm(
-              "Cancel your Pro plan?\n\nWe’ll stop future renewals. Your access stays active until the end of your current billing period."
-            );
-            if (!ok) return;
-
-            // Simple, reliable for now: open an email with prefilled subject/body
-            const subject = encodeURIComponent(
-              "DentAIstudy — Cancel my Pro subscription"
-            );
-            const body = encodeURIComponent(
-              "Hi DentAIstudy team,\n\nPlease cancel my Pro subscription.\n\nMy account email: (write your email here)\n\nThank you."
-            );
-            window.location.href = `mailto:info@dentaistudy.com?subject=${subject}&body=${body}`;
-          });
-        }
-      })();
-    </script>
   </body>
 </html>
