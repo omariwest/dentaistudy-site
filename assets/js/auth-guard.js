@@ -620,6 +620,22 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Paddle IDs should be stored by your webhook (see server edit below)
       const paddleCustomerId =
         meta.paddle_customer_id || appMeta.paddle_customer_id || null;
+
+      // After paddleCustomerId/paddleSubscriptionId are computed (inside isSettings block)
+      try {
+        if (window.Paddle && !window.dasPaddleInitialized) {
+          window.Paddle.Initialize({
+            token: "live_5dddba89244dee1c26f561c5b75",
+            pwCustomer: paddleCustomerId?.startsWith("ctm_")
+              ? { id: paddleCustomerId }
+              : {}, // per Paddle docs: pass empty object if you don't have customer id
+          });
+          window.dasPaddleInitialized = true;
+        }
+      } catch (e) {
+        console.error("[retain] Paddle init on app page failed:", e);
+      }
+
       const paddleSubscriptionId =
         meta.paddle_subscription_id || appMeta.paddle_subscription_id || null;
 
