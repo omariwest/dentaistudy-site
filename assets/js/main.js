@@ -284,9 +284,7 @@ document.querySelectorAll(".copy-btn").forEach((btn) => {
       return;
     }
 
-    // 2) Otherwise, fallback to your internal billing page
-    window.location.href = "billing.html";
-    return;
+    return; // Paddle handled by assets/js/paddle-checkout.js
   }
 
   planButtons.forEach((btn) => {

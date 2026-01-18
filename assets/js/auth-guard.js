@@ -206,7 +206,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             data: { ...meta, last_active_at: now },
           })
           .catch((err) =>
-            console.warn("[auth-guard] Could not update last_active_at:", err)
+            console.warn("[auth-guard] Could not update last_active_at:", err),
           );
       }
     }
@@ -234,8 +234,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       typeof meta.starred_packs_count === "number"
         ? meta.starred_packs_count
         : typeof meta.starred_count === "number"
-        ? meta.starred_count
-        : 0;
+          ? meta.starred_count
+          : 0;
     const lastActive = meta.last_active_at || null;
     const topMode = meta.top_used_category || null;
 
@@ -287,7 +287,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const profileNameEl = document.getElementById("das-profile-name");
       const profileEmailEl = document.getElementById("das-profile-email");
       const profilePlanBadge = document.getElementById(
-        "das-profile-plan-badge"
+        "das-profile-plan-badge",
       );
 
       if (profileNameEl && fullName) {
@@ -304,7 +304,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const packsEl = document.getElementById("das-profile-packs-count");
       const osceEl = document.getElementById("das-profile-osce-count");
       const flashcardEl = document.getElementById(
-        "das-profile-flashcard-count"
+        "das-profile-flashcard-count",
       );
       const topModeEl = document.getElementById("das-profile-top-mode");
       const lastActiveEl = document.getElementById("das-profile-last-active");
@@ -359,7 +359,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       // Default level text + chip color
       const defaultLevelEl = document.getElementById(
-        "das-profile-default-level"
+        "das-profile-default-level",
       );
       if (defaultLevelEl) {
         if (defaultLevel === "postgraduate") {
@@ -385,7 +385,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const identityLevelTag = document.getElementById("das-identity-level");
       const identityPlanTag = document.getElementById("das-identity-plan");
       const identityActivityTag = document.getElementById(
-        "das-identity-activity"
+        "das-identity-activity",
       );
 
       // Level chip
@@ -445,10 +445,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       // Profile study preferences card (lock/ unlock)
       const profilePrefsCard = document.querySelector(
-        "[data-das-profile-preferences-card]"
+        "[data-das-profile-preferences-card]",
       );
       const profilePrefsNote = document.getElementById(
-        "das-profile-preferences-note"
+        "das-profile-preferences-note",
       );
 
       if (profilePrefsCard) {
@@ -475,14 +475,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.getElementById("settings-fullname");
       const settingsEmailInput = document.getElementById("settings-email");
       const settingsDefaultLevelSelect = document.getElementById(
-        "settings-default-level"
+        "settings-default-level",
       );
       const settingsNewPasswordInput = document.getElementById(
-        "settings-new-password"
+        "settings-new-password",
       );
       const settingsSaveBtn = document.getElementById("settings-save-btn");
       const settingsSaveStatus = document.getElementById(
-        "settings-save-status"
+        "settings-save-status",
       );
 
       // Pre-fill readonly profile info
@@ -526,9 +526,8 @@ document.addEventListener("DOMContentLoaded", async () => {
               updatePayload.password = newPassword;
             }
 
-            const { error: updateError } = await supabase.auth.updateUser(
-              updatePayload
-            );
+            const { error: updateError } =
+              await supabase.auth.updateUser(updatePayload);
 
             if (updateError) {
               console.error("[settings] updateUser error", updateError);
@@ -563,21 +562,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     // -------------------------------------------------------------
     if (isSettings) {
       const settingsPlanLabel = document.getElementById(
-        "das-settings-plan-label"
+        "das-settings-plan-label",
       );
       const settingsPlanNote = document.getElementById(
-        "das-settings-plan-note"
+        "das-settings-plan-note",
       );
       const settingsPlanUpgrade = document.getElementById(
-        "das-settings-plan-upgrade-actions"
+        "das-settings-plan-upgrade-actions",
       );
       const settingsPlanManage = document.getElementById(
-        "das-settings-plan-manage-actions"
+        "das-settings-plan-manage-actions",
       );
 
       const deleteAccountBtn = document.getElementById("delete-account-btn");
       const deleteAccountStatus = document.getElementById(
-        "delete-account-status"
+        "delete-account-status",
       );
 
       if (settingsPlanLabel) {
@@ -596,6 +595,216 @@ document.addEventListener("DOMContentLoaded", async () => {
           settingsPlanUpgrade.style.display = "flex";
           settingsPlanManage.style.display = "none";
         }
+      }
+
+      // -------------------------------------------------------------
+      // Settings page: Paddle billing + Retain cancellation
+      // -------------------------------------------------------------
+      const manageStatusEl = document.getElementById(
+        "das-settings-plan-manage-status",
+      );
+
+      const setManageStatus = (msg, isError = false) => {
+        if (!manageStatusEl) return;
+        manageStatusEl.textContent = msg;
+        manageStatusEl.style.color = isError ? "#b91c1c" : "#6b7280";
+      };
+
+      const billingBtn = document.querySelector(
+        '[data-das-manage-plan="billing"]',
+      );
+      const cancelBtn = document.querySelector(
+        '[data-das-manage-plan="cancel"]',
+      );
+
+      // Paddle IDs should be stored by your webhook (see server edit below)
+      const paddleCustomerId =
+        meta.paddle_customer_id || appMeta.paddle_customer_id || null;
+      const paddleSubscriptionId =
+        meta.paddle_subscription_id || appMeta.paddle_subscription_id || null;
+
+      if (billingBtn) {
+        billingBtn.addEventListener("click", async (event) => {
+          event.preventDefault();
+
+          if (!functionsBase) {
+            setManageStatus(
+              "Billing portal is unavailable (missing functions base).",
+              true,
+            );
+            return;
+          }
+          let resolvedCustomerId = paddleCustomerId;
+          let resolvedSubscriptionId = paddleSubscriptionId;
+
+          if (!resolvedCustomerId || !resolvedSubscriptionId) {
+            setManageStatus("Resolving billing profile…");
+
+            const { data: sessionData, error: sessionError } =
+              await supabase.auth.getSession();
+            if (sessionError || !sessionData?.session?.access_token) {
+              setManageStatus("Session expired. Please log in again.", true);
+              return;
+            }
+
+            const r = await fetch(`${functionsBase}/paddle-resolve-ids`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${sessionData.session.access_token}`,
+              },
+            });
+
+            const j = await r.json().catch(() => null);
+            if (!r.ok || !j?.paddle_customer_id || !j?.paddle_subscription_id) {
+              console.error("[paddle-resolve-ids] failed", r.status, j);
+              setManageStatus(
+                j?.hint ||
+                  "Couldn’t resolve billing profile. Make sure checkout used the same email.",
+                true,
+              );
+              return;
+            }
+
+            resolvedCustomerId = j.paddle_customer_id;
+            resolvedSubscriptionId = j.paddle_subscription_id;
+          }
+
+          billingBtn.disabled = true;
+          const oldText = billingBtn.textContent;
+          billingBtn.textContent = "Opening...";
+          setManageStatus("Opening secure billing portal…");
+
+          try {
+            const { data: sessionData, error: sessionError } =
+              await supabase.auth.getSession();
+            if (sessionError || !sessionData?.session?.access_token) {
+              setManageStatus("Session expired. Please log in again.", true);
+              return;
+            }
+
+            const response = await fetch(
+              `${functionsBase}/paddle-portal-session`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${sessionData.session.access_token}`,
+                },
+                body: JSON.stringify({
+                  customer_id: resolvedCustomerId,
+                  subscription_id: resolvedSubscriptionId,
+                  purpose: "update_payment_method",
+                }),
+              },
+            );
+
+            const result = await response.json().catch(() => null);
+            if (!response.ok || !result?.url) {
+              console.error(
+                "[paddle-portal-session] error",
+                response.status,
+                result,
+              );
+              setManageStatus("Couldn’t open billing portal. Try again.", true);
+              return;
+            }
+
+            window.location.href = result.url;
+          } catch (err) {
+            console.error("[billing] failed", err);
+            setManageStatus("Couldn’t open billing portal. Try again.", true);
+          } finally {
+            billingBtn.disabled = false;
+            billingBtn.textContent = oldText;
+          }
+        });
+      }
+
+      if (cancelBtn) {
+        cancelBtn.addEventListener("click", async (event) => {
+          event.preventDefault();
+
+          let resolvedSubscriptionId = paddleSubscriptionId;
+
+          if (!resolvedSubscriptionId) {
+            if (!functionsBase) {
+              setManageStatus(
+                "Cancellation is unavailable (missing functions base).",
+                true,
+              );
+              return;
+            }
+
+            setManageStatus("Resolving billing profile…");
+
+            const { data: sessionData, error: sessionError } =
+              await supabase.auth.getSession();
+            if (sessionError || !sessionData?.session?.access_token) {
+              setManageStatus("Session expired. Please log in again.", true);
+              return;
+            }
+
+            const r = await fetch(`${functionsBase}/paddle-resolve-ids`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${sessionData.session.access_token}`,
+              },
+            });
+
+            const j = await r.json().catch(() => null);
+            if (!r.ok || !j?.paddle_subscription_id) {
+              console.error("[paddle-resolve-ids] failed", r.status, j);
+              setManageStatus(
+                j?.hint ||
+                  "Couldn’t resolve billing profile. Make sure checkout used the same email.",
+                true,
+              );
+              return;
+            }
+
+            resolvedSubscriptionId = j.paddle_subscription_id;
+          }
+
+          if (!window.Paddle?.Retain?.initCancellationFlow) {
+            // Retain cancellation flows are live-only (not loaded in sandbox)
+            setManageStatus(
+              "Retain cancellation flow isn’t available in sandbox. Switch to live Retain to test.",
+              true,
+            );
+            return;
+          }
+
+          cancelBtn.disabled = true;
+          const oldText = cancelBtn.textContent;
+          cancelBtn.textContent = "Opening...";
+          setManageStatus("Opening cancellation flow…");
+
+          try {
+            window.Paddle.Retain.initCancellationFlow({
+              subscriptionId: resolvedSubscriptionId,
+            })
+
+              .then((res) => {
+                // Don’t downgrade here. Webhooks will be source of truth.
+                if (res?.status === "error") {
+                  setManageStatus("Cancellation flow error. Try again.", true);
+                } else {
+                  setManageStatus(
+                    "If you completed cancellation, access updates after Paddle confirms it.",
+                  );
+                }
+              })
+              .catch((e) => {
+                console.error("[retain] initCancellationFlow failed", e);
+                setManageStatus("Cancellation flow error. Try again.", true);
+              });
+          } finally {
+            cancelBtn.disabled = false;
+            cancelBtn.textContent = oldText;
+          }
+        });
       }
 
       // Delete account → automatic via Supabase Edge Function
@@ -661,7 +870,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               console.error(
                 "[delete-account] function error",
                 response.status,
-                result
+                result,
               );
               deleteAccountStatus.style.color = "#b91c1c";
               deleteAccountStatus.textContent =
