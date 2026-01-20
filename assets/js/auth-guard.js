@@ -741,9 +741,19 @@ document.addEventListener("DOMContentLoaded", async () => {
         cancelBtn.addEventListener("click", async (event) => {
           event.preventDefault();
 
+          const confirmed = await dasConfirm({
+            title: "Cancel Pro plan",
+            message:
+              "Are you sure you want to cancel your Pro plan? You'll keep access until the end of your billing period.",
+            okText: "Cancel plan",
+            danger: true,
+          });
+          if (!confirmed) return;
+
+          let resolvedCustomerId = paddleCustomerId;
           let resolvedSubscriptionId = paddleSubscriptionId;
 
-          if (!resolvedSubscriptionId) {
+          if (!resolvedCustomerId || !resolvedSubscriptionId) {
             if (!functionsBase) {
               setManageStatus(
                 "Cancellation is unavailable (missing functions base).",
@@ -770,52 +780,64 @@ document.addEventListener("DOMContentLoaded", async () => {
             });
 
             const j = await r.json().catch(() => null);
-            if (!r.ok || !j?.paddle_subscription_id) {
+            if (!r.ok || !j?.paddle_customer_id || !j?.paddle_subscription_id) {
               console.error("[paddle-resolve-ids] failed", r.status, j);
               setManageStatus(
                 j?.hint ||
-                  "Couldn’t resolve billing profile. Make sure checkout used the same email.",
+                  "Couldn't resolve billing profile. Make sure checkout used the same email.",
                 true,
               );
               return;
             }
 
+            resolvedCustomerId = j.paddle_customer_id;
             resolvedSubscriptionId = j.paddle_subscription_id;
-          }
-
-          if (!window.Paddle?.Retain?.initCancellationFlow) {
-            // Retain cancellation flows are live-only (not loaded in sandbox)
-            setManageStatus(
-              "Retain cancellation flow isn’t available in sandbox. Switch to live Retain to test.",
-              true,
-            );
-            return;
           }
 
           cancelBtn.disabled = true;
           const oldText = cancelBtn.textContent;
           cancelBtn.textContent = "Opening...";
-          setManageStatus("Opening cancellation flow…");
+          setManageStatus("Opening billing portal…");
 
           try {
-            window.Paddle.Retain.initCancellationFlow({
-              subscriptionId: resolvedSubscriptionId,
-            })
+            const { data: sessionData, error: sessionError } =
+              await supabase.auth.getSession();
+            if (sessionError || !sessionData?.session?.access_token) {
+              setManageStatus("Session expired. Please log in again.", true);
+              return;
+            }
 
-              .then((res) => {
-                // Don’t downgrade here. Webhooks will be source of truth.
-                if (res?.status === "error") {
-                  setManageStatus("Cancellation flow error. Try again.", true);
-                } else {
-                  setManageStatus(
-                    "If you completed cancellation, access updates after Paddle confirms it.",
-                  );
-                }
-              })
-              .catch((e) => {
-                console.error("[retain] initCancellationFlow failed", e);
-                setManageStatus("Cancellation flow error. Try again.", true);
-              });
+            const response = await fetch(
+              `${functionsBase}/paddle-portal-session`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${sessionData.session.access_token}`,
+                },
+                body: JSON.stringify({
+                  customer_id: resolvedCustomerId,
+                  subscription_id: resolvedSubscriptionId,
+                  purpose: "cancel_subscription",
+                }),
+              },
+            );
+
+            const result = await response.json().catch(() => null);
+            if (!response.ok || !result?.url) {
+              console.error(
+                "[paddle-portal-session] error",
+                response.status,
+                result,
+              );
+              setManageStatus("Couldn't open billing portal. Try again.", true);
+              return;
+            }
+
+            window.location.href = result.url;
+          } catch (err) {
+            console.error("[cancel] failed", err);
+            setManageStatus("Couldn't open billing portal. Try again.", true);
           } finally {
             cancelBtn.disabled = false;
             cancelBtn.textContent = oldText;
