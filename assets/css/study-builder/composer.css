@@ -232,7 +232,9 @@
   transform-origin: left bottom;
   pointer-events: none;
 
-  transition: opacity 160ms ease, transform 160ms ease;
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
 }
 
 .addmenu.is-open {
@@ -292,13 +294,27 @@
 }
 
 .addpill {
-  border-radius: 999px;
-  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+
+  border-radius: 14px;
+  padding: 10px 12px;
   font-size: 13px;
 
   border: 1px solid rgba(15, 76, 129, 0.16);
   background: #fff;
   color: var(--text);
+
+  transition:
+    background 160ms ease,
+    border-color 160ms ease;
+}
+.addpill-sub {
+  font-size: 12px;
+  opacity: 0.65;
+  font-weight: 400;
 }
 
 .addpill:hover {
