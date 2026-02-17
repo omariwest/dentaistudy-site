@@ -169,8 +169,8 @@
     const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
     const pdf = await loadingTask.promise;
 
-    const maxPages = opts?.maxPages ?? 20;
-    const maxChars = opts?.maxChars ?? 120000;
+    const maxPages = opts?.maxPages ?? Infinity; // was 20 (this is the bug)
+    const maxChars = opts?.maxChars ?? 500000; // higher cap, still bounded
 
     const pagesToRead = Math.min(pdf.numPages, maxPages);
 
@@ -183,7 +183,7 @@
         .filter(Boolean);
 
       if (strings.length) {
-        out += strings.join(" ") + "\n";
+        out += `[Page ${pageNum}]\n` + strings.join(" ") + "\n\n";
       }
 
       if (out.length >= maxChars) break;
@@ -208,8 +208,8 @@
     const p = (async () => {
       try {
         const res = await extractPdfTextWithPdfjs(file, {
-          maxPages: 20,
-          maxChars: 120000,
+          maxPages: Infinity,
+          maxChars: 500000,
         });
 
         pdfCache.docs[id] = {
@@ -387,8 +387,8 @@
         status === "reading"
           ? " (reading…)"
           : status === "ready"
-          ? ""
-          : " (failed)";
+            ? ""
+            : " (failed)";
 
       const chip = document.createElement("div");
       chip.className = "attachchip";
@@ -435,7 +435,7 @@
         (x) =>
           x.name === f.name &&
           x.size === f.size &&
-          x.lastModified === f.lastModified
+          x.lastModified === f.lastModified,
       );
       if (!dup) attached.push(f);
 
@@ -464,7 +464,7 @@
     if (!isAuthenticated) {
       // Professional note for anonymous users
       alert(
-        "PDF uploads are available to DentAIstudy members. Sign in or create a free account to upload documents."
+        "PDF uploads are available to DentAIstudy members. Sign in or create a free account to upload documents.",
       );
       return;
     }
