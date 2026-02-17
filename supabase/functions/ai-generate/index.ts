@@ -43,7 +43,7 @@ function truncateText(text: string, maxChars: number): string {
 async function fetchOpenAIWithBackoff(
   url: string,
   body: unknown,
-  apiKey: string
+  apiKey: string,
 ): Promise<Response> {
   let res: Response | null = null;
 
@@ -73,7 +73,7 @@ async function embedTexts(texts: string[]): Promise<number[][]> {
       model: EMBEDDING_MODEL,
       input: texts,
     },
-    OPENAI_API_KEY
+    OPENAI_API_KEY,
   );
 
   const raw = await res.text();
@@ -89,7 +89,7 @@ async function embedTexts(texts: string[]): Promise<number[][]> {
 
 // Parses text that contains page markers like: [Page 3]
 function splitIntoPages(
-  text: string
+  text: string,
 ): Array<{ page: number | null; text: string }> {
   const t = (text || "").slice(0, MAX_INDEX_CHARS_PER_FILE);
 
@@ -154,7 +154,7 @@ async function indexPdfDocs(
   supabaseAdmin: ReturnType<typeof createClient>,
   userId: string,
   conversationId: string,
-  pdfDocs: PdfDoc[]
+  pdfDocs: PdfDoc[],
 ) {
   for (const doc of pdfDocs) {
     const fileId = String(doc.file_id || "").trim();
@@ -272,7 +272,7 @@ serve(async (req: Request): Promise<Response> => {
     const messagesFromClient = Array.isArray(body?.messages)
       ? body.messages
           .filter(
-            (m: any) => m && (m.role === "user" || m.role === "assistant")
+            (m: any) => m && (m.role === "user" || m.role === "assistant"),
           )
           .slice(-HISTORY_WINDOW)
           .map((m: any) => ({
@@ -294,7 +294,7 @@ serve(async (req: Request): Promise<Response> => {
       SUPABASE_SERVICE_ROLE_KEY,
       {
         auth: { persistSession: false },
-      }
+      },
     );
 
     // User-context client (anon + user JWT): RLS + auth.uid() works inside RPC
@@ -343,7 +343,7 @@ serve(async (req: Request): Promise<Response> => {
             {
               status: 429,
               headers: { ...corsHeaders, "Content-Type": "application/json" },
-            }
+            },
           );
         }
 
@@ -394,32 +394,33 @@ serve(async (req: Request): Promise<Response> => {
     })();
 
     const systemPrompt =
-      "You are DentAIstudy, an exam-focused dental AI assistant. Be structured and concise. " +
+      "You are DentAIstudy, a dental exam-focused assistant.\n" +
+      "Answer like a real tutor: start with the direct answer first, then the why/high-yield details.\n" +
+      "Avoid boilerplate headings unless the user asks.\n" +
       "If PDF excerpts are provided, answer ONLY from those excerpts. If the excerpts do not contain the answer, say you can't find it in the PDF.";
 
     const baseUserPrompt = [
       `Subject: ${subject}`,
       `Study mode: ${mode}`,
-      "",
       `Instruction: ${modeExplanation}`,
+      ragContext ? `\nRelevant PDF excerpts:\n${ragContext}` : "",
+      "\nUse the chat context below. Keep it exam-relevant.",
     ].join("\n");
 
-    // Build final user message (inject retrieved excerpts)
-    const lastUserMsg =
-      messagesFromClient
-        ?.slice()
-        .reverse()
-        .find((m) => m.role === "user")?.content ?? topic;
-
-    const userPrompt = [
-      baseUserPrompt,
-      ragContext ? "\nRelevant PDF excerpts:\n" + ragContext : "",
-      "\nQuestion:\n" + lastUserMsg,
-    ].join("\n");
+    const safeHistory = (
+      Array.isArray(messagesFromClient) ? messagesFromClient : []
+    )
+      .filter((m) => m && (m.role === "user" || m.role === "assistant"))
+      .slice(-HISTORY_WINDOW)
+      .map((m) => ({
+        role: m.role,
+        content: truncateText(String(m.content || ""), MAX_MESSAGE_CHARS),
+      }));
 
     const finalMessages = [
       { role: "system", content: systemPrompt },
-      { role: "user", content: userPrompt },
+      { role: "user", content: baseUserPrompt },
+      ...safeHistory,
     ];
 
     const openAiBody = {
@@ -432,7 +433,7 @@ serve(async (req: Request): Promise<Response> => {
     const aiRes = await fetchOpenAIWithBackoff(
       "https://api.openai.com/v1/chat/completions",
       openAiBody,
-      OPENAI_API_KEY
+      OPENAI_API_KEY,
     );
 
     const aiText = await aiRes.text();
@@ -449,7 +450,7 @@ serve(async (req: Request): Promise<Response> => {
         {
           status: aiRes.status,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+        },
       );
     }
 
