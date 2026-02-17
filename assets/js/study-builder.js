@@ -74,11 +74,11 @@
     bytes[8] = (bytes[8] & 0x3f) | 0x80; // variant
 
     const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join(
-      ""
+      "",
     );
     return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(
       12,
-      16
+      16,
     )}-${hex.slice(16, 20)}-${hex.slice(20)}`;
   }
 
@@ -122,7 +122,7 @@
     html = html.replace(/`([^`]+)`/g, "<code>$1</code>");
     html = html.replace(
       /\b(https?:\/\/[^\s<]+)\b/g,
-      '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>'
+      '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>',
     );
     return html;
   }
@@ -250,7 +250,7 @@
             el.style.top = "";
           });
       },
-      true
+      true,
     );
 
     let thread = [];
@@ -258,6 +258,25 @@
     let isAuthed = false;
     let activeConversationId = null;
     let lastPdfContextHash = "";
+    let lastActiveFileId = "";
+
+    // ===== Study Mode (Quick vs Deep) =====
+    window.DentAIstudyTask = "qa"; // default
+
+    document.addEventListener("click", (e) => {
+      const pill = e.target.closest(".addpill[data-task]");
+      if (!pill) return;
+
+      document
+        .querySelectorAll(".addpill[data-task]")
+        .forEach((p) => p.classList.remove("is-active"));
+
+      pill.classList.add("is-active");
+
+      const task = pill.getAttribute("data-task");
+      window.DentAIstudyTask =
+        task === "chapter_notes" ? "chapter_notes" : "qa";
+    });
 
     function getUrlChatId() {
       const url = new URL(window.location.href);
@@ -630,7 +649,7 @@
           const wasOpen = !pop.hidden;
 
           const anyOpen = listEl.querySelectorAll(
-            ".sb-chatmenu-pop:not([hidden])"
+            ".sb-chatmenu-pop:not([hidden])",
           );
           anyOpen.forEach((el) => {
             el.hidden = true;
@@ -810,7 +829,7 @@
 
             if (window.DentAIPDF?.hasPending?.()) {
               window.ChatUI?.addAI?.(
-                "Still reading your PDF… try again in a moment."
+                "Still reading your PDF… try again in a moment.",
               );
               return;
             }
@@ -869,9 +888,12 @@
                 lastPdfContextHash = pdfHash;
               } else if (!pdfHash) {
                 lastPdfContextHash = "";
+                lastActiveFileId = "";
               }
 
               const pdfDocs = window.DentAIPDF?.consumePending?.() || [];
+              if (pdfDocs.length && pdfDocs[0]?.file_id)
+                lastActiveFileId = String(pdfDocs[0].file_id);
 
               const response = await fetch(AI_ENDPOINT, {
                 method: "POST",
@@ -879,6 +901,8 @@
                 body: JSON.stringify({
                   topic: text,
                   conversation_id: activeConversationId,
+                  task: window.DentAIstudyTask || "qa",
+                  file_id: lastActiveFileId,
                   pdf_docs: pdfDocs,
                   messages: requestMessages,
                 }),
@@ -970,7 +994,7 @@
             }
           }, 0);
         },
-        true
+        true,
       );
     })();
   }
