@@ -230,6 +230,58 @@ function buildRagContext(chunks: any[]): string {
   return out.trim();
 }
 
+async function fetchAllChunksForFile(
+  supabaseAdmin: any,
+  userId: string,
+  conversationId: string,
+  fileId: string,
+) {
+  const { data, error } = await supabaseAdmin
+    .from("pdf_chunks")
+    .select("chunk_index,page_start,page_end,content,file_name")
+    .eq("user_id", userId)
+    .eq("conversation_id", conversationId)
+    .eq("file_id", fileId)
+    .order("chunk_index", { ascending: true });
+
+  if (error) throw error;
+  return Array.isArray(data) ? data : [];
+}
+
+function makeBatchesByCharLimit(rows: any[], maxChars: number) {
+  const batches: any[][] = [];
+  let cur: any[] = [];
+  let curLen = 0;
+
+  for (const r of rows) {
+    const txt = String(r.content || "").trim();
+    if (!txt) continue;
+
+    const addLen = txt.length + 40; // tiny buffer for headers/newlines
+    if (cur.length && curLen + addLen > maxChars) {
+      batches.push(cur);
+      cur = [];
+      curLen = 0;
+    }
+    cur.push(r);
+    curLen += addLen;
+  }
+  if (cur.length) batches.push(cur);
+  return batches;
+}
+
+function formatBatch(rows: any[]) {
+  let out = "";
+  for (const r of rows) {
+    const page =
+      r.page_start == null
+        ? ""
+        : ` (page ${r.page_start}${r.page_end && r.page_end !== r.page_start ? `-${r.page_end}` : ""})`;
+    out += `\n--- ${r.file_name || "PDF"}${page} ---\n${String(r.content || "").trim()}\n`;
+  }
+  return out.trim();
+}
+
 serve(async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS")
     return new Response("ok", { headers: corsHeaders });
@@ -259,6 +311,12 @@ serve(async (req: Request): Promise<Response> => {
     const mode = String(body?.mode ?? "General overview");
     const subject = String(body?.subject ?? "General dentistry");
     const conversationId = String(body?.conversation_id ?? "").trim();
+
+    // NEW: controls behavior without changing UI much
+    const task = String(body?.task ?? "qa").trim(); // "qa" | "chapter_notes"
+    const activeFileId =
+      String(body?.file_id ?? "").trim() ||
+      String(body?.pdf_docs?.[0]?.file_id ?? "").trim();
 
     const pdfDocs: PdfDoc[] = Array.isArray(body?.pdf_docs)
       ? body.pdf_docs.map((d: any) => ({
@@ -358,9 +416,9 @@ serve(async (req: Request): Promise<Response> => {
       await indexPdfDocs(supabaseAdmin, userId!, conversationId, pdfDocs);
     }
 
-    // Retrieve top-k relevant chunks (if any exist)
+    // Retrieve top-k relevant chunks (QA only)
     let ragContext = "";
-    if (canUsePdf) {
+    if (canUsePdf && task !== "chapter_notes") {
       try {
         const question =
           topic ||
@@ -382,6 +440,132 @@ serve(async (req: Request): Promise<Response> => {
       } catch (e) {
         console.error("RAG_RETRIEVE_ERROR", e);
       }
+    }
+
+    // NEW: full chapter notes (batch summarize -> merge)
+    if (canUsePdf && task === "chapter_notes") {
+      if (!activeFileId) {
+        return new Response(JSON.stringify({ error: "FILE_ID_REQUIRED" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const allChunks = await fetchAllChunksForFile(
+        supabaseAdmin,
+        userId!,
+        conversationId,
+        activeFileId,
+      );
+
+      if (!allChunks.length) {
+        return new Response(JSON.stringify({ error: "NO_CHUNKS_FOUND" }), {
+          status: 404,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // batch size: big enough to be efficient, small enough to fit reliably
+      const batches = makeBatchesByCharLimit(allChunks, 12000);
+      const partials: string[] = [];
+
+      for (let i = 0; i < batches.length; i++) {
+        const batchText = formatBatch(batches[i]);
+
+        const body1 = {
+          model: "gpt-4.1-mini",
+          temperature: 0.2,
+          max_tokens: MAX_OUTPUT_TOKENS,
+          messages: [
+            {
+              role: "system",
+              content:
+                "You are DentAIstudy. Create exam-ready notes from the provided text ONLY. " +
+                "Be clean and useful: short headings, bullet points only when needed, high-yield focus. " +
+                "Do NOT invent missing content.",
+            },
+            {
+              role: "user",
+              content:
+                `Subject: ${subject}\n` +
+                `Goal: Produce exam-ready notes for this section.\n` +
+                `Section ${i + 1}/${batches.length}:\n\n` +
+                batchText,
+            },
+          ],
+        };
+
+        const r1 = await fetchOpenAIWithBackoff(
+          "https://api.openai.com/v1/chat/completions",
+          body1,
+          OPENAI_API_KEY,
+        );
+        const t1 = await r1.text();
+        const j1 = t1 ? JSON.parse(t1) : null;
+        if (!r1.ok) {
+          console.error("OPENAI_ERROR_SECTION", r1.status, t1);
+          return new Response(
+            JSON.stringify({ error: "OPENAI_ERROR", details: t1 }),
+            {
+              status: 500,
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            },
+          );
+        }
+
+        const s = String(j1?.choices?.[0]?.message?.content ?? "").trim();
+        if (s) partials.push(s);
+      }
+
+      // merge partial notes into one premium sheet
+      const body2 = {
+        model: "gpt-4.1-mini",
+        temperature: 0.2,
+        max_tokens: 1200,
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are DentAIstudy. Merge section notes into ONE exam-ready chapter sheet. " +
+              "Structure: concise headings, key definitions, red flags, tables (text-based), and likely exam questions. " +
+              "No filler. No repeating the same point twice.",
+          },
+          {
+            role: "user",
+            content:
+              `Subject: ${subject}\n` +
+              `Deliverable: Complete exam sheet for the full chapter.\n\n` +
+              partials
+                .map((p, idx) => `--- Section Notes ${idx + 1} ---\n${p}`)
+                .join("\n\n"),
+          },
+        ],
+      };
+
+      const r2 = await fetchOpenAIWithBackoff(
+        "https://api.openai.com/v1/chat/completions",
+        body2,
+        OPENAI_API_KEY,
+      );
+      const t2 = await r2.text();
+      const j2 = t2 ? JSON.parse(t2) : null;
+
+      if (!r2.ok) {
+        console.error("OPENAI_ERROR_MERGE", r2.status, t2);
+        return new Response(
+          JSON.stringify({ error: "OPENAI_ERROR", details: t2 }),
+          {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          },
+        );
+      }
+
+      const merged = String(j2?.choices?.[0]?.message?.content ?? "").trim();
+      return new Response(JSON.stringify({ output: merged }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const modeExplanation = (() => {
