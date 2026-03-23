@@ -90,9 +90,9 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 13px 14px;
+  padding: 15px 14px;
   font-size: 15px;
-  color: #1a1a2e;
+  color: #0b0f19;
   font-weight: 500;
   text-decoration: none;
   border-radius: 10px;
@@ -102,6 +102,8 @@
   flex-shrink: 0;
   opacity: 0.55;
   transition: opacity 0.15s ease;
+  align-self: center;
+  margin-top: 2px;
 }
 .slide-nav-links a:hover {
   background: rgba(10, 61, 98, 0.06);

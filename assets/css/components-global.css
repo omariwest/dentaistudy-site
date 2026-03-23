@@ -263,7 +263,9 @@ a:hover {
   border-radius: 999px;
 
   /* animation */
-  transition: transform 0.28s ease, opacity 0.18s ease;
+  transition:
+    transform 0.28s ease,
+    opacity 0.18s ease;
   transform-origin: center;
 }
 
@@ -337,7 +339,7 @@ a:hover {
   align-items: center;
   margin-bottom: 20px;
   font-weight: bold;
-  color: #0a3d62;
+  color: #0b0f19;
 }
 
 .slide-nav-close {
@@ -348,10 +350,25 @@ a:hover {
 }
 
 .slide-nav-links a {
-  display: block;
-  padding: 12px 0;
-  font-size: 16px;
-  color: #0a3d62;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 15px 14px;
+  font-size: 15px;
+  color: #0b0f19;
+  border-radius: 10px;
+  transition: background 0.15s ease;
+}
+
+.slide-nav-links a:hover {
+  background: rgba(10, 61, 98, 0.06);
+}
+.slide-nav-links a svg {
+  flex-shrink: 0;
+  opacity: 0.55;
+}
+.slide-nav-links a:hover svg {
+  opacity: 0.85;
 }
 
 .slide-nav-divider {
