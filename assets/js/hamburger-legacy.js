@@ -66,9 +66,10 @@
     if (y <= TOP_SAFE_PX) {
       setHidden(false);
     } else if (dy > 0) {
+      if (!hidden) lastToggleY = y;
       if (y - lastToggleY >= HIDE_AFTER_PX) setHidden(true);
     } else if (dy < 0) {
-      if (lastToggleY - y >= SHOW_AFTER_PX) setHidden(false);
+      setHidden(false);
     }
 
     lastY = y;
