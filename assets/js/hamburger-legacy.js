@@ -48,7 +48,7 @@
     if (hidden === next) return;
     hidden = next;
     header.classList.toggle("is-hidden", next);
-    lastToggleY = lastY;
+    lastToggleY = window.scrollY || 0;
   }
 
   function compute() {
