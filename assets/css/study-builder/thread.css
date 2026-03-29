@@ -27,7 +27,9 @@
 
   opacity: 1;
   transform: translateY(0);
-  transition: opacity 220ms ease, transform 220ms ease;
+  transition:
+    opacity 220ms ease,
+    transform 220ms ease;
 }
 
 .empty-state.is-hidden {
@@ -107,6 +109,56 @@
   color: #ffffff;
   border-color: rgba(15, 76, 129, 0.35);
 }
+/* PDF card above user bubble */
+.msg.user {
+  flex-direction: column;
+  align-items: flex-end;
+}
+.msg-pdf-card {
+  width: 140px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f8f8fa;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  margin-bottom: 4px;
+}
+.msg-pdf-thumb {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+  object-position: top left;
+  display: block;
+}
+.msg-pdf-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+}
+.msg-pdf-ico {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  background: rgba(220, 38, 38, 0.1);
+  color: rgba(220, 38, 38, 0.8);
+}
+.msg-pdf-ico svg {
+  width: 12px;
+  height: 12px;
+  stroke: currentColor;
+}
+.msg-pdf-name {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(15, 23, 42, 0.75);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
 .msg.ai .bubble {
   background: #ffffff;
   color: var(--text);
@@ -166,7 +218,10 @@
   visibility: hidden;
   pointer-events: none;
   z-index: 30;
-  transition: opacity 120ms ease, transform 120ms ease, visibility 120ms ease;
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease,
+    visibility 120ms ease;
 }
 
 .msg-act.show-copied .copied-pill {

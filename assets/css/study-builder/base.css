@@ -70,3 +70,21 @@ textarea {
 button {
   cursor: pointer;
 }
+/* Custom scrollbar (thin, subtle) */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(15, 76, 129, 0.15) transparent;
+}
+*::-webkit-scrollbar {
+  width: 6px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background: rgba(15, 76, 129, 0.15);
+  border-radius: 999px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(15, 76, 129, 0.25);
+}

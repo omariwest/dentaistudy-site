@@ -231,7 +231,7 @@
 
 @media (min-width: 1025px) {
   :root {
-    --sb-w: 260px; /* slimmer sidebar on desktop only */
+    --sb-w: 300px;
   }
 
   #hamburger,
@@ -280,14 +280,18 @@
   .sb-chatmenu {
     opacity: 0;
     pointer-events: none;
-    transform: translateY(1px);
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
   }
 
   .sb-chatrow:hover .sb-chatmenu,
   .sb-chatrow:focus-within .sb-chatmenu {
     opacity: 1;
     pointer-events: auto;
-    transform: translateY(0);
+    transform: translateY(-50%);
   }
 }
 
