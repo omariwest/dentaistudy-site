@@ -509,12 +509,31 @@
   });
 
   // ========= Submit =========
-  form.addEventListener("submit", (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const text = ta.value.trim();
     if (!text) return;
 
-    window.ChatUI?.addUser(text);
+    // Build PDF metadata with thumbnails for the chat bubble
+    const pdfMeta = [];
+    for (const f of attached) {
+      let thumb = "";
+      try {
+        const ab = await f.arrayBuffer();
+        const doc = await window.pdfjsLib.getDocument({ data: ab }).promise;
+        const pg = await doc.getPage(1);
+        const vp = pg.getViewport({ scale: 0.5 });
+        const c = document.createElement("canvas");
+        c.width = vp.width;
+        c.height = vp.height;
+        await pg.render({ canvasContext: c.getContext("2d"), viewport: vp })
+          .promise;
+        thumb = c.toDataURL("image/jpeg", 0.6);
+      } catch (_) {}
+      pdfMeta.push({ name: f.name, thumb });
+    }
+
+    window.ChatUI?.addUser(text, pdfMeta.length ? pdfMeta : null);
 
     // reset input
     ta.value = "";

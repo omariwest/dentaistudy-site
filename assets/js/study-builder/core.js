@@ -122,8 +122,8 @@
       syncEmptyState();
       updateJump();
     },
-    addUser(text) {
-      renderMessage({ role: "user", text });
+    addUser(text, pdfMeta) {
+      renderMessage({ role: "user", text, pdfMeta });
       showThinking();
       scrollToBottom();
       updateJump();
@@ -269,7 +269,7 @@
   function iconThumbUp() {
     return svgWrap([
       path(
-        "M14 9V5a3 3 0 0 0-3-3l-4 9v11h10a2 2 0 0 0 2-2l1-9a2 2 0 0 0-2-2h-4Z"
+        "M14 9V5a3 3 0 0 0-3-3l-4 9v11h10a2 2 0 0 0 2-2l1-9a2 2 0 0 0-2-2h-4Z",
       ),
       path("M7 22H4a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h3"),
     ]);
@@ -278,23 +278,59 @@
   function iconThumbDown() {
     return svgWrap([
       path(
-        "M10 15v4a3 3 0 0 0 3 3l4-9V2H7a2 2 0 0 0-2 2l-1 9a2 2 0 0 0 2 2h4Z"
+        "M10 15v4a3 3 0 0 0 3 3l4-9V2H7a2 2 0 0 0-2 2l-1 9a2 2 0 0 0 2 2h4Z",
       ),
       path("M17 2h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-3"),
     ]);
   }
 
-  function renderMessage({ role, text }) {
+  function renderMessage({ role, text, pdfMeta }) {
     const wrap = document.createElement("div");
     wrap.className = `msg ${role}`;
+
+    // Extract PDF lines from user text (history fallback)
+    let cleanText = text;
+    let pdfNames = [];
+    if (role === "user") {
+      const lines = text.split("\n");
+      const kept = [];
+      for (const ln of lines) {
+        if (ln.startsWith("📄 ")) pdfNames.push(ln.replace("📄 ", ""));
+        else kept.push(ln);
+      }
+      cleanText = kept.join("\n").trim();
+    }
+
+    // Render PDF cards above the bubble
+    const cards = pdfMeta || pdfNames.map((n) => ({ name: n, thumb: "" }));
+    if (role === "user" && cards.length) {
+      cards.forEach((pdf) => {
+        const card = document.createElement("div");
+        card.className = "msg-pdf-card";
+        if (pdf.thumb) {
+          const img = document.createElement("img");
+          img.className = "msg-pdf-thumb";
+          img.src = pdf.thumb;
+          img.alt = "";
+          card.appendChild(img);
+        }
+        const label = document.createElement("div");
+        label.className = "msg-pdf-label";
+        label.innerHTML =
+          '<div class="msg-pdf-ico"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/></svg></div>' +
+          '<span class="msg-pdf-name">' +
+          (pdf.name || "").replace(/</g, "&lt;") +
+          "</span>";
+        card.appendChild(label);
+        wrap.appendChild(card);
+      });
+    }
+
     const bubble = document.createElement("div");
     bubble.className = "bubble";
-    // message body (text)
     const body = document.createElement("div");
     body.className = "msg-text";
-    body.textContent = text;
-
-    bubble.innerHTML = "";
+    body.textContent = cleanText;
     bubble.appendChild(body);
 
     // AI actions row (only for ai messages)
