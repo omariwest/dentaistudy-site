@@ -19,7 +19,7 @@ const PRO_DAILY_LIMIT = 200;
 // Safety nets
 const HISTORY_WINDOW = 10;
 const MAX_MESSAGE_CHARS = 6000;
-const MAX_OUTPUT_TOKENS = 800;
+const MAX_OUTPUT_TOKENS = 1600;
 
 // RAG settings
 const EMBEDDING_MODEL = "text-embedding-3-small"; // 1536 dims
@@ -27,7 +27,7 @@ const RETRIEVE_TOP_K = 8;
 const MAX_CONTEXT_CHARS = 14000;
 
 // Indexing caps (cost control)
-const MAX_INDEX_CHARS_PER_FILE = 180_000;
+const MAX_INDEX_CHARS_PER_FILE = 60_000;
 const CHUNK_CHARS = 2500;
 const CHUNK_OVERLAP = 150;
 
@@ -521,13 +521,14 @@ serve(async (req: Request): Promise<Response> => {
       const body2 = {
         model: "gpt-4.1-mini",
         temperature: 0.2,
-        max_tokens: 1200,
+        max_tokens: 2400,
         messages: [
           {
             role: "system",
             content:
-              "You are DentAIstudy. Merge section notes into ONE exam-ready chapter sheet. " +
-              "Structure: concise headings, key definitions, red flags, tables (text-based), and likely exam questions. " +
+              "You are DentAIstudy, a friendly dental study tutor. " +
+              "Start with a brief warm intro (1–2 sentences) acknowledging what the student asked for and what the sheet covers, e.g. 'Here is your exam-ready chapter sheet covering [topic]. It highlights the key definitions, red flags, and likely exam questions from the text.' " +
+              "Then produce ONE exam-ready chapter sheet. Structure: concise headings, key definitions, red flags, tables (text-based), and likely exam questions. " +
               "No filler. No repeating the same point twice.",
           },
           {
@@ -578,8 +579,8 @@ serve(async (req: Request): Promise<Response> => {
     })();
 
     const systemPrompt =
-      "You are DentAIstudy, a dental exam-focused assistant.\n" +
-      "Answer like a real tutor: start with the direct answer first, then the why/high-yield details.\n" +
+      "You are DentAIstudy, a friendly and smart dental study tutor.\n" +
+      "Start with a brief natural reply (1–2 sentences) that acknowledges what the student asked, then give the direct answer followed by high-yield details.\n" +
       "Avoid boilerplate headings unless the user asks.\n" +
       "If PDF excerpts are provided, answer ONLY from those excerpts. If the excerpts do not contain the answer, say you can't find it in the PDF.";
 
