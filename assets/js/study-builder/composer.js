@@ -257,6 +257,7 @@
 
   function sealForSend() {
     safeLoadPdfCache();
+    var MAX_SEND_CHARS = 60000;
     pendingSendDocs = attached
       .map((f) => {
         const id = pdfFileId(f);
@@ -265,7 +266,10 @@
           ? {
               file_id: id,
               file_name: d.name || f.name,
-              text: d.text,
+              text:
+                d.text.length > MAX_SEND_CHARS
+                  ? d.text.slice(0, MAX_SEND_CHARS)
+                  : d.text,
               pages: d.pages || null,
             }
           : null;
