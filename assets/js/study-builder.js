@@ -286,6 +286,9 @@
       const task = pill.getAttribute("data-task");
       window.DentAIstudyTask =
         task === "chapter_notes" ? "chapter_notes" : "qa";
+
+      const addBtn = document.getElementById("btnAdd");
+      if (addBtn?.classList.contains("is-open")) addBtn.click();
     });
 
     function getUrlChatId() {
@@ -306,9 +309,14 @@
     }
 
     function titleFromText(text) {
-      const t = (text || "").trim().replace(/\s+/g, " ");
+      const t = (text || "")
+        .split("\n")
+        .filter((ln) => !ln.startsWith("📄 "))
+        .join(" ")
+        .trim()
+        .replace(/\s+/g, " ");
       if (!t) return "New chat";
-      return t.length > 60 ? `${t.slice(0, 60)}…` : t;
+      return t.length > 200 ? t.slice(0, 200) : t;
     }
 
     // Desktop-only modal (keeps mobile/iPad using native prompt/confirm)
@@ -602,8 +610,13 @@
         }`;
         btn.type = "button";
         btn.dataset.chatId = c.id;
-        btn.textContent = (c.title || "New chat").trim() || "New chat";
-        btn.title = btn.textContent;
+        const fullTitle =
+          ((c.title || "New chat").trim() || "New chat")
+            .split(" ")
+            .slice(0, -1)
+            .join(" ") || "New chat";
+        btn.textContent = fullTitle;
+        btn.title = "";
 
         const menuBtn = document.createElement("button");
         menuBtn.className = "sb-chatmenu";
