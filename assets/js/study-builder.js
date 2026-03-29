@@ -196,6 +196,16 @@
         continue;
       }
 
+      const headingMatch = /^(#{1,4})\s+(.+)$/.exec(line);
+      if (headingMatch) {
+        const level = headingMatch[1].length;
+        out.push(
+          `<h${level}>${inlineFormat(escapeHtml(headingMatch[2]))}</h${level}>`,
+        );
+        i += 1;
+        continue;
+      }
+
       out.push(`<p>${inlineFormat(escapeHtml(line))}</p>`);
       i += 1;
     }
@@ -917,8 +927,13 @@
                 data = null;
               }
 
-              if (response.ok && data && typeof data.content === "string") {
-                const content = data.content || "No answer returned.";
+              if (
+                response.ok &&
+                data &&
+                typeof (data.content ?? data.output) === "string"
+              ) {
+                const content =
+                  data.content || data.output || "No answer returned.";
                 if (!accessToken) incAnonUsage();
 
                 window.ChatUI?.addAI(content);
