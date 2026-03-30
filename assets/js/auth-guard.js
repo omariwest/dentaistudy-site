@@ -20,6 +20,22 @@ console.log("[auth-guard] LOADED FILE v3.1 on", window.location.href);
 //     - fallback: user_metadata.avatar_url
 //     - fallback: user_metadata.picture
 
+// Instant auth UI — reads Supabase session from localStorage synchronously
+(function () {
+  try {
+    const keys = Object.keys(localStorage);
+    const sessionKey = keys.find(
+      (k) => k.startsWith("sb-") && k.endsWith("-auth-token"),
+    );
+    if (sessionKey) {
+      const parsed = JSON.parse(localStorage.getItem(sessionKey));
+      if (parsed?.access_token || parsed?.session?.access_token) {
+        updateAuthUI({ user: {} }); // logged in: swap to "Log out" instantly
+      }
+    }
+  } catch (_) {}
+})();
+
 document.addEventListener("DOMContentLoaded", async () => {
   const path = window.location.pathname || "";
   const fileName = path.split("/").pop() || "index.html";
@@ -236,7 +252,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         : typeof meta.starred_count === "number"
           ? meta.starred_count
           : 0;
-    const lastActive = meta.last_active_at || null;
+    const lastActive =
+      isProfile || isSettings ? now : meta.last_active_at || null;
     const topMode = meta.top_used_category || null;
 
     // Plan / subscription tier (provider-neutral)
@@ -245,6 +262,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const isPaidPlan =
       subscriptionTier === "pro" || subscriptionTier === "pro_yearly";
+
+    // Expose for other modules (composer, etc.)
+    window.DentAIUser = { tier: subscriptionTier, isPro: isPaidPlan };
 
     console.log("[auth-guard] derived plan from metadata:", {
       fileName,
