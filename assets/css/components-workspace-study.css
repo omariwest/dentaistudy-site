@@ -466,6 +466,8 @@
 
 .page-study .study-chat-log {
   padding: 0;
+  max-width: 100%;
+  overflow-x: hidden;
   max-height: none;
   overflow-y: visible;
   background: transparent;
