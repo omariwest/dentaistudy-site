@@ -1,36 +1,79 @@
 /* assets/css/study-builder/markdown.css
    Uses your old Markdown renderer output (tables/bold) inside new chat bubbles.
 */
-.msg .msg-text{ line-height: 1.55; }
-.msg .msg-text p{ margin: 0 0 10px; }
-.msg .msg-text p:last-child{ margin-bottom: 0; }
+.msg .msg-text {
+  line-height: 1.55;
+}
+.msg .msg-text p {
+  margin: 0 0 10px;
+}
+.msg .msg-text p:last-child {
+  margin-bottom: 0;
+}
 .msg .msg-text ul,
-.msg .msg-text ol{ margin: 8px 0 10px; padding-left: 1.25rem; }
-.msg .msg-text li{ margin: 4px 0; }
-.msg .msg-text strong{ font-weight: 750; }
-.msg .msg-text a{ text-decoration: underline; }
+.msg .msg-text ol {
+  margin: 8px 0 10px;
+  padding-left: 1.25rem;
+}
+.msg .msg-text li {
+  margin: 4px 0;
+}
+.msg .msg-text strong {
+  font-weight: 750;
+}
+.msg .msg-text a {
+  text-decoration: underline;
+}
 
-.msg .study-ai-table-wrap{
+.msg .study-ai-table-wrap {
   margin: 10px 0;
   overflow: auto;
   border: 1px solid rgba(15, 23, 42, 0.12);
   border-radius: 12px;
 }
-.msg .study-ai-table{
+.msg .study-ai-table {
   width: 100%;
   border-collapse: collapse;
   min-width: 560px;
 }
 .msg .study-ai-table th,
-.msg .study-ai-table td{
+.msg .study-ai-table td {
   text-align: left;
   padding: 10px 12px;
-  border-bottom: 1px solid rgba(15, 23, 42, 0.10);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.1);
   vertical-align: top;
   font-size: 13px;
 }
-.msg .study-ai-table th{
+.msg .study-ai-table th {
   font-weight: 750;
   background: rgba(2, 6, 23, 0.03);
 }
-.msg .study-ai-table tr:last-child td{ border-bottom: none; }
+.msg .study-ai-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* ===== MCQ formatting ===== */
+.msg .msg-text p.mcq-question {
+  font-weight: 650;
+  color: rgba(15, 23, 42, 0.92);
+  margin-top: 14px;
+  margin-bottom: 4px;
+  line-height: 1.5;
+}
+
+.msg .msg-text .mcq-num {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.msg .msg-text p.mcq-option {
+  margin: 2px 0 2px 6px;
+  color: rgba(15, 23, 42, 0.75);
+}
+
+.msg .msg-text .mcq-opt-label {
+  font-weight: 650;
+  color: rgba(15, 23, 42, 0.55);
+  min-width: 22px;
+  display: inline-block;
+}
