@@ -96,7 +96,16 @@
   // ========= Attachments (PDF only, up to 5) =========
   /** @type {File[]} */
   let attached = [];
-  const MAX_PDFS = 5;
+  // Limits per plan — resolved at pick/drop time
+  function getPlanLimits() {
+    const tier = window.DentAIUser?.tier || "anon";
+    if (tier === "pro" || tier === "pro_yearly")
+      return { maxPdfs: 10, maxMb: 60 };
+    if (tier === "free") return { maxPdfs: 5, maxMb: 20 };
+    return { maxPdfs: 0, maxMb: 0 }; // anon
+  }
+
+  const MAX_PDFS = 10; // hard ceiling, real limit enforced via getPlanLimits()
 
   // Sticky PDF context cache (no visible chat pollution)
   const PDF_CACHE_KEY = "dentai_pdf_cache_v1";
@@ -429,46 +438,112 @@
   function addFiles(list) {
     if (!list || !list.length) return;
 
-    const incoming = Array.from(list).filter(isPdf);
-    if (!incoming.length) return;
+    const { maxPdfs, maxMb } = getPlanLimits();
+    const maxBytes = maxMb * 1024 * 1024;
 
-    for (const f of incoming) {
-      if (attached.length >= MAX_PDFS) break;
+    // Anon: block entirely
+    if (maxPdfs === 0) {
+      showToast(
+        "Sign in to attach PDFs",
+        "PDF uploads are available to free and Pro members.",
+        "warn",
+      );
+      return;
+    }
 
+    const all = Array.from(list);
+    const nonPdf = all.filter((f) => !isPdf(f));
+    const pdfs = all.filter(isPdf);
+    const tooBig = pdfs.filter((f) => f.size > maxBytes);
+    const valid = pdfs.filter((f) => f.size <= maxBytes);
+
+    // Show appropriate toast
+    if (nonPdf.length && !pdfs.length) {
+      showToast(
+        "PDF files only",
+        "Other file types aren't supported.",
+        "error",
+      );
+      return;
+    }
+    if (tooBig.length && !valid.length) {
+      showToast(
+        `File too large`,
+        `Max size is ${maxMb}MB per PDF on your plan.`,
+        "error",
+      );
+      return;
+    }
+    if (nonPdf.length || tooBig.length) {
+      showToast(
+        "Some files skipped",
+        `Only PDFs under ${maxMb}MB were attached.`,
+        "warn",
+      );
+    }
+
+    let slotsFilled = 0;
+    for (const f of valid) {
+      if (attached.length >= maxPdfs) {
+        showToast(
+          "PDF limit reached",
+          `Your plan allows up to ${maxPdfs} PDFs per chat.`,
+          "warn",
+        );
+        break;
+      }
       const dup = attached.some(
         (x) =>
           x.name === f.name &&
           x.size === f.size &&
           x.lastModified === f.lastModified,
       );
-      if (!dup) attached.push(f);
-
-      // parse + sticky cache
+      if (!dup) {
+        attached.push(f);
+        slotsFilled++;
+      }
       ensurePdfParsedAndCached(f);
     }
 
     renderAttachments();
-
-    // allow picking same file again
     if (pdfInput) pdfInput.value = "";
+  }
+
+  // ========= Toast =========
+  const dropToast = document.getElementById("dropToast");
+  let toastTimer = null;
+
+  function showToast(title, sub, type = "warn") {
+    if (!dropToast) return;
+    const ico =
+      type === "error"
+        ? `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`
+        : `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
+
+    dropToast.innerHTML = `
+      <span class="drop-toast-ico drop-toast-ico--${type}">${ico}</span>
+      <span class="drop-toast-body">
+        <span class="drop-toast-title">${title}</span>
+        ${sub ? `<span class="drop-toast-sub">${sub}</span>` : ""}
+      </span>`;
+
+    dropToast.hidden = false;
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      dropToast.hidden = true;
+    }, 4000);
   }
 
   async function triggerPdfPick() {
     if (!pdfInput) return;
 
-    // Check if user is authenticated
-    let isAuthenticated = false;
-    try {
-      if (window.dasSupabase?.auth) {
-        const { data } = await window.dasSupabase.auth.getSession();
-        isAuthenticated = !!data?.session;
-      }
-    } catch {}
+    const tier = window.DentAIUser?.tier || null;
 
-    if (!isAuthenticated) {
-      // Professional note for anonymous users
-      alert(
-        "PDF uploads are available to DentAIstudy members. Sign in or create a free account to upload documents.",
+    if (!tier) {
+      showToast(
+        "Sign in to attach PDFs",
+        "PDF uploads are available to free and Pro members.",
+        "warn",
       );
       return;
     }
@@ -545,6 +620,36 @@
     closeAddMenu();
 
     // AI reply is handled by assets/js/study-builder.js (Supabase Edge Function).
+  });
+
+  // ========= Drag-and-drop (desktop only) =========
+  const dropOverlay = document.getElementById("dropOverlay");
+  let dragCounter = 0;
+
+  document.addEventListener("dragenter", (e) => {
+    if (!e.dataTransfer?.types?.includes("Files")) return;
+    dragCounter++;
+    if (dropOverlay) dropOverlay.hidden = false;
+  });
+
+  document.addEventListener("dragleave", () => {
+    dragCounter--;
+    if (dragCounter <= 0) {
+      dragCounter = 0;
+      if (dropOverlay) dropOverlay.hidden = true;
+    }
+  });
+
+  document.addEventListener("dragover", (e) => {
+    e.preventDefault();
+  });
+
+  document.addEventListener("drop", (e) => {
+    e.preventDefault();
+    dragCounter = 0;
+    if (dropOverlay) dropOverlay.hidden = true;
+    const files = e.dataTransfer?.files;
+    if (files?.length) addFiles(files);
   });
 
   // init
