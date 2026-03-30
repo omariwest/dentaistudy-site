@@ -67,6 +67,39 @@
   }
 
   let thinkingEl = null;
+  let thinkingTimer = null;
+
+  const THINKING_PHASES = [
+    "Reading your question…",
+    "Scanning the material…",
+    "Connecting the concepts…",
+    "Structuring the answer…",
+    "Almost there…",
+  ];
+
+  const THINKING_PHASES_PDF = [
+    "Reading the PDF…",
+    "Extracting key concepts…",
+    "Mapping the clinical points…",
+    "Structuring exam notes…",
+    "Almost there…",
+  ];
+
+  const THINKING_PHASES_DEEP = [
+    "Analysing the full chapter…",
+    "Identifying core themes…",
+    "Building structured notes…",
+    "Formatting for your exam…",
+    "Almost there…",
+  ];
+
+  function getThinkingPhases() {
+    const task = window.DentAIstudyTask || "qa";
+    const hasPdf = !!window.DentAIPDF?.getActiveContext?.();
+    if (task === "chapter_notes") return THINKING_PHASES_DEEP;
+    if (hasPdf) return THINKING_PHASES_PDF;
+    return THINKING_PHASES;
+  }
 
   function showThinking() {
     if (thinkingEl?.isConnected) return;
@@ -77,18 +110,43 @@
     const bubble = document.createElement("div");
     bubble.className = "bubble";
 
+    // Tooth logo pulse
+    const logoWrap = document.createElement("div");
+    logoWrap.className = "thinking-logo";
+    logoWrap.innerHTML = `<svg viewBox="0 0 32 32" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg">   <path d="M16 4.2C13.9 4.2 12.3 5 10.9 5.8C9.8 6.4 8.8 6.9 7.7 6.9C6.7 6.9 6.1 7.3 5.7 8.1C5.2 9.1 5 10.7 5 12.8C5 15.6 5.8 18.6 6.9 21.8C7.7 24.2 8.2 26.5 9.1 28C9.7 29.1 10.5 29.8 11.7 29.8C12.8 29.8 13.7 29.1 14.5 27.7C15.1 26.6 15.6 25.2 16 24C16.4 25.2 16.9 26.6 17.5 27.7C18.3 29.1 19.2 29.8 20.3 29.8C21.5 29.8 22.3 29.1 22.9 28C23.8 26.5 24.3 24.2 25.1 21.8C26.2 18.6 27 15.6 27 12.8C27 10.7 26.8 9.1 26.3 8.1C25.9 7.3 25.3 6.9 24.3 6.9C23.2 6.9 22.2 6.4 21.1 5.8C19.7 5 18.1 4.2 16 4.2C14.8 4.2 13.9 4.6 13 5.1C14 4.7 15 4.5 16 4.5C17 4.5 18 4.7 19 5.1C18.1 4.6 17.2 4.2 16 4.2Z" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>   <path d="M10.2 14.1C12.4 14.1 14.3 15 16 16.7C17.7 15 19.6 14.1 21.8 14.1" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>   <path d="M10.2 17.3C12.6 17.5 14.5 18.4 16 20C17.5 18.4 19.4 17.5 21.8 17.3" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>   <path d="M10.3 19.7C12.7 20.2 14.5 21.5 16 23.2C17.5 21.5 19.3 20.2 21.7 19.7" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/> </svg>`;
+
     const t = document.createElement("div");
     t.className = "thinking-text";
-    t.textContent = "Thinking…";
 
+    const phases = getThinkingPhases();
+    t.textContent = phases[0];
+
+    bubble.appendChild(logoWrap);
     bubble.appendChild(t);
     wrap.appendChild(bubble);
 
     thinkingEl = wrap;
     messagesEl.appendChild(wrap);
+
+    // Cycle through phases
+    let i = 1;
+    thinkingTimer = setInterval(() => {
+      if (!thinkingEl?.isConnected) return;
+      t.style.opacity = "0";
+      setTimeout(() => {
+        if (!thinkingEl?.isConnected) return;
+        t.textContent = phases[Math.min(i, phases.length - 1)];
+        t.style.opacity = "1";
+        i++;
+      }, 200);
+    }, 1800);
   }
 
   function hideThinking() {
+    if (thinkingTimer) {
+      clearInterval(thinkingTimer);
+      thinkingTimer = null;
+    }
     if (!thinkingEl) return;
     thinkingEl.remove();
     thinkingEl = null;

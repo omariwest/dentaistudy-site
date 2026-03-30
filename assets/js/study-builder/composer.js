@@ -404,31 +404,26 @@
             : " (failed)";
 
       const chip = document.createElement("div");
-      chip.className = "attachchip";
+      chip.className =
+        "attachchip" + (status === "reading" ? " is-reading" : "");
 
       const ico = document.createElement("div");
       ico.className = "pdfico";
       ico.appendChild(iconPdf());
 
-      const name = document.createElement("div");
-      name.className = "name";
-      name.textContent = file.name + suffix;
-
       const x = document.createElement("button");
       x.type = "button";
       x.className = "x";
-      x.setAttribute("aria-label", "Remove file");
+      x.setAttribute("aria-label", `Remove ${file.name}`);
       x.appendChild(iconX());
       x.addEventListener("click", () => {
-        // remove from visible list
         attached.splice(idx, 1);
-        // deactivate from sticky context too
         setPdfActive(id, false);
         renderAttachments();
       });
 
+      chip.setAttribute("title", file.name + suffix);
       chip.appendChild(ico);
-      chip.appendChild(name);
       chip.appendChild(x);
 
       attachBar.appendChild(chip);
