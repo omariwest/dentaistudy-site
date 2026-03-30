@@ -578,7 +578,9 @@
   opacity: 0;
   transform: translateX(8px) translateY(4px);
   pointer-events: none;
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
 }
 
 /* Show feedback when copied */
@@ -603,6 +605,8 @@
 
   .page-study .study-chat-bubble--ai .study-bubble-content {
     padding: 14px; /* uniform, no fake padding */
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 }
 
@@ -839,7 +843,9 @@
   pointer-events: none;
   visibility: hidden;
 
-  transition: opacity 140ms ease, transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition:
+    opacity 140ms ease,
+    transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
   z-index: 20;
 }
 
