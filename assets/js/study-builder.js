@@ -119,6 +119,7 @@
 
   function inlineFormat(html) {
     html = html.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+    html = html.replace(/\*([^*]+)\*/g, "<em>$1</em>");
     html = html.replace(/`([^`]+)`/g, "<code>$1</code>");
     html = html.replace(
       /\b(https?:\/\/[^\s<]+)\b/g,
@@ -201,6 +202,26 @@
         const level = headingMatch[1].length;
         out.push(
           `<h${level}>${inlineFormat(escapeHtml(headingMatch[2]))}</h${level}>`,
+        );
+        i += 1;
+        continue;
+      }
+
+      // Numbered list item (MCQ questions: "1. Which of the...")
+      const numberedMatch = /^(\d+)\.\s+(.+)$/.exec(line);
+      if (numberedMatch) {
+        out.push(
+          `<p class="mcq-question"><span class="mcq-num">${numberedMatch[1]}.</span> ${inlineFormat(escapeHtml(numberedMatch[2]))}</p>`,
+        );
+        i += 1;
+        continue;
+      }
+
+      // MCQ options (A) B) C) D))
+      const optionMatch = /^([A-D])\)\s+(.+)$/.exec(line);
+      if (optionMatch) {
+        out.push(
+          `<p class="mcq-option"><span class="mcq-opt-label">${optionMatch[1]})</span> ${inlineFormat(escapeHtml(optionMatch[2]))}</p>`,
         );
         i += 1;
         continue;
