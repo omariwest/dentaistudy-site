@@ -162,6 +162,7 @@
 .msg.ai .bubble {
   background: #ffffff;
   color: var(--text);
+  overflow-x: auto;
 }
 
 /* ===== AI message actions (ChatGPT-style) ===== */
