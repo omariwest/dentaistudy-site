@@ -294,6 +294,35 @@
           </button>
         </section>
 
+        <!-- Error / info toast -->
+        <div id="dropToast" class="drop-toast" hidden aria-live="polite"></div>
+
+        <!-- Drop zone overlay (desktop drag-and-drop) -->
+        <div id="dropOverlay" class="drop-overlay" hidden aria-hidden="true">
+          <div class="drop-overlay-inner">
+            <div class="drop-overlay-ico">
+              <svg
+                viewBox="0 0 24 24"
+                width="28"
+                height="28"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"
+                />
+                <path d="M14 2v5h5" />
+                <line x1="12" y1="18" x2="12" y2="12" />
+                <polyline points="9 15 12 12 15 15" />
+              </svg>
+            </div>
+            <p class="drop-overlay-label">Drop PDF to attach</p>
+          </div>
+        </div>
+
         <footer class="composer-wrap" aria-label="Composer">
           <form class="composer" id="composer" autocomplete="off">
             <button class="roundbtn" type="button" aria-label="Add" id="btnAdd">
@@ -307,12 +336,11 @@
               hidden
             >
               <button class="addmenu-item" type="button" data-add="pdf">
-                <span class="addmenu-ico" aria-hidden="true">
-                  <!-- paperclip icon -->
+                <span class="addmenu-ico addmenu-ico--pdf" aria-hidden="true">
                   <svg
                     viewBox="0 0 24 24"
-                    width="20"
-                    height="20"
+                    width="16"
+                    height="16"
                     fill="none"
                     stroke="currentColor"
                     stroke-width="2"
@@ -320,28 +348,69 @@
                     stroke-linejoin="round"
                   >
                     <path
-                      d="M21.44 11.05 12.2 20.29a5 5 0 0 1-7.07-7.07l9.2-9.2a3.5 3.5 0 1 1 4.95 4.95l-9.2 9.2a2 2 0 0 1-2.83-2.83l8.49-8.49"
+                      d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
                     />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="9" y1="13" x2="15" y2="13" />
+                    <line x1="9" y1="17" x2="13" y2="17" />
                   </svg>
                 </span>
-                <span class="addmenu-label">Add PDF</span>
+                <span class="addmenu-item-text">
+                  <span class="addmenu-item-title">Attach PDF</span>
+                  <span class="addmenu-item-sub">Upload study material</span>
+                </span>
               </button>
 
+              <div class="addmenu-divider"></div>
               <div class="addmenu-title">Study mode</div>
 
               <div class="addmenu-pills" role="group" aria-label="Study mode">
                 <button class="addpill is-active" type="button" data-task="qa">
-                  ⚡ Quick answer
-                  <span class="addpill-sub"
-                    >Focused, exam-relevant response</span
-                  >
+                  <span class="addpill-ico addpill-ico--qa" aria-hidden="true">
+                    <svg
+                      viewBox="0 0 24 24"
+                      width="15"
+                      height="15"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <polygon
+                        points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"
+                      />
+                    </svg>
+                  </span>
+                  <span class="addpill-body">
+                    <span class="addpill-name">Quick answer</span>
+                    <span class="addpill-sub">Focused, exam-relevant</span>
+                  </span>
                 </button>
 
                 <button class="addpill" type="button" data-task="chapter_notes">
-                  🧠 Deep study mode
-                  <span class="addpill-sub"
-                    >Full chapter analysis & structured notes</span
+                  <span
+                    class="addpill-ico addpill-ico--deep"
+                    aria-hidden="true"
                   >
+                    <svg
+                      viewBox="0 0 24 24"
+                      width="15"
+                      height="15"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+                    </svg>
+                  </span>
+                  <span class="addpill-body">
+                    <span class="addpill-name">Deep study</span>
+                    <span class="addpill-sub">Full chapter & notes</span>
+                  </span>
                 </button>
               </div>
             </div>
