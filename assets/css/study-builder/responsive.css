@@ -261,7 +261,10 @@
     color: inherit;
   }
   .sb-nav a.sb-btn:hover {
-    background: rgba(15, 76, 129, 0.08);
+    background: rgba(10, 61, 98, 0.06);
+  }
+  .sb-nav a.sb-btn:hover .ico {
+    opacity: 0.85;
   }
 
   /* Desktop: use more horizontal space + shift content left */

@@ -77,15 +77,19 @@
   font-size: 14px;
 }
 .sb-btn:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.06);
+  background: rgba(10, 61, 98, 0.06);
+  border-color: transparent;
+}
+
+.sb-btn:hover .ico {
+  opacity: 0.85;
 }
 
 .ico {
   width: 20px;
   display: grid;
   place-items: center;
-  opacity: 0.95;
+  opacity: 0.55;
 }
 
 .sb-section {
