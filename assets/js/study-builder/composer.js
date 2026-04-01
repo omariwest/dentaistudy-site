@@ -552,6 +552,10 @@
     addFiles(pdfInput.files);
     closeAddMenu();
     ta.focus({ preventScroll: true });
+    setTimeout(
+      () => ta.scrollIntoView({ block: "center", behavior: "smooth" }),
+      350,
+    );
   });
 
   // ========= Add menu actions =========
