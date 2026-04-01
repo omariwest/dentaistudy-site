@@ -43,7 +43,7 @@
     opacity 0.2s ease;
 }
 .menu-toggle:hover {
-  background: rgba(2, 6, 23, 0.06);
+  background: transparent;
 }
 .menu-toggle:focus {
   outline: none;
@@ -107,6 +107,7 @@
 }
 .slide-nav-links a:hover {
   background: rgba(10, 61, 98, 0.06);
+  opacity: 0.7;
 }
 .slide-nav-links a:hover svg {
   opacity: 0.85;
@@ -116,6 +117,10 @@
   height: 1px;
   background: rgba(15, 23, 42, 0.12);
   margin: 8px 0;
+}
+
+.slide-nav-links .slide-login-link {
+  font-weight: 600;
 }
 
 .slide-nav.active {
