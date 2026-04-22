@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
 /* base.css – design tokens for DentAIstudy
    Keep this file small: only CSS variables and global design tokens.
    All layout and component styles live in components.css.
@@ -13,7 +15,7 @@
   --color-accent: #10b981;
 
   /* Neutrals (optional helpers for future use) */
-  --gray-50:  #f9fafb;
+  --gray-50: #f9fafb;
   --gray-100: #f3f4f6;
   --gray-200: #e5e7eb;
   --gray-300: #d1d5db;

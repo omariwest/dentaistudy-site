@@ -411,13 +411,50 @@
 
 .study-mode-pill {
   border-radius: 999px;
-  border: 1px solid #e5e7eb;
-  padding: 4px 10px;
-  font-size: 0.8rem;
+  border: 1px solid #d7dee7;
+  padding: 6px 14px;
+  font-size: 0.9rem;
+  line-height: 1;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  background: #f9fafb;
+  background: #f8fafc;
+  color: #334155;
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
+}
+
+.study-mode-pill:hover {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #0a3d62;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
+  transform: translateY(-1px);
+}
+
+.study-mode-pill:focus-visible {
+  outline: none;
+  border-color: #0a3d62;
+  box-shadow: 0 0 0 3px rgba(10, 61, 98, 0.12);
+}
+
+.study-mode-pill.blog-filter.is-active {
+  background: #0a3d62;
+  border-color: #0a3d62;
+  color: #ffffff;
+  box-shadow: 0 10px 22px rgba(10, 61, 98, 0.18);
+}
+
+.study-mode-pill.blog-filter.is-active:hover {
+  background: #0f4c81;
+  border-color: #0f4c81;
+  color: #ffffff;
 }
 
 .study-mode-pill input {
