@@ -18,14 +18,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>Pricing – DentAIstudy</title>
+    <title>Exams – DentAIstudy</title>
 
     <meta
       name="description"
-      content="See DentAIstudy pricing and plans for AI-powered dental revision, study sessions, exam prep tools, and smarter learning support."
+      content="Exam-specific study hubs for dental licensing exams. ADEX, NBDE, NDEB, and more — structured guides with OSCE prep, scoring criteria, and fail points."
     />
 
-    <link rel="canonical" href="https://dentaistudy.com/pricing.html" />
+    <link rel="canonical" href="https://dentaistudy.com/exams.html" />
 
     <link rel="stylesheet" href="assets/css/style-v3.css" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
@@ -41,31 +41,29 @@
     <script src="assets/js/auth-client.js" defer></script>
     <script src="assets/js/auth-guard.js" defer></script>
     <script src="assets/js/auth-logout.js" defer></script>
-
-    <script src="https://cdn.paddle.com/paddle/v2/paddle.js" defer></script>
-    <script src="assets/js/paddle-init.js" defer></script>
-    <script src="assets/js/paddle-checkout.js" defer></script>
-
     <script defer src="assets/js/main.js"></script>
   </head>
 
   <body>
     <div class="main-wrapper">
+      <!-- HEADER -->
       <header class="site-header">
         <div class="container header-inner">
-          <button class="menu-toggle">
+          <button class="menu-toggle" aria-label="Open menu">
             <span></span><span></span><span></span>
           </button>
-          <a class="brand" href="index.html"
-            ><span>Dent</span><span>AIstudy</span></a
-          >
+          <a class="brand" href="index.html">
+            <span>Dent</span><span>AIstudy</span>
+          </a>
+
           <nav class="header-nav">
             <a href="subjects.html">Subjects</a>
-            <a href="exams.html">Exams</a>
+            <a href="exams.html" class="is-active">Exams</a>
             <a href="study.html">Study Builder</a>
             <a href="blogs.html">Blogs</a>
-            <a href="pricing.html" class="is-active">Pricing</a>
+            <a href="pricing.html">Pricing</a>
           </nav>
+
           <div class="header-right">
             <a href="login.html" class="btn btn-outline header-login">Log in</a>
             <a href="signup.html" class="btn btn-primary header-signup"
@@ -75,6 +73,7 @@
         </div>
       </header>
 
+      <!-- Mobile nav -->
       <div class="slide-nav-backdrop"></div>
       <nav class="slide-nav">
         <div class="slide-nav-links">
@@ -233,144 +232,224 @@
         </div>
       </nav>
 
-      <section class="section pricing-section">
-        <div class="container pricing-container">
-          <div class="section-header pricing-header">
-            <div class="section-kicker">Pricing</div>
-            <h1 class="section-title">
-              Simple pricing for focused dental study
-            </h1>
-            <p class="section-subtitle">
-              Start free, upgrade only when you’re ready. No contracts, cancel
-              anytime.
+      <div class="subjects-shell">
+        <!-- Page hero -->
+        <section class="page-hero page-hero-subjects">
+          <div class="container">
+            <h1>Exams</h1>
+            <p>
+              Focused study guides for major dental licensing exams — OSCE
+              stations, scoring criteria, fail points, and everything you need
+              to pass.
             </p>
           </div>
+        </section>
 
-          <main class="page-content pricing-page-main">
-            <section class="pricing-grid">
-              <!-- Free plan -->
-              <div class="pricing-card">
-                <div class="pricing-card-header">
-                  <h2>Free</h2>
-                  <p class="pricing-subtitle">
-                    For students exploring the platform and basic study tools.
-                  </p>
-                  <p class="pricing-price">$0 <span>/ forever</span></p>
+        <!-- SUBJECT GRID -->
+        <section class="subjects-section">
+          <div class="container">
+            <div class="subjects-grid">
+              <!-- ADEX -->
+              <a
+                href="exams/adex.html"
+                class="subject-card"
+                style="text-decoration: none; color: inherit"
+              >
+                <div class="subject-icon-frame">
+                  <img
+                    src="assets/img/exams/adex.png"
+                    alt="ADEX exam icon"
+                    loading="lazy"
+                  />
                 </div>
-
-                <ul class="pricing-features">
-                  <li>Limited daily AI generations</li>
-                  <li>Basic OSCE, Viva, and theory modes</li>
-                  <li>Notes, flashcards, and summaries</li>
-                  <li>Access to core dental subjects only</li>
-                  <li>Single-device usage</li>
-                  <li>Platform updates and announcements</li>
-                </ul>
-
-                <a
-                  href="signup.html"
-                  class="btn btn-outline"
-                  data-pricing-plan="free"
-                  style="
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                  "
-                >
-                  Start free
-                </a>
-                <p class="pricing-note">
-                  Ideal if you are trying DentAIstudy for the first time.
+                <h3>ADEX</h3>
+                <p>
+                  American Dental Examination — restorative preps, OSCE
+                  stations, and scoring criteria.
                 </p>
-              </div>
-
-              <!-- Pro Monthly -->
-              <div class="pricing-card">
-                <div class="pricing-card-header">
-                  <div class="pricing-title-row">
-                    <h2>Pro</h2>
-                    <span class="pricing-badge">Most popular</span>
-                  </div>
-
-                  <p class="pricing-subtitle">
-                    For students who want advanced AI tools and faster study
-                    workflows.
-                  </p>
-                  <p class="pricing-price">$4.99 <span>/ month</span></p>
+                <div class="subject-ai">
+                  20 articles covering every ADEX section and fail point.
                 </div>
+              </a>
 
-                <ul class="pricing-features">
-                  <li>Higher daily AI generation limits</li>
-                  <li>Advanced OSCE, Viva, and theory modes</li>
-                  <li>PDF upload with smart content extraction</li>
-                  <li>Faster processing in busy hours</li>
-                  <li>Access to all subjects</li>
-                  <li>Early access to new features</li>
-                </ul>
-
-                <a
-                  href="signup.html"
-                  class="btn btn-primary"
-                  data-pricing-plan="pro"
-                  style="
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                  "
-                >
-                  Get Pro monthly
-                </a>
-                <p class="pricing-note">
-                  Refunds follow our
-                  <a href="refund-policy.html">Refund Policy</a>.
-                </p>
-              </div>
-
-              <!-- Pro Yearly -->
-              <div class="pricing-card">
-                <div class="pricing-card-header">
-                  <h2>Pro Yearly</h2>
-                  <p class="pricing-subtitle">
-                    For long-term learners who want full access with the best
-                    value.
-                  </p>
-                  <p class="pricing-price">$49 <span>/ year</span></p>
+              <!-- INBDE -->
+              <a
+                href="exams/inbde.html"
+                class="subject-card"
+                style="text-decoration: none; color: inherit"
+              >
+                <div class="subject-icon-frame">
+                  <img
+                    src="assets/img/exams/inbde.png"
+                    alt="INBDE exam icon"
+                    loading="lazy"
+                  />
                 </div>
-
-                <ul class="pricing-features">
-                  <li>All Pro Monthly features included</li>
-                  <li>Lowest effective monthly price</li>
-                  <li>Stable long-term access for exam seasons</li>
-                  <li>Bonus study optimizations</li>
-                  <li>Ideal for long-term preparation</li>
-                  <li>One simple yearly payment</li>
-                </ul>
-
-                <a
-                  href="signup.html"
-                  class="btn btn-primary"
-                  data-pricing-plan="pro_yearly"
-                  style="
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                  "
-                >
-                  Get Pro yearly
-                </a>
-                <p class="pricing-note">
-                  Refunds follow our
-                  <a href="refund-policy.html">Refund Policy</a>.
+                <h3>INBDE</h3>
+                <p>
+                  Integrated National Board Dental Examination — the US
+                  state-level licensing pathway.
                 </p>
-              </div>
-            </section>
-            <p class="pricing-powered">
-              Secure checkout by <strong>Paddle</strong>
-            </p>
-          </main>
-        </div>
-      </section>
+                <div class="subject-ai">
+                  Biomedical, clinical, and case-based question prep.
+                </div>
+              </a>
 
+              <!-- ORE -->
+              <a
+                href="exams/ore.html"
+                class="subject-card"
+                style="text-decoration: none; color: inherit"
+              >
+                <div class="subject-icon-frame">
+                  <img
+                    src="assets/img/exams/ore.png"
+                    alt="ORE exam icon"
+                    loading="lazy"
+                  />
+                </div>
+                <h3>ORE</h3>
+                <p>
+                  Overseas Registration Exam (UK) — Part 1 knowledge and Part 2
+                  clinical skills.
+                </p>
+                <div class="subject-ai">
+                  Written paper prep, OSCE stations, and clinical scenarios.
+                </div>
+              </a>
+
+              <!-- ADC -->
+              <a
+                href="exams/adc.html"
+                class="subject-card"
+                style="text-decoration: none; color: inherit"
+              >
+                <div class="subject-icon-frame">
+                  <img
+                    src="assets/img/exams/adc.png"
+                    alt="ADC exam icon"
+                    loading="lazy"
+                  />
+                </div>
+                <h3>ADC</h3>
+                <p>
+                  Australian Dental Council — written exam and practical
+                  clinical assessment.
+                </p>
+                <div class="subject-ai">
+                  MCQ strategies, clinical stations, and Australian guidelines.
+                </div>
+              </a>
+
+              <!-- NDECC -->
+              <a
+                href="exams/ndecc.html"
+                class="subject-card"
+                style="text-decoration: none; color: inherit"
+              >
+                <div class="subject-icon-frame">
+                  <img
+                    src="assets/img/exams/ndecc.png"
+                    alt="NDECC exam icon"
+                    loading="lazy"
+                  />
+                </div>
+                <h3>NDECC</h3>
+                <p>
+                  National Dental Examination of Clinical Competence — Canada's
+                  clinical licensing exam.
+                </p>
+                <div class="subject-ai">
+                  OSCE prep, patient management, and Canadian clinical
+                  standards.
+                </div>
+              </a>
+
+              <!-- SDLE -->
+              <a
+                href="exams/sdle.html"
+                class="subject-card"
+                style="text-decoration: none; color: inherit"
+              >
+                <div class="subject-icon-frame">
+                  <img
+                    src="assets/img/exams/sdle.png"
+                    alt="SDLE exam icon"
+                    loading="lazy"
+                  />
+                </div>
+                <h3>SDLE</h3>
+                <p>
+                  Saudi Dental Licensure Examination — the SCFHS licensing
+                  pathway for dentists.
+                </p>
+                <div class="subject-ai">
+                  MCQ focus areas, clinical modules, and Saudi practice
+                  guidelines.
+                </div>
+              </a>
+
+              <!-- UAE -->
+              <a
+                href="exams/uae.html"
+                class="subject-card"
+                style="text-decoration: none; color: inherit"
+              >
+                <div class="subject-icon-frame">
+                  <img
+                    src="assets/img/exams/uae.png"
+                    alt="UAE exam icon"
+                    loading="lazy"
+                  />
+                </div>
+                <h3>UAE</h3>
+                <p>
+                  UAE Dental Licensing Examination — the licensing pathway for
+                  dentists in the UAE.
+                </p>
+                <div class="subject-ai">
+                  DHA, MOH, DOH, eligibility, and UAE practice guidelines.
+                </div>
+              </a>
+            </div>
+
+            <div style="text-align: center; margin-top: 40px">
+              <a
+                href="subjects.html"
+                class="btn btn-primary"
+                style="
+                  display: inline-flex;
+                  align-items: center;
+                  gap: 8px;
+                  padding: 12px 24px;
+                  font-size: 16px;
+                  font-weight: 600;
+                "
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <rect x="3" y="3" width="7" height="7" rx="1.5" />
+                  <rect x="14" y="3" width="7" height="7" rx="1.5" />
+                  <rect x="3" y="14" width="7" height="7" rx="1.5" />
+                  <rect x="14" y="14" width="7" height="7" rx="1.5" />
+                </svg>
+                Browse Subjects
+              </a>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- FOOTER -->
       <footer class="site-footer">
         <div class="container">
           <div class="footer-top">
@@ -438,6 +517,7 @@
       </footer>
     </div>
 
+    <!-- Cookie -->
     <div class="cookie-banner">
       <div class="container cookie-inner">
         <div class="cookie-text">

@@ -17,7 +17,15 @@
     </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <title>Blogs – DentAIstudy</title>
+    <meta
+      name="description"
+      content="DentAIstudy blog with dental exam guides, OSCE tips, revision strategies, and clinical study articles for dental students and licensing prep."
+    />
+
+    <link rel="canonical" href="https://dentaistudy.com/blogs.html" />
+
     <link rel="stylesheet" href="assets/css/style-v3.css" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
@@ -33,6 +41,13 @@
     <script src="assets/js/auth-guard.js" defer></script>
     <script src="assets/js/auth-logout.js" defer></script>
     <script defer src="assets/js/main.js"></script>
+    <script defer src="assets/js/blogs-adex.js"></script>
+    <script defer src="assets/js/blogs-adc.js"></script>
+    <script defer src="assets/js/blogs-inbde.js"></script>
+    <script defer src="assets/js/blogs-ndecc.js"></script>
+    <script defer src="assets/js/blogs-ore.js"></script>
+    <script defer src="assets/js/blogs-sdle.js"></script>
+    <script defer src="assets/js/blogs-uae.js"></script>
     <script defer src="assets/js/blogs.js"></script>
   </head>
 
@@ -50,10 +65,10 @@
 
           <nav class="header-nav">
             <a href="subjects.html">Subjects</a>
-            <a href="study.html">Study builder</a>
+            <a href="exams.html">Exams</a>
+            <a href="study.html">Study Builder</a>
             <a href="blogs.html" class="is-active">Blogs</a>
             <a href="pricing.html">Pricing</a>
-            <a href="contact.html">Contact</a>
           </nav>
 
           <div class="header-right">
@@ -68,26 +83,7 @@
       <!-- Mobile nav -->
       <div class="slide-nav-backdrop"></div>
       <nav class="slide-nav">
-        <div class="slide-nav-header">
-          <h3>Menu</h3>
-        </div>
         <div class="slide-nav-links">
-          <a href="study.html">
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.8"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-            </svg>
-            <span>Study builder</span>
-          </a>
           <a href="subjects.html">
             <svg
               width="20"
@@ -105,6 +101,41 @@
               <rect x="14" y="14" width="7" height="7" rx="1.5" />
             </svg>
             <span>Subjects</span>
+          </a>
+          <a href="exams.html">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"
+              />
+              <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
+              <path d="M9 14l2 2 4-4" />
+            </svg>
+            <span>Exams</span>
+          </a>
+          <a href="study.html">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+            </svg>
+            <span>Study Builder</span>
           </a>
           <a href="blogs.html">
             <svg
@@ -139,23 +170,6 @@
               <line x1="7" y1="7" x2="7.01" y2="7" />
             </svg>
             <span>Pricing</span>
-          </a>
-          <a href="contact.html">
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.8"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path
-                d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
-              />
-            </svg>
-            <span>Contact</span>
           </a>
 
           <div
@@ -230,15 +244,16 @@
         <div class="container">
           <div
             class="section-header"
-            style="text-align: left; max-width: 760px; margin: 0"
+            style="text-align: left; max-width: 860px; margin: 0"
           >
-            <div class="section-kicker">DentAIstudy Blog</div>
-            <h1 class="section-title" style="margin-bottom: 6px">
-              High-Yield Dentistry, OSCE, and Viva Clarity
+            <div class="section-kicker">DentAIstudy Blogs</div>
+            <h1 class="section-title" style="margin-bottom: 8px">
+              Exam-Focused Dental Guides for OSCE, Viva, and Board Prep
             </h1>
-            <p class="section-subtitle" style="max-width: 640px">
-              Fast, examiner-style explanations to help you revise smarter — not
-              longer.
+            <p class="section-subtitle" style="max-width: 760px">
+              Browse exam hubs, high-yield subject articles, and fast clinical
+              breakdowns — then turn any topic into notes, flashcards, and
+              recall flows with Study Builder.
             </p>
           </div>
         </div>
@@ -409,14 +424,23 @@
             <button class="study-mode-pill blog-filter" data-filter="adex">
               ADEX
             </button>
-            <button class="study-mode-pill blog-filter" data-filter="osce">
-              OSCE
+            <button class="study-mode-pill blog-filter" data-filter="adc">
+              ADC
             </button>
-            <button class="study-mode-pill blog-filter" data-filter="viva">
-              Viva
+            <button class="study-mode-pill blog-filter" data-filter="inbde">
+              INBDE
             </button>
-            <button class="study-mode-pill blog-filter" data-filter="theory">
-              Theory
+            <button class="study-mode-pill blog-filter" data-filter="ndecc">
+              NDECC
+            </button>
+            <button class="study-mode-pill blog-filter" data-filter="ore">
+              ORE
+            </button>
+            <button class="study-mode-pill blog-filter" data-filter="sdle">
+              SDLE
+            </button>
+            <button class="study-mode-pill blog-filter" data-filter="uae">
+              UAE
             </button>
             <button class="study-mode-pill blog-filter" data-filter="operative">
               Operative
@@ -436,8 +460,8 @@
             <button class="study-mode-pill blog-filter" data-filter="perio">
               Perio
             </button>
-            <button class="study-mode-pill blog-filter" data-filter="skills">
-              Study skills
+            <button class="study-mode-pill blog-filter" data-filter="general">
+              General
             </button>
           </div>
 
@@ -613,10 +637,10 @@
             <a
               href="blogs/blog-dental-trauma-ellis.html"
               class="blog-card"
-              data-category="osce pedo"
+              data-category="pedo"
             >
               <article class="subject-card">
-                <div class="sidebar-tag" style="width: max-content">OSCE</div>
+                <div class="sidebar-tag" style="width: max-content">Pedo</div>
                 <h3>
                   Dental Trauma: Ellis Classification & Simple Management Guide
                 </h3>
@@ -749,6 +773,23 @@
                 <p>
                   A simple, high-yield guide to NaOCl, EDTA, CHX, and activation
                   methods.
+                </p>
+                <div class="subject-ai">7 min read • Endodontics</div>
+              </article>
+            </a>
+
+            <!-- 16b -->
+            <a
+              href="blogs/blog-endo-diagnosis.html"
+              class="blog-card is-hidden"
+              data-category="endo theory"
+            >
+              <article class="subject-card">
+                <div class="sidebar-tag" style="width: max-content">Endo</div>
+                <h3>Endodontic Diagnosis Simplified</h3>
+                <p>
+                  Pulp and periapical classification with clinical tests and
+                  diagnostic flowcharts.
                 </p>
                 <div class="subject-ai">7 min read • Endodontics</div>
               </article>
@@ -1018,18 +1059,51 @@
           <!-- Load more -->
           <div style="text-align: center; margin-top: 22px">
             <button id="load-more" class="btn btn-outline">
-              Load more posts
+              Show more articles
             </button>
           </div>
 
           <!-- CTA -->
-          <div style="text-align: center; margin-top: 34px">
-            <p style="font-size: 0.9rem; color: #6b7280; margin-bottom: 10px">
-              Turn any blog into a high-yield study pack.
-            </p>
-            <a href="study.html" class="btn btn-primary"
-              >Open the Study builder →</a
+          <div style="text-align: center; margin-top: 40px">
+            <p
+              style="
+                font-size: 0.95rem;
+                color: #64748b;
+                margin-bottom: 14px;
+                line-height: 1.5;
+              "
             >
+              Turn any article into exam-ready notes, flashcards, and quick
+              recall flows.
+            </p>
+            <a
+              href="study.html"
+              class="btn btn-primary"
+              style="
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                padding: 12px 24px;
+                font-size: 16px;
+                font-weight: 600;
+              "
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+              </svg>
+              Try Study Builder
+            </a>
           </div>
         </div>
       </section>
@@ -1039,7 +1113,7 @@
         <div class="container">
           <div class="footer-top">
             <div>
-              <div class="footer-brand">DentAIstudy</div>
+              <a href="index.html" class="footer-brand">DentAIstudy</a>
               <p>AI-enhanced tools for dental students and residents.</p>
               <div class="footer-social">
                 <a
@@ -1071,15 +1145,16 @@
             <div class="footer-column">
               <h4>Product</h4>
               <a href="subjects.html">Subjects</a>
-              <a href="study.html">Study builder</a>
+              <a href="exams.html">Exams</a>
+              <a href="study.html">Study Builder</a>
               <a href="blogs.html">Blogs</a>
-              <a href="pricing.html">Pricing</a>
             </div>
 
             <div class="footer-column">
               <h4>Company</h4>
               <a href="about.html">About</a>
               <a href="contact.html">Contact</a>
+              <a href="pricing.html">Pricing</a>
               <a href="faqs.html">FAQ</a>
             </div>
 
@@ -1095,7 +1170,7 @@
           </div>
 
           <div class="footer-bottom">
-            © 2025 DentAIstudy. All rights reserved.
+            © 2026 DentAIstudy. All rights reserved.
           </div>
         </div>
       </footer>

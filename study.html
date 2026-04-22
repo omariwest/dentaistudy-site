@@ -20,7 +20,15 @@
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
-    <title>Study builder – DentAIstudy</title>
+
+    <title>Study Builder – DentAIstudy</title>
+
+    <meta
+      name="description"
+      content="Build AI-powered dental study sessions from your files, notes, and topics with exam-focused prompts, quizzes, and revision support."
+    />
+
+    <link rel="canonical" href="https://dentaistudy.com/study.html" />
 
     <link rel="stylesheet" href="assets/css/study-builder/base.css" />
     <link rel="stylesheet" href="assets/css/study-builder/shell.css" />
@@ -326,7 +334,20 @@
         <footer class="composer-wrap" aria-label="Composer">
           <form class="composer" id="composer" autocomplete="off">
             <button class="roundbtn" type="button" aria-label="Add" id="btnAdd">
-              <span aria-hidden="true">+</span>
+              <span aria-hidden="true">
+                <svg
+                  viewBox="0 0 24 24"
+                  width="18"
+                  height="18"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.4"
+                  stroke-linecap="round"
+                >
+                  <path d="M12 5v14"></path>
+                  <path d="M5 12h14"></path>
+                </svg>
+              </span>
             </button>
             <div
               class="addmenu"
@@ -495,22 +516,6 @@
     <div class="slide-nav-backdrop"></div>
     <nav class="slide-nav" aria-label="Mobile menu">
       <div class="slide-nav-links">
-        <a href="study.html">
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.8"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-          </svg>
-          <span>Study builder</span>
-        </a>
         <a href="subjects.html">
           <svg
             width="20"
@@ -528,6 +533,41 @@
             <rect x="14" y="14" width="7" height="7" rx="1.5" />
           </svg>
           <span>Subjects</span>
+        </a>
+        <a href="exams.html">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"
+            />
+            <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
+            <path d="M9 14l2 2 4-4" />
+          </svg>
+          <span>Exams</span>
+        </a>
+        <a href="study.html">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+          </svg>
+          <span>Study Builder</span>
         </a>
         <a href="blogs.html">
           <svg
@@ -562,23 +602,6 @@
             <line x1="7" y1="7" x2="7.01" y2="7" />
           </svg>
           <span>Pricing</span>
-        </a>
-        <a href="contact.html">
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.8"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path
-              d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
-            />
-          </svg>
-          <span>Contact</span>
         </a>
 
         <div

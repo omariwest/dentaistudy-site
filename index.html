@@ -17,7 +17,14 @@
     </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <title>DentAIstudy – AI-powered dental study assistant</title>
+    <meta
+      name="description"
+      content="AI-powered dental study platform for exam prep, OSCE practice, study sessions, and smarter revision for dental students and dentists."
+    />
+    <link rel="canonical" href="https://dentaistudy.com/" />
+
     <link rel="stylesheet" href="assets/css/style-v3.css" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
@@ -54,10 +61,10 @@
 
           <nav class="header-nav">
             <a href="subjects.html">Subjects</a>
-            <a href="study.html">Study builder</a>
+            <a href="exams.html">Exams</a>
+            <a href="study.html">Study Builder</a>
             <a href="blogs.html">Blogs</a>
             <a href="pricing.html">Pricing</a>
-            <a href="contact.html">Contact</a>
           </nav>
 
           <div class="header-right">
@@ -73,22 +80,6 @@
       <div class="slide-nav-backdrop"></div>
       <nav class="slide-nav">
         <div class="slide-nav-links">
-          <a href="study.html">
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.8"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-            </svg>
-            <span>Study builder</span>
-          </a>
           <a href="subjects.html">
             <svg
               width="20"
@@ -106,6 +97,41 @@
               <rect x="14" y="14" width="7" height="7" rx="1.5" />
             </svg>
             <span>Subjects</span>
+          </a>
+          <a href="exams.html">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"
+              />
+              <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
+              <path d="M9 14l2 2 4-4" />
+            </svg>
+            <span>Exams</span>
+          </a>
+          <a href="study.html">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+            </svg>
+            <span>Study Builder</span>
           </a>
           <a href="blogs.html">
             <svg
@@ -140,23 +166,6 @@
               <line x1="7" y1="7" x2="7.01" y2="7" />
             </svg>
             <span>Pricing</span>
-          </a>
-          <a href="contact.html">
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.8"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path
-                d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
-              />
-            </svg>
-            <span>Contact</span>
           </a>
 
           <div
@@ -226,127 +235,347 @@
         </div>
       </nav>
 
-      <!-- HERO (gradient like signup) -->
+      <!-- HERO -->
       <div class="hero-home-shell">
         <section class="hero hero-home">
-          <div class="container hero-grid hero-home-grid">
-            <!-- Left copy -->
-            <div>
+          <div
+            class="container hero-grid hero-home-grid hero-home-grid--showcase"
+          >
+            <div class="hero-copy-col">
               <div class="hero-badge-row">
                 <span>
                   <span class="hero-badge-dot"></span>
-                  <span>AI Dental space for</span>
+                  <span>Dental-only AI • Study Builder • Exam hubs</span>
                 </span>
-                <span>OSCE • Viva • Theory</span>
               </div>
 
-              <div class="hero-eyebrow">Dental learning, simplified</div>
+              <div class="hero-eyebrow">Focused dental exam prep</div>
 
-              <h1 class="hero-title">Stay in study mode, not chat mode.</h1>
+              <h1 class="hero-title">
+                Study dentistry in one place — not across random tabs.
+              </h1>
 
               <p class="hero-lead">
-                Turn any topic into OSCE flows, high-yield notes, and flashcards
-                — in a clean interface built for undergrads, interns, and
-                residents.
+                Turn a topic or uploaded PDF into cleaner dental notes, quick
+                answers, and deeper study material — then move straight into
+                your exam hubs when you need structured guidance.
               </p>
 
-              <!-- Dashboard Preview (static image, lightweight) -->
-              <div class="hero-preview-wrap">
+              <div class="hero-actions hero-actions-main">
+                <a
+                  href="study.html"
+                  class="btn btn-primary hero-cta-btn hero-cta-btn-primary"
+                >
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+                  </svg>
+                  <span>Open Study Builder</span>
+                </a>
+
+                <a
+                  href="exams.html"
+                  class="btn btn-outline hero-cta-btn hero-cta-btn-secondary"
+                >
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"
+                    />
+                    <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
+                    <path d="M9 14l2 2 4-4" />
+                  </svg>
+                  <span>Explore exam hubs</span>
+                </a>
+              </div>
+            </div>
+
+            <aside class="hero-visual-col">
+              <div class="hero-preview-wrap hero-preview-wrap--showcase">
                 <div class="hero-preview-bar">
                   <span class="dot red"></span>
                   <span class="dot yellow"></span>
                   <span class="dot green"></span>
-                  <span class="hero-preview-title">Study Builder Preview</span>
+                  <span class="hero-preview-title">Live Study Builder</span>
                 </div>
 
                 <img
                   class="hero-preview-img"
-                  src="assets/img/dashboard-preview.webp"
-                  alt="DentAIstudy Study Builder dashboard preview"
+                  src="assets/img/dashboard-preview.png"
+                  alt="DentAIstudy Study Builder interface"
                   loading="lazy"
                 />
               </div>
+            </aside>
+            <div class="hero-proof-list">
+              <div class="hero-proof-item">
+                <strong>Upload your own material</strong>
+                <span>Use PDFs, lecture files, and dense study notes.</span>
+              </div>
 
-              <div class="hero-actions">
-                <a href="study.html" class="btn btn-primary">Start studying</a>
-                <a href="subjects.html" class="btn btn-outline"
-                  >Browse subjects</a
+              <div class="hero-proof-item">
+                <strong>Choose the mode you need</strong>
+                <span
+                  >Quick answer for speed or deep study for fuller
+                  revision.</span
                 >
               </div>
 
-              <p class="hero-lead hero-meta-alt">
-                Made for dental education only
-              </p>
-
-              <div class="hero-level-chips">
-                <span class="hero-level-chip">Undergrads</span>
-                <span class="hero-level-chip">Intern / House officer</span>
-                <span class="hero-level-chip">Postgrads &amp; residents</span>
+              <div class="hero-proof-item">
+                <strong>Get exam-focused output</strong>
+                <span
+                  >Built for OSCE, viva, theory, and structured study
+                  help.</span
+                >
               </div>
             </div>
-
-            <!-- Right hero card -->
-            <aside class="hero-card hero-home-card">
-              <div class="hero-card-label">
-                <span>DentAIstudy generates</span>
-                <span class="hero-card-chip">Preview</span>
-              </div>
-
-              <!-- ADD this wrapper -->
-              <div class="hero-card-items">
-                <div class="feature-item">
-                  <div class="icon-pill">
-                    <img src="assets/img/OSCE flows.png" alt="OSCE flows" />
-                  </div>
-                  <h3>OSCE flows</h3>
-                  <p>
-                    Station-ready checklists with history, exam, investigations
-                    &amp; management.
-                  </p>
-                </div>
-
-                <div class="feature-item">
-                  <div class="icon-pill">
-                    <img
-                      src="assets/img/High-yield sheets.png"
-                      alt="High-yield sheets"
-                    />
-                  </div>
-                  <h3>High-yield sheets</h3>
-                  <p>
-                    One-page summaries for last-minute revision before clinics
-                    and vivas.
-                  </p>
-                </div>
-
-                <div class="feature-item">
-                  <div class="icon-pill">
-                    <img
-                      src="assets/img/Flashcard decks.png"
-                      alt="Flashcard decks"
-                    />
-                  </div>
-                  <h3>Flashcard decks</h3>
-                  <p>
-                    Clean Q/A cards ready to export into Anki, Quizlet, or your
-                    own system.
-                  </p>
-                </div>
-              </div>
-              <!-- END wrapper -->
-            </aside>
           </div>
         </section>
       </div>
 
-      <!-- FEATURES -->
+      <!-- SEE STUDY BUILDER IN ACTION -->
       <section class="section">
         <div class="container">
           <div class="section-header">
-            <div class="section-kicker">Why choose us</div>
-            <h2 class="section-title">Designed for dental students</h2>
+            <div class="section-kicker">How Study Builder works</div>
+            <h2 class="section-title">
+              Turn any topic or PDF into clear exam-focused study help
+            </h2>
             <p class="section-subtitle">
-              Clear, professional tools built for fast understanding.
+              Choose how you want to study, start with your topic or file, and
+              get structured answers and notes built for faster dental revision.
+            </p>
+          </div>
+
+          <div class="workflow-steps-grid">
+            <article class="workflow-step-card">
+              <div class="workflow-step-shot">
+                <img
+                  src="assets/img/step-mode.png"
+                  alt="Choose quick answer or deep study in Study Builder"
+                  loading="lazy"
+                />
+              </div>
+              <div class="workflow-step-body">
+                <div class="workflow-step-number">Step 1</div>
+                <h3>Choose how you want to study</h3>
+                <p>
+                  Need a fast answer, deeper notes, or focused revision? Pick
+                  the study mode that matches exactly what you need right now.
+                </p>
+              </div>
+            </article>
+
+            <article class="workflow-step-card">
+              <div class="workflow-step-shot">
+                <img
+                  src="assets/img/step-upload.png"
+                  alt="Attach PDF or start with a topic in Study Builder"
+                  loading="lazy"
+                />
+              </div>
+              <div class="workflow-step-body">
+                <div class="workflow-step-number">Step 2</div>
+                <h3>Start with your topic or upload your PDF</h3>
+                <p>
+                  Paste a topic, upload your lecture file, or drop in study
+                  material you already have and let the platform do the heavy
+                  lifting.
+                </p>
+              </div>
+            </article>
+
+            <article class="workflow-step-card">
+              <div class="workflow-step-shot">
+                <img
+                  src="assets/img/step-output.png"
+                  alt="Generated dental answer or notes in Study Builder"
+                  loading="lazy"
+                />
+              </div>
+              <div class="workflow-step-body">
+                <div class="workflow-step-number">Step 3</div>
+                <h3>Get clear answers and exam-ready notes</h3>
+                <p>
+                  Receive structured explanations, study notes, and useful
+                  outputs you can review faster, remember better, and use with
+                  more confidence.
+                </p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- FIND YOUR EXAM -->
+      <section class="section">
+        <div class="container">
+          <div class="section-header">
+            <div class="section-kicker">Find your exam</div>
+            <h2 class="section-title">Go straight to your exam hub</h2>
+            <p class="section-subtitle">
+              Start with the exam route you are preparing for, then move into
+              guides, articles, and study support.
+            </p>
+          </div>
+
+          <div class="features-modern exam-hubs-grid">
+            <div class="feature-item">
+              <div class="feature-icon">
+                <img
+                  src="assets/img/exams/inbde.png"
+                  alt="INBDE exam hub"
+                  style="width: 72px; height: 72px; object-fit: contain"
+                />
+              </div>
+              <h3>INBDE</h3>
+              <p>
+                Exam guides, article clusters, and focused prep for the U.S.
+                dental licensure route.
+              </p>
+              <div style="margin-top: 16px">
+                <a href="exams/inbde.html" class="btn btn-outline">Open hub</a>
+              </div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-icon">
+                <img
+                  src="assets/img/exams/adex.png"
+                  alt="ADEX exam hub"
+                  style="width: 72px; height: 72px; object-fit: contain"
+                />
+              </div>
+              <h3>ADEX</h3>
+              <p>
+                OSCE, operative, viva, and practical exam content for candidates
+                who want structured prep.
+              </p>
+              <div style="margin-top: 16px">
+                <a href="exams/adex.html" class="btn btn-outline">Open hub</a>
+              </div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-icon">
+                <img
+                  src="assets/img/exams/ore.png"
+                  alt="ORE exam hub"
+                  style="width: 72px; height: 72px; object-fit: contain"
+                />
+              </div>
+              <h3>ORE</h3>
+              <p>
+                Entry point for ORE Part 1, Part 2, booking, timelines, and
+                exam-specific article paths.
+              </p>
+              <div style="margin-top: 16px">
+                <a href="exams/ore.html" class="btn btn-outline">Open hub</a>
+              </div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-icon">
+                <img
+                  src="assets/img/exams/ndecc.png"
+                  alt="NDECC exam hub"
+                  style="width: 72px; height: 72px; object-fit: contain"
+                />
+              </div>
+              <h3>NDECC</h3>
+              <p>
+                Canadian equivalency exam guides, route explanations, and
+                supporting articles in one place.
+              </p>
+              <div style="margin-top: 16px">
+                <a href="exams/ndecc.html" class="btn btn-outline">Open hub</a>
+              </div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-icon">
+                <img
+                  src="assets/img/exams/adc.png"
+                  alt="ADC exam hub"
+                  style="width: 72px; height: 72px; object-fit: contain"
+                />
+              </div>
+              <h3>ADC</h3>
+              <p>
+                Assessment pathway, written exam, practical exam, costs,
+                deadlines, and Australia route content.
+              </p>
+              <div style="margin-top: 16px">
+                <a href="exams/adc.html" class="btn btn-outline">Open hub</a>
+              </div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-icon">
+                <img
+                  src="assets/img/exams/sdle.png"
+                  alt="SDLE exam hub"
+                  style="width: 72px; height: 72px; object-fit: contain"
+                />
+              </div>
+              <h3>SDLE</h3>
+              <p>
+                Saudi exam prep content, route guidance, and linked long-tail
+                study articles for faster navigation.
+              </p>
+              <div style="margin-top: 16px">
+                <a href="exams/sdle.html" class="btn btn-outline">Open hub</a>
+              </div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-icon">
+                <img
+                  src="assets/img/exams/uae.png"
+                  alt="UAE dental exam hub"
+                  style="width: 72px; height: 72px; object-fit: contain"
+                />
+              </div>
+              <h3>UAE</h3>
+              <p>
+                DHA, MOH, and DOH pathways with route comparisons, licensing
+                content, and exam guidance.
+              </p>
+              <div style="margin-top: 16px">
+                <a href="exams/uae.html" class="btn btn-outline">Open hub</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- STUDY OUTPUTS -->
+      <section class="section">
+        <div class="container">
+          <div class="section-header">
+            <div class="section-kicker">Study outputs</div>
+            <h2 class="section-title">What DentAIstudy helps you generate</h2>
+            <p class="section-subtitle">
+              Built for actual dental revision, not generic chatbot replies.
             </p>
           </div>
 
@@ -354,111 +583,375 @@
             <div class="feature-item">
               <div class="feature-icon">
                 <img
-                  src="assets/img/Why choose us icons/High-quality explanations.png"
-                  alt="High-quality explanations icon"
-                  style="width: 60px; height: 60px; object-fit: contain"
+                  src="assets/img/OSCE flows.png"
+                  alt="OSCE flows"
+                  style="width: 64px; height: 64px; object-fit: contain"
                 />
               </div>
-              <h3>High-quality explanations</h3>
-              <p>Accurate terminology &amp; structured reasoning.</p>
+              <h3>OSCE flows</h3>
+              <p>
+                Structured station-style answers with history, examination,
+                investigations, and management.
+              </p>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-icon">
+                <img
+                  src="assets/img/High-yield sheets.png"
+                  alt="High-yield sheets"
+                  style="width: 64px; height: 64px; object-fit: contain"
+                />
+              </div>
+              <h3>High-yield sheets</h3>
+              <p>
+                Compressed revision material for fast review before clinics,
+                vivas, and exam sessions.
+              </p>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-icon">
+                <img
+                  src="assets/img/Flashcard decks.png"
+                  alt="Flashcard decks"
+                  style="width: 64px; height: 64px; object-fit: contain"
+                />
+              </div>
+              <h3>Flashcard decks</h3>
+              <p>
+                Clean question-and-answer cards you can study directly or move
+                into your own system.
+              </p>
             </div>
 
             <div class="feature-item">
               <div class="feature-icon">
                 <img
                   src="assets/img/Why choose us icons/Exam-focused outputs.png"
-                  alt="Exam-focused outputs icon"
-                  style="width: 60px; height: 60px; object-fit: contain"
+                  alt="Exam-focused notes"
+                  style="width: 64px; height: 64px; object-fit: contain"
                 />
               </div>
-              <h3>Exam-focused outputs</h3>
-              <p>OSCE flows, case notes, steps &amp; classifications.</p>
+              <h3>Exam-focused notes</h3>
+              <p>
+                Organized dental explanations and study notes shaped for
+                exam-style understanding.
+              </p>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-icon">
+                <img
+                  src="assets/img/Why choose us icons/High-quality explanations.png"
+                  alt="Quick answers"
+                  style="width: 64px; height: 64px; object-fit: contain"
+                />
+              </div>
+              <h3>Quick answers</h3>
+              <p>
+                Fast focused responses when you need a clean answer without
+                getting lost in long output.
+              </p>
             </div>
 
             <div class="feature-item">
               <div class="feature-icon">
                 <img
                   src="assets/img/Why choose us icons/Fast & distraction-free.png"
-                  alt="Fast and distraction-free icon"
-                  style="width: 60px; height: 60px; object-fit: contain"
+                  alt="Deep study mode"
+                  style="width: 64px; height: 64px; object-fit: contain"
                 />
               </div>
-              <h3>Fast &amp; distraction-free</h3>
-              <p>Clean interface — optimized for studying.</p>
+              <h3>Deep study</h3>
+              <p>
+                Longer structured output for fuller revision when a topic needs
+                more depth and coverage.
+              </p>
             </div>
+          </div>
+
+          <div style="text-align: center; margin-top: 40px">
+            <a
+              href="study.html"
+              class="btn btn-primary"
+              style="
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                padding: 12px 24px;
+                font-size: 16px;
+                font-weight: 600;
+              "
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+              </svg>
+              Try Study Builder
+            </a>
           </div>
         </div>
       </section>
 
-      <!-- REVIEWS -->
+      <!-- POPULAR SUBJECTS -->
       <section class="section">
         <div class="container">
           <div class="section-header">
-            <div class="section-kicker">Student feedback</div>
-            <h2 class="section-title">Trusted by learners</h2>
+            <div class="section-kicker">Popular subjects</div>
+            <h2 class="section-title">Jump into core dental subjects</h2>
             <p class="section-subtitle">
-              Short, honest comments from students who care about efficiency.
+              Use subject hubs when you want broader study by discipline, not
+              only by exam route.
+            </p>
+          </div>
+
+          <div class="features-modern">
+            <div class="feature-item">
+              <div class="feature-icon">
+                <img
+                  src="assets/img/subjects/operative.png"
+                  alt="Operative Dentistry"
+                  style="width: 72px; height: 72px; object-fit: contain"
+                />
+              </div>
+              <h3>Operative Dentistry</h3>
+              <p>
+                Restorative principles, cavity preparation, matrix systems,
+                finishing, and exam-focused basics.
+              </p>
+              <div style="margin-top: 16px">
+                <a
+                  href="subjects/operative-dentistry.html"
+                  class="btn btn-outline"
+                  >Open subject</a
+                >
+              </div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-icon">
+                <img
+                  src="assets/img/subjects/endodontics.png"
+                  alt="Endodontics"
+                  style="width: 72px; height: 72px; object-fit: contain"
+                />
+              </div>
+              <h3>Endodontics</h3>
+              <p>
+                Diagnosis, pulp therapy, irrigation, obturation logic, and the
+                core concepts students revisit often.
+              </p>
+              <div style="margin-top: 16px">
+                <a href="subjects/endodontics.html" class="btn btn-outline"
+                  >Open subject</a
+                >
+              </div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-icon">
+                <img
+                  src="assets/img/subjects/oral surgery.png"
+                  alt="Oral Surgery"
+                  style="width: 72px; height: 72px; object-fit: contain"
+                />
+              </div>
+              <h3>Oral Surgery</h3>
+              <p>
+                Extractions, post-op principles, complications, emergency
+                thinking, and high-yield clinical revision.
+              </p>
+              <div style="margin-top: 16px">
+                <a href="subjects/oral-surgery.html" class="btn btn-outline"
+                  >Open subject</a
+                >
+              </div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-icon">
+                <img
+                  src="assets/img/subjects/pedodontics.png"
+                  alt="Pediatric Dentistry"
+                  style="width: 72px; height: 72px; object-fit: contain"
+                />
+              </div>
+              <h3>Pediatric Dentistry</h3>
+              <p>
+                Behaviour guidance, pulpotomy and pulpectomy logic, prevention,
+                and child-focused clinical topics.
+              </p>
+              <div style="margin-top: 16px">
+                <a
+                  href="subjects/pediatric-dentistry.html"
+                  class="btn btn-outline"
+                  >Open subject</a
+                >
+              </div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-icon">
+                <img
+                  src="assets/img/subjects/orthodontics.png"
+                  alt="Orthodontics"
+                  style="width: 72px; height: 72px; object-fit: contain"
+                />
+              </div>
+              <h3>Orthodontics</h3>
+              <p>
+                Problem lists, space analysis, diagnosis thinking, and revision
+                support for core ortho topics.
+              </p>
+              <div style="margin-top: 16px">
+                <a href="subjects/orthodontics.html" class="btn btn-outline"
+                  >Open subject</a
+                >
+              </div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-icon">
+                <img
+                  src="assets/img/subjects/periodontology.png"
+                  alt="Periodontology"
+                  style="width: 72px; height: 72px; object-fit: contain"
+                />
+              </div>
+              <h3>Periodontology</h3>
+              <p>
+                Assessment, staging, grading, maintenance, and the concepts that
+                keep appearing in exams and clinics.
+              </p>
+              <div style="margin-top: 16px">
+                <a href="subjects/periodontology.html" class="btn btn-outline"
+                  >Open subject</a
+                >
+              </div>
+            </div>
+          </div>
+
+          <div style="text-align: center; margin-top: 40px">
+            <a
+              href="subjects.html"
+              class="btn btn-primary"
+              style="
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                padding: 12px 24px;
+                font-size: 16px;
+                font-weight: 600;
+              "
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <rect x="3" y="3" width="7" height="7" rx="1.5" />
+                <rect x="14" y="3" width="7" height="7" rx="1.5" />
+                <rect x="3" y="14" width="7" height="7" rx="1.5" />
+                <rect x="14" y="14" width="7" height="7" rx="1.5" />
+              </svg>
+              Browse Subjects
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- REAL TESTIMONIALS -->
+      <section class="section">
+        <div class="container">
+          <div class="section-header">
+            <div class="section-kicker">Real testimonials</div>
+            <h2 class="section-title">What dental learners are saying</h2>
+            <p class="section-subtitle">
+              Real feedback from users using DentAIstudy for clinics, residency,
+              and board prep.
             </p>
           </div>
 
           <div class="reviews-grid">
             <div class="review-card">
               <div class="review-header">
-                <div class="review-avatar">
-                  <img
-                    src="assets/img/review-1.jpg"
-                    alt="Profile picture of Aisha"
-                  />
-                </div>
+                <img src="assets/img/Priya Patel.jpg" alt="Priya Patel" />
                 <div>
-                  <div class="review-name">Aisha</div>
-                  <div class="review-role">Dental intern</div>
+                  <div class="review-name">Priya Patel</div>
+                  <div class="review-role">Dental Intern • United Kingdom</div>
                 </div>
               </div>
+
               <div class="stars">★★★★★</div>
+
               <div class="review-text">
-                “I use DentAIstudy before every clinic session. It turns my
-                topics into quick OSCE flows I can skim in 2–3 minutes.”
+                “I used to get lost in dense textbooks right before clinics. Now
+                I use the Study Builder to turn heavy topics into clean,
+                station-style OSCE flows — History, Exam, Investigations, and
+                Management. It gives me exactly what I need to review in minutes
+                before seeing a patient.”
               </div>
             </div>
 
             <div class="review-card">
               <div class="review-header">
-                <div class="review-avatar">
-                  <img
-                    src="assets/img/review-2.jpg"
-                    alt="Profile picture of Marco"
-                  />
-                </div>
+                <img src="assets/img/Dr. David Chen.jpg" alt="Dr. David Chen" />
                 <div>
-                  <div class="review-name">Marco</div>
-                  <div class="review-role">Orthodontic resident</div>
+                  <div class="review-name">Dr. David Chen</div>
+                  <div class="review-role">Orthodontic Resident • Canada</div>
                 </div>
               </div>
+
               <div class="stars">★★★★★</div>
+
               <div class="review-text">
-                “The structure is what sold me. History, exam, investigations,
-                management — exactly how examiners think.”
+                “Residency seminars require a completely different level of
+                depth. I use Deep Study mode to unpack complex mechanics and
+                turn them into organized, high-yield notes. It strips away the
+                fluff and leaves the exact structured answers I need for
+                specialty-level discussions.”
               </div>
             </div>
 
             <div class="review-card">
               <div class="review-header">
-                <div class="review-avatar">
-                  <img
-                    src="assets/img/review-3.jpg"
-                    alt="Profile picture of Sara"
-                  />
-                </div>
+                <img
+                  src="assets/img/Dr. Isabella Rossi.jpg"
+                  alt="Dr. Isabella Rossi"
+                />
                 <div>
-                  <div class="review-name">Sara</div>
-                  <div class="review-role">Final-year dental student</div>
+                  <div class="review-name">Dr. Isabella Rossi</div>
+                  <div class="review-role">
+                    General Dentist • Australia • ADC Board Prep
+                  </div>
                 </div>
               </div>
+
               <div class="stars">★★★★★</div>
+
               <div class="review-text">
-                “Flashcards + compressed notes in one place. It feels like a
-                small dashboard just for my exams.”
+                “Balancing a busy schedule with ADC exam prep felt overwhelming
+                until I found the Exam Hubs. I find my route first, then use the
+                flashcards and quick answers between patients. It feels like
+                having a tutor that understands exactly which high-yield dental
+                details examiners care about.”
               </div>
             </div>
           </div>
@@ -471,7 +964,8 @@
           <div class="section-header">
             <h2 class="section-title">Frequently asked questions</h2>
             <p class="section-subtitle">
-              Short answers so you can get back to studying.
+              Quick answers about pricing, study tools, and how DentAIstudy fits
+              into real exam prep.
             </p>
           </div>
 
@@ -481,10 +975,10 @@
                 <span>Is DentAIstudy free?</span><span>⌄</span>
               </button>
               <div class="faq-answer">
-                DentAIstudy has a Free plan to explore the platform and core
-                study tools. If you need higher daily limits and advanced
-                features, you can upgrade to Pro. See
-                <a href="pricing.html">Pricing</a>.
+                DentAIstudy includes a Free plan so you can explore the platform
+                and core study tools. If you need higher daily limits, PDF
+                upload, and more advanced study modes, you can upgrade to Pro.
+                See <a href="pricing.html">Pricing</a>.
               </div>
             </div>
 
@@ -493,12 +987,32 @@
                 <span>What makes DentAIstudy different?</span><span>⌄</span>
               </button>
               <div class="faq-answer">
-                DentAIstudy is built specifically for dental students — not as a
-                general chatbot, but as a structured study workspace. It focuses
-                on exam-ready outputs such as OSCE checklists, viva points,
-                classifications, and clear clinical reasoning. Instead of long
-                paragraphs, you get clean, organized study material designed the
-                way examiners think.
+                DentAIstudy is built for dental studying, not generic chatting.
+                It helps you turn dense topics into structured notes, OSCE-style
+                flows, flashcards, and cleaner revision material in a focused
+                workspace.
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <button class="faq-question">
+                <span>What can Study Builder create?</span><span>⌄</span>
+              </button>
+              <div class="faq-answer">
+                Study Builder can turn a topic, article, or uploaded material
+                into structured notes, flashcards, quick recall flows, and
+                examiner-style study content you can review faster.
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <button class="faq-question">
+                <span>Can I use my own PDFs or notes?</span><span>⌄</span>
+              </button>
+              <div class="faq-answer">
+                Yes. DentAIstudy supports using your own study material so you
+                can transform lecture notes, PDFs, and dense references into
+                cleaner revision outputs inside the platform.
               </div>
             </div>
 
@@ -507,61 +1021,15 @@
                 <span>Can I rely on it clinically?</span><span>⌄</span>
               </button>
               <div class="faq-answer">
-                DentAIstudy is designed for studying, revision, and
-                strengthening your understanding of dental concepts. It is not a
-                clinical decision tool and should never replace supervisors,
-                professors, or official guidelines. Always verify information
-                during real patient care.
+                No. DentAIstudy is for studying and revision only. Always follow
+                supervisors, institutional teaching, and official clinical
+                guidelines in real patient care.
               </div>
             </div>
+          </div>
 
-            <div class="faq-item">
-              <button class="faq-question">
-                <span>Do I need an account?</span><span>⌄</span>
-              </button>
-              <div class="faq-answer">
-                You can explore the platform without an account. Creating an
-                account unlocks extra benefits such as saving study packs,
-                tracking your activity, and personalizing your study workspace.
-              </div>
-            </div>
-
-            <div class="faq-item">
-              <button class="faq-question">
-                <span>Which subjects are supported?</span><span>⌄</span>
-              </button>
-              <div class="faq-answer">
-                DentAIstudy supports all major dental subjects, including
-                Operative, Endodontics, Prosthodontics, Orthodontics,
-                Periodontics, Oral Surgery, Oral Pathology, Radiology, and more.
-                We continuously refine and expand coverage to keep your study
-                materials comprehensive and up to date.
-              </div>
-            </div>
-
-            <div class="faq-item">
-              <button class="faq-question">
-                <span>Is my data stored?</span><span>⌄</span>
-              </button>
-              <div class="faq-answer">
-                We store only the information needed to run your DentAIstudy
-                account and keep your study materials available across devices.
-                Your data is private, never sold, and protected under our
-                Privacy Policy. You’re always in control of your content.
-              </div>
-            </div>
-
-            <div class="faq-item">
-              <button class="faq-question">
-                <span>Who is DentAIstudy for?</span><span>⌄</span>
-              </button>
-              <div class="faq-answer">
-                DentAIstudy is designed for undergraduate dental students,
-                interns/house officers, and postgraduate trainees who want
-                structured, examiner-style study material in a fast,
-                distraction-free workspace.
-              </div>
-            </div>
+          <div style="text-align: center; margin-top: 22px">
+            <a href="faqs.html" class="btn btn-outline">View all FAQs</a>
           </div>
         </div>
       </section>
@@ -571,7 +1039,7 @@
         <div class="container">
           <div class="footer-top">
             <div>
-              <div class="footer-brand">DentAIstudy</div>
+              <a href="index.html" class="footer-brand">DentAIstudy</a>
               <p>AI-enhanced tools for dental students and residents.</p>
               <div class="footer-social">
                 <a
@@ -603,15 +1071,16 @@
             <div class="footer-column">
               <h4>Product</h4>
               <a href="subjects.html">Subjects</a>
-              <a href="study.html">Study builder</a>
+              <a href="exams.html">Exams</a>
+              <a href="study.html">Study Builder</a>
               <a href="blogs.html">Blogs</a>
-              <a href="pricing.html">Pricing</a>
             </div>
 
             <div class="footer-column">
               <h4>Company</h4>
               <a href="about.html">About</a>
               <a href="contact.html">Contact</a>
+              <a href="pricing.html">Pricing</a>
               <a href="faqs.html">FAQ</a>
             </div>
 
@@ -627,7 +1096,7 @@
           </div>
 
           <div class="footer-bottom">
-            © 2025 DentAIstudy. All rights reserved.
+            © 2026 DentAIstudy. All rights reserved.
           </div>
         </div>
       </footer>

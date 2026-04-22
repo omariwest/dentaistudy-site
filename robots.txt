@@ -5,15 +5,12 @@ Allow: /
 Disallow: /goodbye.html
 Disallow: /profile.html
 Disallow: /settings.html
-Disallow: /logout.html
+Disallow: /billing-success.html
 Disallow: /supabase/
 Disallow: /blogs/temp/
 
-# Allow assets (CSS, JS, images)
+# Allow assets
 Allow: /assets/
 
-# Crawl optimization
-Crawl-delay: 2
-
-# Sitemap location
+# Sitemap
 Sitemap: https://dentaistudy.com/sitemap.xml
