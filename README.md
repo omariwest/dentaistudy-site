@@ -1,18 +1,36 @@
 # DentAIstudy
 
-AI-powered dental study platform for undergrads, postgrads, and dental professionals.
+Turn any dental topic or PDF into clear, exam-focused study help.
 
-Build custom flashcards, high-yield notes, and OSCE flows from any dental topic — instantly.
+DentAIstudy is an AI-powered dental study platform built for students, postgraduates, and dental professionals who want faster revision, better structure, and less time wasted turning raw material into usable notes.
+
+With Study Builder, users can start with a topic or upload their file and generate structured notes, flashcards, high-yield study sheets, and OSCE-style study flows in minutes.
 
 🔗 **[dentaistudy.com](https://dentaistudy.com)**
 
-## Features
+## What DentAIstudy helps users do
 
-- **Study Builder** — generate structured study materials with AI
-- **Subject Library** — organized by dental specialty
-- **Flashcard Decks** — spaced repetition ready
-- **High-Yield Sheets** — condensed exam prep
-- **OSCE Flows** — clinical scenario walkthroughs
+- Turn scattered dental material into clear, structured study outputs
+- Study faster with notes designed for revision, not just reading
+- Generate flashcards and high-yield summaries from one workflow
+- Break down complex topics into simpler, exam-ready formats
+- Move from raw content to useful study material with less friction
+
+## Core features
+
+- **Study Builder** — start with a dental topic or upload a file to generate focused study material
+- **Subject Library** — browse study content organised by dental specialty
+- **Flashcard Decks** — build recall-friendly sets for active revision
+- **High-Yield Notes** — generate condensed summaries for faster review
+- **OSCE Flows** — practise structured clinical thinking and scenario-based preparation
+
+## Built for
+
+- Dental students
+- Postgraduate trainees
+- International exam candidates
+- Clinicians reviewing core topics
+- Anyone who wants clearer dental study workflows
 
 ## Stack
 
