@@ -55,11 +55,18 @@
   height: 100%;
 
   line-height: 1;
-  font-size: 26px;
 
   transform: none;
   transform-origin: 50% 50%;
   transition: transform 160ms ease;
+}
+
+.roundbtn > span svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  flex: 0 0 auto;
 }
 
 /* toggled state */
