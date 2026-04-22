@@ -1,0 +1,937 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Google tag (gtag.js) -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-65ZNB9L5D6"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+
+      gtag("config", "G-65ZNB9L5D6");
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      ORE Booking System Explained: How to Secure a Place, Priority Rules, and
+      What Changes Under UCLC – DentAIstudy
+    </title>
+
+    <meta
+      name="description"
+      content="How the ORE booking system works, the exact eGDC process, priority booking categories, refugee priority access, practical strategies for securing a seat, and what changes under UCLC from September 2026."
+    />
+
+    <link
+      rel="canonical"
+      href="https://www.dentaistudy.com/blogs/ore/ore-booking-system-priority-rules.html"
+    />
+
+    <link rel="stylesheet" href="../../assets/css/style-v3.css" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon-512.png" />
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+      defer
+    ></script>
+    <script src="../../assets/js/auth-client.js" defer></script>
+    <script src="../../assets/js/auth-guard.js" defer></script>
+    <script src="../../assets/js/auth-logout.js" defer></script>
+    <script defer src="../../assets/js/main.js"></script>
+  </head>
+
+  <body>
+    <div class="main-wrapper">
+      <!-- HEADER -->
+      <header class="site-header">
+        <div class="container header-inner">
+          <button class="menu-toggle">
+            <span></span><span></span><span></span>
+          </button>
+          <a class="brand" href="../../index.html"
+            ><span>Dent</span><span>AIstudy</span></a
+          >
+
+          <nav class="header-nav">
+            <a href="../../subjects.html">Subjects</a>
+            <a href="../../exams.html">Exams</a>
+            <a href="../../study.html">Study Builder</a>
+            <a href="../../blogs.html" class="is-active">Blogs</a>
+            <a href="../../pricing.html">Pricing</a>
+          </nav>
+
+          <div class="header-right">
+            <a href="../../login.html" class="btn btn-outline header-login"
+              >Log in</a
+            >
+            <a href="../../signup.html" class="btn btn-primary header-signup"
+              >Sign up</a
+            >
+          </div>
+        </div>
+      </header>
+
+      <!-- MOBILE NAV -->
+      <div class="slide-nav-backdrop"></div>
+      <nav class="slide-nav">
+        <div class="slide-nav-links">
+          <a href="../../subjects.html">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="3" y="3" width="7" height="7" rx="1.5" />
+              <rect x="14" y="3" width="7" height="7" rx="1.5" />
+              <rect x="3" y="14" width="7" height="7" rx="1.5" />
+              <rect x="14" y="14" width="7" height="7" rx="1.5" />
+            </svg>
+            <span>Subjects</span>
+          </a>
+          <a href="../../exams.html">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"
+              />
+              <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
+              <path d="M9 14l2 2 4-4" />
+            </svg>
+            <span>Exams</span>
+          </a>
+          <a href="../../study.html">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+            </svg>
+            <span>Study Builder</span>
+          </a>
+          <a href="../../blogs.html">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M12 20h9" />
+              <path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4z" />
+            </svg>
+            <span>Blogs</span>
+          </a>
+          <a href="../../pricing.html">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"
+              />
+              <line x1="7" y1="7" x2="7.01" y2="7" />
+            </svg>
+            <span>Pricing</span>
+          </a>
+
+          <div
+            class="slide-nav-divider"
+            role="separator"
+            aria-hidden="true"
+          ></div>
+
+          <a href="../../profile.html">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+            <span>My profile</span>
+          </a>
+          <a href="../../settings.html">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="3" />
+              <path
+                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1.08 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1.08 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.604.852.997 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1.08z"
+              />
+            </svg>
+            <span>Account settings</span>
+          </a>
+
+          <div
+            class="slide-nav-divider"
+            role="separator"
+            aria-hidden="true"
+          ></div>
+
+          <a href="../../login.html" class="slide-login-link">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+              <polyline points="10 17 15 12 10 7" />
+              <line x1="15" y1="12" x2="3" y2="12" />
+            </svg>
+            <span>Log in</span>
+          </a>
+        </div>
+      </nav>
+
+      <!-- BREADCRUMB -->
+      <section class="section" style="padding: 20px 0 0">
+        <div class="container">
+          <nav aria-label="Breadcrumb" style="font-size: 14px; color: #64748b">
+            <a
+              href="../../index.html"
+              style="color: #0a3d62; text-decoration: none"
+              >Home</a
+            >
+            <span style="margin: 0 6px">›</span>
+            <a
+              href="../../exams.html"
+              style="color: #0a3d62; text-decoration: none"
+              >Exams</a
+            >
+            <span style="margin: 0 6px">›</span>
+            <a
+              href="../../exams/ore.html"
+              style="color: #0a3d62; text-decoration: none"
+              >ORE Exam Guide</a
+            >
+            <span style="margin: 0 6px">›</span>
+            <span style="color: #1a1a2e">ORE Booking System Explained</span>
+          </nav>
+        </div>
+      </section>
+
+      <!-- BLOG -->
+      <main class="section">
+        <div class="container container-narrow">
+          <div class="section-header" style="text-align: left">
+            <div class="section-kicker">ORE exam</div>
+            <h1 class="section-title">
+              ORE Booking System Explained: How to Secure a Place, Priority
+              Rules, and What Changes Under UCLC
+            </h1>
+            <p class="section-subtitle">
+              The ORE booking system has been compared to buying Glastonbury
+              tickets — places disappear within seconds of opening, and there is
+              no queue, no waitlist, and no credit for having tried before. This
+              guide explains exactly how the system works, who gets priority
+              access, and the practical steps that give you the best chance of
+              securing a seat.
+            </p>
+          </div>
+
+          <!-- QUICK ANSWERS -->
+          <section class="study-answer-card">
+            <h2>Quick Answers</h2>
+
+            <h3>When does ORE booking open and how do I access it?</h3>
+            <p>
+              ORE booking opens approximately eight weeks before each sitting
+              date, at 14:30 UK time on the advertised booking day. All bookings
+              are made through your eGDC account at mygdc.gdc-uk.org. You must
+              be on the GDC's approved candidate list before you can access the
+              booking system. The exam appears in the bookings tab approximately
+              eight hours before opening, listed as unavailable. You must
+              refresh at or after 14:30 to see the booking button become active.
+              Payment of the full exam fee is required shortly after booking or
+              the place is cancelled.
+            </p>
+
+            <h3>How fast do ORE places sell out?</h3>
+            <p>
+              Extremely fast. The April 2026 Part 1 sitting with 600 places sold
+              out within minutes of booking opening. The April 2026 Part 2
+              sitting with 144 places also sold out shortly after opening. Part
+              2 usually goes faster because the number of seats is much smaller.
+            </p>
+
+            <h3>Who gets priority booking access?</h3>
+            <p>
+              The GDC operates two priority categories. The first is time-limit
+              priority for candidates approaching the five-year deadline. The
+              second is refugee priority for dental professionals with verified
+              refugee or protected status in the UK. These candidates are given
+              separate access before the general booking rush.
+            </p>
+
+            <h3>Can I book for multiple people or use multiple devices?</h3>
+            <p>
+              No on both counts. You can only use your eGDC account on one
+              device at a time. Logging in somewhere else logs out the first
+              session. If your account is inactive for 15 minutes, you are
+              automatically logged out.
+            </p>
+
+            <h3>What happens if I miss the booking window?</h3>
+            <p>
+              If all places are taken, you must wait for the next sitting unless
+              a booked candidate withdraws and the GDC reopens the booking
+              window. There is no waitlist for fully booked sittings, so you
+              need to watch email updates and the booking dates page closely.
+            </p>
+          </section>
+
+          <article class="blog-body">
+            <h2>1. Why the Booking System Is So Competitive</h2>
+            <p>
+              The ORE booking problem is fundamentally one of supply and demand.
+              Applications rose sharply while annual sitting capacity under the
+              current contract remained limited. Part 1 has far more seats than
+              Part 2, but both remain heavily oversubscribed. That is why
+              general booking feels less like normal scheduling and more like a
+              timed seat grab.
+            </p>
+            <p>
+              The first-come-first-served mechanism has attracted criticism
+              because it gives no advantage to candidates who have been trying
+              repeatedly for months. A candidate approved yesterday enters the
+              same general race as someone who has already missed multiple
+              openings.
+            </p>
+            <p>
+              As of now, the GDC has not introduced a wider fairness system for
+              general candidates beyond the existing priority categories. The
+              bigger structural fix is expected to come from increased capacity
+              under the UCLC contract.
+            </p>
+
+            <a
+              href="ore-2026-complete-guide.html"
+              class="study-answer-card"
+              style="text-decoration: none; color: inherit; display: block"
+            >
+              <h3 style="font-size: 1rem; margin: 0 0 4px; color: #0a3d62">
+                Need the full ORE context first?
+              </h3>
+              <p style="margin: 0; font-size: 0.9rem; color: #64748b">
+                See the complete 2026 guide for the full pathway, capacity
+                history, and UCLC transition overview.
+              </p>
+            </a>
+
+            <h2>2. How the eGDC Booking System Works: Technical Walkthrough</h2>
+            <p>
+              All ORE bookings are made exclusively through eGDC. You must
+              already be an approved ORE candidate with an active account before
+              you can book. If you have not set up your eGDC account, do it as
+              soon as you are approved. Waiting until booking day is risky and
+              unnecessary.
+            </p>
+            <p>
+              Before booking day, log in and go to the bookings tab. The
+              upcoming sitting appears roughly eight hours before the window
+              opens. That is your signal that the exam is visible and that your
+              account is ready.
+            </p>
+            <p>
+              At 14:30 UK time, refresh your browser. The status changes and the
+              book and pay button becomes active. Click immediately and finish
+              payment within the allowed time window. The GDC accepts Visa and
+              Mastercard only.
+            </p>
+
+            <div class="blog-table-wrap">
+              <table class="blog-table">
+                <thead>
+                  <tr>
+                    <th>Booking Day Step</th>
+                    <th>Key Rule / Timing</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Log into eGDC before booking day</td>
+                    <td>Set up account immediately after approval</td>
+                  </tr>
+                  <tr>
+                    <td>Exam appears in bookings tab</td>
+                    <td>About 8 hours before 14:30 on booking day</td>
+                  </tr>
+                  <tr>
+                    <td>Booking window opens</td>
+                    <td>Exactly 14:30 UK time</td>
+                  </tr>
+                  <tr>
+                    <td>Refresh browser</td>
+                    <td>At or just after 14:30</td>
+                  </tr>
+                  <tr>
+                    <td>Click book and pay</td>
+                    <td>Immediately once the button becomes active</td>
+                  </tr>
+                  <tr>
+                    <td>Complete payment</td>
+                    <td>
+                      Within the allowed payment period or the place is lost
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Single device only</td>
+                    <td>Second login logs out the first session</td>
+                  </tr>
+                  <tr>
+                    <td>Inactivity timeout</td>
+                    <td>Auto logout after 15 minutes</td>
+                  </tr>
+                  <tr>
+                    <td>Accepted payment cards</td>
+                    <td>Visa or Mastercard only</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="study-form-card">
+              <h3>Do not click book unless you can pay immediately</h3>
+              <p>
+                The GDC is strict here. If you click the booking button and do
+                not complete payment, you can lose the place and may create
+                problems for your next booking attempt. Have the payment card
+                ready before 14:30.
+              </p>
+            </div>
+
+            <h2>3. Priority Booking Category 1: Time-Limit Candidates</h2>
+            <p>
+              The first priority category covers candidates approaching the
+              statutory five-year time limit. Because the law requires both
+              parts to be passed within that window, the GDC contacts these
+              candidates in advance and allocates places through a separate
+              process.
+            </p>
+            <p>
+              These candidates do not go through the normal
+              first-come-first-served rush. They are usually contacted directly
+              by the GDC examinations team with instructions on how to secure
+              their place.
+            </p>
+            <p>
+              If you think you are near the five-year limit and have not heard
+              from the GDC, do not assume the system will catch it
+              automatically. Contact them early.
+            </p>
+
+            <a
+              href="ore-5-year-deadline-attempts-rule.html"
+              class="study-answer-card"
+              style="text-decoration: none; color: inherit; display: block"
+            >
+              <h3 style="font-size: 1rem; margin: 0 0 4px; color: #0a3d62">
+                Check the 5-year deadline rules
+              </h3>
+              <p style="margin: 0; font-size: 0.9rem; color: #64748b">
+                See how the clock starts, how remaining attempts work, and what
+                happens if you are close to expiry.
+              </p>
+            </a>
+
+            <h2>
+              4. Priority Booking Category 2: Refugee and Protected Status
+              Candidates
+            </h2>
+            <p>
+              In January 2025, the GDC introduced a dedicated priority booking
+              window for dental professionals who hold refugee status or
+              protected status in the UK. This was designed to reduce some of
+              the barriers those candidates face in both documentation and
+              booking access.
+            </p>
+            <p>
+              Under this policy, eligible candidates receive an earlier booking
+              window, usually around two weeks before the general opening. That
+              gives them a realistic opportunity to secure a seat before the
+              main rush.
+            </p>
+            <p>
+              Priority booking under this route is limited. It applies for up to
+              two Part 1 and two Part 2 attempts, and those attempts still count
+              within the standard four-attempt limit.
+            </p>
+
+            <div class="blog-table-wrap">
+              <table class="blog-table">
+                <thead>
+                  <tr>
+                    <th>Priority Category</th>
+                    <th>Who Qualifies</th>
+                    <th>How Access Is Granted</th>
+                    <th>Attempts Covered</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Time-limit priority</td>
+                    <td>Candidates nearing the five-year Part 2 deadline</td>
+                    <td>Direct email and separate GDC process</td>
+                    <td>All remaining attempts before expiry</td>
+                  </tr>
+                  <tr>
+                    <td>Refugee priority</td>
+                    <td>GDC-verified refugee or protected status candidates</td>
+                    <td>Dedicated earlier booking window</td>
+                    <td>Up to 2 Part 1 and 2 Part 2 attempts</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <a
+              href="ore-refugee-priority-booking-2025-policy.html"
+              class="study-answer-card"
+              style="text-decoration: none; color: inherit; display: block"
+            >
+              <h3 style="font-size: 1rem; margin: 0 0 4px; color: #0a3d62">
+                Need the full refugee priority policy?
+              </h3>
+              <p style="margin: 0; font-size: 0.9rem; color: #64748b">
+                Review eligibility, required documents, and the linked
+                alternative evidence policy.
+              </p>
+            </a>
+
+            <h2>5. Practical Strategies for General Booking Day</h2>
+            <p>
+              For candidates outside the priority categories, booking is a
+              genuine competition. The smartest approach is simple preparation,
+              not tricks.
+            </p>
+            <p>
+              Confirm your eGDC login several days in advance. Make sure the
+              exam is visible in your bookings tab on the morning of booking
+              day. Prepare the payment card early and confirm with your bank
+              that international online transactions and the fee amount will go
+              through without blocks.
+            </p>
+            <p>
+              Use a reliable internet connection, be logged in before 14:30 UK
+              time, and do not waste time refreshing repeatedly before the
+              window opens. Refresh at the opening moment and move fast.
+            </p>
+
+            <div class="study-form-card">
+              <h3>Use the eight-hour visibility window</h3>
+              <p>
+                If the exam does not appear in your bookings tab on the morning
+                of booking day, treat that as a problem and contact the GDC
+                before the opening time. Do not discover an eligibility issue at
+                14:29.
+              </p>
+            </div>
+
+            <div class="blog-table-wrap">
+              <table class="blog-table">
+                <thead>
+                  <tr>
+                    <th>Preparation Step</th>
+                    <th>When to Do It</th>
+                    <th>Why It Matters</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Confirm eGDC login credentials</td>
+                    <td>3–5 days before booking day</td>
+                    <td>Account issues take time to fix</td>
+                  </tr>
+                  <tr>
+                    <td>Test card for international transactions</td>
+                    <td>About 1 week before</td>
+                    <td>Bank blocks cause payment failure</td>
+                  </tr>
+                  <tr>
+                    <td>Confirm card limit covers the exam fee</td>
+                    <td>About 1 week before</td>
+                    <td>Avoid losing the place at payment stage</td>
+                  </tr>
+                  <tr>
+                    <td>Check UK time versus your local time</td>
+                    <td>Day before booking day</td>
+                    <td>The opening time is based on UK time</td>
+                  </tr>
+                  <tr>
+                    <td>Verify exam is visible in bookings tab</td>
+                    <td>Morning of booking day</td>
+                    <td>Absence can signal an eligibility issue</td>
+                  </tr>
+                  <tr>
+                    <td>Be logged in before 14:30</td>
+                    <td>14:25–14:28 UK time</td>
+                    <td>Saves critical seconds</td>
+                  </tr>
+                  <tr>
+                    <td>Have a backup payment card ready</td>
+                    <td>Before booking day</td>
+                    <td>Gives you a fallback if the first card fails</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h2>6. Withdrawals, Refunds, and Missed Sittings</h2>
+            <p>
+              If you have booked a place and need to withdraw, check the GDC
+              withdrawal policy first. Exam fees are non-refundable in ordinary
+              circumstances. Medical withdrawals may be considered if supported
+              by proper evidence, but non-medical reasons are usually not
+              accepted.
+            </p>
+            <p>
+              If you withdraw and a place becomes available, the GDC can reopen
+              the booking window to all eligible candidates. These secondary
+              openings can happen with little notice, so candidates who missed
+              the main opening should keep watching closely.
+            </p>
+            <p>
+              If you do not attend without withdrawing formally, the fee is lost
+              and the attempt counts against your maximum allowed attempts.
+            </p>
+
+            <div class="study-form-card">
+              <h3>Visa timing is your responsibility</h3>
+              <p>
+                If you are travelling from outside the UK, do not book assuming
+                the visa will sort itself out later. Visa delay or refusal does
+                not automatically protect your exam fee or your attempt.
+              </p>
+            </div>
+
+            <h2>7. What the UCLC Contract Means for Booking</h2>
+            <p>
+              The arrival of UCL Consultants Ltd as the new ORE provider from
+              September 2026 should improve the booking landscape mainly through
+              more seats and more predictable scheduling.
+            </p>
+            <p>
+              Under the new contract, Part 1 capacity rises first, and Part 2
+              capacity also increases substantially. That should reduce the
+              pressure on individual openings, especially over time.
+            </p>
+            <p>
+              What is not yet fully confirmed is whether the booking mechanism
+              itself will change. The GDC has acknowledged the weaknesses of the
+              current system, but as of now the exact future booking model has
+              not been formally announced.
+            </p>
+
+            <div class="study-form-card">
+              <h3>What to watch from September 2026</h3>
+              <p>
+                Watch for first UCLC sitting dates, any changes to the booking
+                method, venue confirmation, and any fee changes under the new
+                contract.
+              </p>
+            </div>
+
+            <a
+              href="ore-uclc-transition-2026-what-changes.html"
+              class="study-answer-card"
+              style="text-decoration: none; color: inherit; display: block"
+            >
+              <h3 style="font-size: 1rem; margin: 0 0 4px; color: #0a3d62">
+                Need the full UCLC transition detail?
+              </h3>
+              <p style="margin: 0; font-size: 0.9rem; color: #64748b">
+                See what is confirmed for September 2026, what is still pending,
+                and how candidates already in the pipeline should plan.
+              </p>
+            </a>
+
+            <div class="blog-cta-card">
+              <h2>How DentAIstudy helps</h2>
+              <p>
+                DentAIstudy helps ORE candidates turn booking stress into a more
+                organised plan.
+              </p>
+              <ul>
+                <li>Break the ORE path into clearer next steps</li>
+                <li>
+                  Stay organised across eligibility, booking, and revision
+                </li>
+                <li>Turn dense guidance into practical planning blocks</li>
+                <li>Reduce avoidable booking-day mistakes</li>
+              </ul>
+              <a href="../../study.html" class="btn btn-primary">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                  <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+                </svg>
+                Try Study Builder
+              </a>
+            </div>
+
+            <h2>Related ORE articles</h2>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px">
+              <a
+                href="ore-2026-complete-guide.html"
+                style="
+                  font-size: 0.85rem;
+                  padding: 6px 14px;
+                  background: #f1f5f9;
+                  border-radius: 999px;
+                  color: #0a3d62;
+                  text-decoration: none;
+                "
+                >Complete ORE 2026 Guide</a
+              >
+              <a
+                href="ore-5-year-deadline-attempts-rule.html"
+                style="
+                  font-size: 0.85rem;
+                  padding: 6px 14px;
+                  background: #f1f5f9;
+                  border-radius: 999px;
+                  color: #0a3d62;
+                  text-decoration: none;
+                "
+                >5-Year Deadline Guide</a
+              >
+              <a
+                href="ore-refugee-priority-booking-2025-policy.html"
+                style="
+                  font-size: 0.85rem;
+                  padding: 6px 14px;
+                  background: #f1f5f9;
+                  border-radius: 999px;
+                  color: #0a3d62;
+                  text-decoration: none;
+                "
+                >Refugee Priority Policy</a
+              >
+              <a
+                href="ore-uclc-transition-2026-what-changes.html"
+                style="
+                  font-size: 0.85rem;
+                  padding: 6px 14px;
+                  background: #f1f5f9;
+                  border-radius: 999px;
+                  color: #0a3d62;
+                  text-decoration: none;
+                "
+                >UCLC Transition 2026</a
+              >
+              <a
+                href="ore-application-process-step-by-step.html"
+                style="
+                  font-size: 0.85rem;
+                  padding: 6px 14px;
+                  background: #f1f5f9;
+                  border-radius: 999px;
+                  color: #0a3d62;
+                  text-decoration: none;
+                "
+                >Application Process</a
+              >
+            </div>
+
+            <h2>References</h2>
+            <ul>
+              <li>
+                <a
+                  href="https://www.gdc-uk.org/registration/overseas-registration-exam/ore-booking-dates"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style="color: #0a3d62"
+                  >General Dental Council — ORE booking dates</a
+                >
+                | Official booking dates, opening time, sitting status, and
+                booking rules.
+              </li>
+              <li>
+                <a
+                  href="https://www.gdc-uk.org/registration/overseas-registration-exam/applying-for-ore/booking-your-exam"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style="color: #0a3d62"
+                  >General Dental Council — Booking your ORE exam</a
+                >
+                | eGDC process, payment rules, accepted cards, and withdrawal
+                policy.
+              </li>
+              <li>
+                <a
+                  href="https://www.gdc-uk.org/registration/overseas-registration-exam/applying-for-ore/overseas-registration-exam-faqs"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style="color: #0a3d62"
+                  >General Dental Council — ORE FAQs</a
+                >
+                | Priority categories and booking channel rules.
+              </li>
+              <li>
+                <a
+                  href="https://dentistry.co.uk/2025/10/09/overseas-registration-exam-petition-launches-to-reform-booking-system/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style="color: #0a3d62"
+                  >Dentistry.co.uk — Petition to reform ORE booking system</a
+                >
+                | Background on criticism of the current first-come-first-served
+                model.
+              </li>
+              <li>
+                <a
+                  href="https://dentistry.co.uk/2025/10/31/gdc-responds-to-petition-campaigning-for-fairer-ore-booking-system/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style="color: #0a3d62"
+                  >Dentistry.co.uk — GDC intends to reform overseas registration
+                  exam</a
+                >
+                | GDC response on booking reform discussion.
+              </li>
+              <li>
+                <a
+                  href="https://dentistry.co.uk/2025/11/13/refugee-dentists-given-easier-access-to-uk-registration/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style="color: #0a3d62"
+                  >Dentistry.co.uk — Refugee dentists given easier access to UK
+                  registration</a
+                >
+                | Background on refugee priority access figures.
+              </li>
+              <li>
+                <a
+                  href="https://www.gdc-uk.org/news-blogs/news/detail/2025/11/05/preferred-bidder-for-overseas-registration-examination-(ore)-confirmed"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style="color: #0a3d62"
+                  >General Dental Council — Preferred bidder for ORE
+                  confirmed</a
+                >
+                | UCLC transition and future capacity expansion.
+              </li>
+            </ul>
+          </article>
+        </div>
+      </main>
+
+      <!-- FOOTER -->
+      <footer class="site-footer">
+        <div class="container">
+          <div class="footer-top">
+            <div>
+              <a href="../../index.html" class="footer-brand">DentAIstudy</a>
+              <p>AI-enhanced tools for dental students and residents.</p>
+              <div class="footer-social">
+                <a href="https://www.tiktok.com/@dentaistudy" target="_blank"
+                  ><img
+                    src="../../assets/img/footer-icons/tiktok-icon.png"
+                    class="footer-social-img"
+                /></a>
+                <a href="mailto:info@dentaistudy.com"
+                  ><img
+                    src="../../assets/img/footer-icons/email-icon.png"
+                    class="footer-social-img"
+                /></a>
+              </div>
+            </div>
+
+            <div class="footer-column">
+              <h4>Product</h4>
+              <a href="../../subjects.html">Subjects</a>
+              <a href="../../exams.html">Exams</a>
+              <a href="../../study.html">Study Builder</a>
+              <a href="../../blogs.html">Blogs</a>
+            </div>
+
+            <div class="footer-column">
+              <h4>Company</h4>
+              <a href="../../about.html">About</a>
+              <a href="../../contact.html">Contact</a>
+              <a href="../../pricing.html">Pricing</a>
+              <a href="../../faqs.html">FAQ</a>
+            </div>
+
+            <div class="footer-column">
+              <h4>Legal</h4>
+              <a href="../../privacy.html">Privacy Policy</a>
+              <a href="../../terms.html">Terms & Conditions</a>
+              <a href="../../cookies.html">Cookies Policy</a>
+              <a href="../../disclaimer.html">Disclaimer</a>
+              <a href="../../billing.html">Billing</a>
+              <a href="../../refund-policy.html">Refunds</a>
+            </div>
+          </div>
+
+          <div class="footer-bottom">
+            © 2026 DentAIstudy. All rights reserved.
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
