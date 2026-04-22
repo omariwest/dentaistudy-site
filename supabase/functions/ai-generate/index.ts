@@ -19,7 +19,8 @@ const PRO_DAILY_LIMIT = 200;
 // Safety nets
 const HISTORY_WINDOW = 10;
 const MAX_MESSAGE_CHARS = 6000;
-const MAX_OUTPUT_TOKENS = 1600;
+const MAX_OUTPUT_TOKENS_QA = 1600;
+const MAX_OUTPUT_TOKENS_DEEP = 2600;
 
 // RAG settings
 const EMBEDDING_MODEL = "text-embedding-3-small"; // 1536 dims
@@ -416,9 +417,14 @@ serve(async (req: Request): Promise<Response> => {
       await indexPdfDocs(supabaseAdmin, userId!, conversationId, pdfDocs);
     }
 
-    // Retrieve top-k relevant chunks (QA only)
+    // Retrieve top-k relevant chunks unless we are building full PDF chapter notes
+    const isDeepStudy = task === "chapter_notes";
+    const canBuildPdfChapterNotes = Boolean(
+      canUsePdf && isDeepStudy && activeFileId,
+    );
+
     let ragContext = "";
-    if (canUsePdf && task !== "chapter_notes") {
+    if (canUsePdf && !canBuildPdfChapterNotes) {
       try {
         const question =
           topic ||
@@ -427,6 +433,7 @@ serve(async (req: Request): Promise<Response> => {
             .reverse()
             .find((m) => m.role === "user")?.content ??
             "");
+
         if (question) {
           const [qEmbed] = await embedTexts([question]);
           const { data } = await supabaseUser.rpc("match_pdf_chunks", {
@@ -442,15 +449,8 @@ serve(async (req: Request): Promise<Response> => {
       }
     }
 
-    // NEW: full chapter notes (batch summarize -> merge)
-    if (canUsePdf && task === "chapter_notes") {
-      if (!activeFileId) {
-        return new Response(JSON.stringify({ error: "FILE_ID_REQUIRED" }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
+    // Full PDF chapter notes only when a PDF is actually available
+    if (canBuildPdfChapterNotes) {
       const allChunks = await fetchAllChunksForFile(
         supabaseAdmin,
         userId!,
@@ -465,7 +465,6 @@ serve(async (req: Request): Promise<Response> => {
         });
       }
 
-      // batch size: big enough to be efficient, small enough to fit reliably
       const batches = makeBatchesByCharLimit(allChunks, 12000);
       const partials: string[] = [];
 
@@ -475,13 +474,13 @@ serve(async (req: Request): Promise<Response> => {
         const body1 = {
           model: "gpt-4.1-mini",
           temperature: 0.2,
-          max_tokens: MAX_OUTPUT_TOKENS,
+          max_tokens: MAX_OUTPUT_TOKENS_QA,
           messages: [
             {
               role: "system",
               content:
-                "You are DentAIstudy. Create exam-ready notes from the provided text ONLY. " +
-                "Be clean and useful: short headings, bullet points only when needed, high-yield focus. " +
+                "You are DentAIstudy, an expert dental tutor. Create exam-ready notes from the provided text ONLY. " +
+                "Keep the notes high-yield, structured, and accurate. Use short headings and bullets only when they help. " +
                 "Do NOT invent missing content.",
             },
             {
@@ -502,6 +501,7 @@ serve(async (req: Request): Promise<Response> => {
         );
         const t1 = await r1.text();
         const j1 = t1 ? JSON.parse(t1) : null;
+
         if (!r1.ok) {
           console.error("OPENAI_ERROR_SECTION", r1.status, t1);
           return new Response(
@@ -517,19 +517,18 @@ serve(async (req: Request): Promise<Response> => {
         if (s) partials.push(s);
       }
 
-      // merge partial notes into one premium sheet
       const body2 = {
         model: "gpt-4.1-mini",
         temperature: 0.2,
-        max_tokens: 2400,
+        max_tokens: MAX_OUTPUT_TOKENS_DEEP,
         messages: [
           {
             role: "system",
             content:
-              "You are DentAIstudy, a friendly dental study tutor. " +
-              "Start with a brief warm intro (1–2 sentences) acknowledging what the student asked for and what the sheet covers, e.g. 'Here is your exam-ready chapter sheet covering [topic]. It highlights the key definitions, red flags, and likely exam questions from the text.' " +
-              "Then produce ONE exam-ready chapter sheet. Structure: concise headings, key definitions, red flags, tables (text-based), and likely exam questions. " +
-              "No filler. No repeating the same point twice.",
+              "You are DentAIstudy, an expert dental tutor and clinical teaching professor. " +
+              "Create one polished deep-study chapter sheet from the section notes. " +
+              "Start with a short warm intro, then structure the answer with concise headings, core concepts, definitions, red flags, tables when useful, and likely exam questions. " +
+              "No filler. No repeated points.",
           },
           {
             role: "user",
@@ -570,26 +569,42 @@ serve(async (req: Request): Promise<Response> => {
     }
 
     const modeExplanation = (() => {
+      if (isDeepStudy) {
+        return "Give a fuller deep-study answer: direct answer, concept breakdown, mechanism or rationale, clinical relevance, exam traps, memory aids, and a short recap.";
+      }
+
       const l = mode.toLowerCase();
-      if (l.includes("osce"))
-        return "Produce an OSCE-style checklist or station flow.";
-      if (l.includes("flashcard")) return "Produce concise exam flashcards.";
-      if (l.includes("mcq")) return "Produce exam-style MCQs with answers.";
-      return "Produce a concise, structured exam-focused explanation.";
+      if (l.includes("osce")) {
+        return "Produce an OSCE-style checklist or station flow with key examiner points.";
+      }
+      if (l.includes("flashcard")) {
+        return "Produce concise but useful exam flashcards with answers.";
+      }
+      if (l.includes("mcq")) {
+        return "Produce exam-style MCQs with answers and short explanations.";
+      }
+
+      return "Give a clear exam-focused answer with the direct answer first, then fuller high-yield teaching points. Do not be too brief.";
     })();
 
     const systemPrompt =
-      "You are DentAIstudy, a friendly and smart dental study tutor.\n" +
-      "Start with a brief natural reply (1–2 sentences) that acknowledges what the student asked, then give the direct answer followed by high-yield details.\n" +
-      "Avoid boilerplate headings unless the user asks.\n" +
-      "If PDF excerpts are provided, answer ONLY from those excerpts. If the excerpts do not contain the answer, say you can't find it in the PDF.";
+      "You are DentAIstudy, an expert dental tutor and clinical teaching professor.\n" +
+      "Your domain is dentistry, oral health, dental school learning, dental exams, and closely related medical topics used in dental training.\n" +
+      "If the user asks about a clearly unrelated field, reply politely in 1–2 sentences that DentAIstudy is built for dental learning and invite a dental or oral-health question instead.\n" +
+      "Start with a brief natural acknowledgement, then answer clearly and teach like a strong professor: accurate, structured, high-yield, and easy to revise.\n" +
+      "When the request is in deep study mode, give a fuller layered explanation instead of a short reply.\n" +
+      "Avoid filler, avoid repeating the same point twice, and do not invent facts.\n" +
+      "If PDF excerpts are provided, use them as the primary source. If the excerpts do not contain the answer, say so clearly.";
 
     const baseUserPrompt = [
       `Subject: ${subject}`,
-      `Study mode: ${mode}`,
+      `Study mode: ${isDeepStudy ? "Deep study" : mode}`,
       `Instruction: ${modeExplanation}`,
+      isDeepStudy
+        ? "Target depth: fuller teaching answer, not a short quick reply."
+        : "Target depth: concise but still useful, not thin.",
       ragContext ? `\nRelevant PDF excerpts:\n${ragContext}` : "",
-      "\nUse the chat context below. Keep it exam-relevant.",
+      "\nUse the chat context below. Keep it exam-relevant and student-friendly.",
     ].join("\n");
 
     const safeHistory = (
@@ -611,8 +626,8 @@ serve(async (req: Request): Promise<Response> => {
     const openAiBody = {
       model: "gpt-4.1-mini",
       messages: finalMessages,
-      temperature: 0.3,
-      max_tokens: MAX_OUTPUT_TOKENS,
+      temperature: isDeepStudy ? 0.35 : 0.3,
+      max_tokens: isDeepStudy ? MAX_OUTPUT_TOKENS_DEEP : MAX_OUTPUT_TOKENS_QA,
     };
 
     const aiRes = await fetchOpenAIWithBackoff(
