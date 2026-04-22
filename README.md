@@ -16,9 +16,10 @@ With Study Builder, users can start with a topic or upload their file and genera
 - Break down complex topics into simpler, exam-ready formats
 - Move from raw content to useful study material with less friction
 
-## Core features
+## Core platform areas
 
 - **Study Builder** — start with a dental topic or upload a file to generate focused study material
+- **Exam Hubs** — structured exam-focused pages and resources for pathways such as INBDE, ADEX, ORE, ADC, NDECC, SDLE, and UAE licensing routes
 - **Subject Library** — browse study content organised by dental specialty
 - **Flashcard Decks** — build recall-friendly sets for active revision
 - **High-Yield Notes** — generate condensed summaries for faster review
