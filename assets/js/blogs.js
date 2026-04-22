@@ -1,221 +1,94 @@
-// blogs.js – registry-based blog listing (ADEX-ready)
+// blogs.js – blog listing engine (reads from window.BLOG_REGISTRY)
 document.addEventListener("DOMContentLoaded", () => {
   const blogLibrary = document.getElementById("blog-library");
   const filters = Array.from(document.querySelectorAll(".blog-filter"));
   const searchInput = document.getElementById("blog-search");
   const loadMoreBtn = document.getElementById("load-more");
 
-  // If we're not on the blogs page, do nothing
   if (!blogLibrary) return;
 
-  // ------------------------------------
-  // 1. BLOG REGISTRY
-  //    Add new entries here only.
-  // ------------------------------------
-  const BLOG_REGISTRY = [
-    {
-      title: "ADEX Exam 2025 – What Candidates Must Know",
-      url: "blogs/adex/adex-what-is-the-exam.html",
-      tag: "ADEX",
-      description:
-        "A clear, examiner-focused guide to the ADEX exam structure, scoring, and what you need to pass.",
-      meta: "7 min read • ADEX exam",
-      category: "theory adex", // used for filter pills + search
-    },
-    // ➜ Future ADEX posts: add more objects here.
+  const BLOG_REGISTRY = window.BLOG_REGISTRY || [];
 
-    {
-      title: "ADEX Scoring & Common Failing Points",
-      url: "blogs/adex/adex-scoring-fail-points.html",
-      tag: "ADEX",
-      description:
-        "Understanding ADEX scoring, critical errors, and the mistakes that cause most candidates to fail.",
-      meta: "8 min read • ADEX exam",
-      category: "theory adex",
-    },
-    {
-      title: "ADEX Class II Preparation – Step-by-Step Guide",
-      url: "blogs/adex/adex-class-ii-preparation.html",
-      tag: "ADEX",
-      description:
-        "A safe, examiner-friendly Class II (MO/DO) preparation method for predictable ADEX passing.",
-      meta: "9 min read • ADEX exam",
-      category: "skills adex class2",
-    },
-    {
-      title: "ADEX Class III Preparation – Complete Exam Guide",
-      url: "blogs/adex/adex-class-iii-preparation.html",
-      tag: "ADEX",
-      description:
-        "Controlled access, proximal extension, enamel preservation, and the criteria you must meet to pass.",
-      meta: "8 min read • ADEX exam",
-      category: "skills adex class3",
-    },
-    {
-      title: "ADEX Provisional Crown Preparation – Step-by-Step Guide",
-      url: "blogs/adex/adex-provisional-crown-preparation.html",
-      tag: "ADEX",
-      description:
-        "How to prepare, trim, fit, and finish a provisional crown that meets ADEX pass-level criteria.",
-      meta: "8 min read • ADEX exam",
-      category: "skills adex provisional",
-    },
-    {
-      title: "ADEX OSCE Overview – Format, Topics & Strategy",
-      url: "blogs/adex/adex-osce-overview.html",
-      tag: "ADEX",
-      description:
-        "A complete breakdown of ADEX OSCE structure, radiology patterns, emergency logic, and clinical reasoning.",
-      meta: "7 min read • ADEX exam",
-      category: "theory adex osce",
-    },
-    {
-      title: "ADEX Radiology OSCE – High-Yield Interpretation Guide",
-      url: "blogs/adex/adex-radiology-osce.html",
-      tag: "ADEX",
-      description:
-        "The radiographic patterns, bone loss rules, caries appearances, and periapical signs repeatedly tested in the ADEX OSCE.",
-      meta: "8 min read • ADEX exam",
-      category: "theory adex osce radiology",
-    },
-    {
-      title: "ADEX Medical Emergencies OSCE – High-Yield Decision Guide",
-      url: "blogs/adex/adex-emergencies-osce.html",
-      tag: "ADEX",
-      description:
-        "A predictable guide to syncope, hypoglycemia, angina, asthma, and anaphylaxis — and the first-step actions ADEX expects.",
-      meta: "7 min read • ADEX exam",
-      category: "theory adex osce emergencies",
-    },
-    {
-      title: "ADEX Treatment Planning OSCE – Next Best Step Guide",
-      url: "blogs/adex/adex-treatment-planning-osce.html",
-      tag: "ADEX",
-      description:
-        "Simple, predictable sequencing rules to choose the safest next step in ADEX treatment planning OSCE cases.",
-      meta: "7 min read • ADEX exam",
-      category: "theory adex osce treatment",
-    },
-    {
-      title: "ADEX Ethics & Legal OSCE – High-Yield Decision Guide",
-      url: "blogs/adex/adex-ethics-legal-osce.html",
-      tag: "ADEX",
-      description:
-        "Consent, confidentiality, documentation, minors, scope of practice, and error disclosure — the ethics patterns ADEX repeats.",
-      meta: "7 min read • ADEX exam",
-      category: "theory adex osce ethics",
-    },
-    // ADEX BLOGS (11–20)
-    {
-      title: "ADEX Periodontal Assessment OSCE – Probing, Charting & Diagnosis",
-      url: "blogs/adex/adex-periodontal-assessment-osce.html",
-      tag: "ADEX",
-      description:
-        "How to probe, chart, and stage periodontal disease in ADEX OSCE cases with safe, examiner-friendly wording.",
-      meta: "7 min read • ADEX exam",
-      category: "theory adex osce perio",
-    },
-    {
-      title: "ADEX Local Anesthesia OSCE – Techniques & Safety Steps",
-      url: "blogs/adex/adex-local-anesthesia-osce.html",
-      tag: "ADEX",
-      description:
-        "Landmarks, injection sequence, aspiration, and failure management for ADEX local anesthesia OSCE stations.",
-      meta: "7 min read • ADEX exam",
-      category: "theory adex osce anesthesia",
-    },
-    {
-      title: "ADEX Medical History Review OSCE – Red Flags & Modifications",
-      url: "blogs/adex/adex-medical-history-review-osce.html",
-      tag: "ADEX",
-      description:
-        "Systematic questions, medical red flags, and chairside treatment modifications ADEX expects you to mention.",
-      meta: "7 min read • ADEX exam",
-      category: "theory adex osce medical",
-    },
-    {
-      title: "ADEX Infection Control & PPE OSCE – Step-by-Step Guide",
-      url: "blogs/adex/adex-infection-control-ppe-osce.html",
-      tag: "ADEX",
-      description:
-        "Donning and doffing PPE, surface disinfection, instrument flow, and cross-contamination traps in ADEX OSCE.",
-      meta: "6 min read • ADEX exam",
-      category: "theory adex osce infection",
-    },
-    {
-      title: "ADEX Restorative Errors & Fail Points – Mistakes to Avoid",
-      url: "blogs/adex/adex-restorative-errors-fail-points.html",
-      tag: "ADEX",
-      description:
-        "The preparation, margin, and contact mistakes that repeatedly cause critical failures in ADEX manikin exams.",
-      meta: "7 min read • ADEX exam",
-      category: "skills adex restorative",
-    },
-    {
-      title: "ADEX Radiographic Interpretation – Caries, Perio & Endo Patterns",
-      url: "blogs/adex/adex-radiographic-interpretation.html",
-      tag: "ADEX",
-      description:
-        "Pattern recognition for caries, periodontal bone loss, and endodontic lesions in ADEX radiographic questions.",
-      meta: "8 min read • ADEX exam",
-      category: "theory adex osce radiology",
-    },
-    {
-      title: "ADEX Emergency Drug Kit – Items, Uses & Exam Essentials",
-      url: "blogs/adex/adex-emergency-drug-kit.html",
-      tag: "ADEX",
-      description:
-        "Core emergency drugs, indications, and dosages you must recall for ADEX OSCE and medical emergency stations.",
-      meta: "6 min read • ADEX exam",
-      category: "theory adex osce emergencies",
-    },
-    {
-      title:
-        "ADEX Patient Communication OSCE – Consent, Explanation & Behavior",
-      url: "blogs/adex/adex-patient-communication-osce.html",
-      tag: "ADEX",
-      description:
-        "How to structure consent, explain risks, and manage anxious or upset patients in ADEX communication OSCEs.",
-      meta: "7 min read • ADEX exam",
-      category: "theory adex osce communication",
-    },
-    {
-      title: "ADEX Pharmacology Essentials – What You Must Know for the Exam",
-      url: "blogs/adex/adex-pharmacology-essentials.html",
-      tag: "ADEX",
-      description:
-        "High-yield analgesic, antibiotic, and emergency drug facts ADEX commonly tests in OSCE and viva questions.",
-      meta: "7 min read • ADEX exam",
-      category: "theory adex pharmacology",
-    },
-    {
-      title: "ADEX Common Viva Questions – High-Yield Short Answers",
-      url: "blogs/adex/adex-common-viva-questions.html",
-      tag: "ADEX",
-      description:
-        "Short, structured sample answers to common ADEX viva questions in cariology, perio, endo, anesthesia, and emergencies.",
-      meta: "8 min read • ADEX exam",
-      category: "theory adex viva",
-    },
-  ];
+  const TAG_META = {
+    adex: { category: "adex", tag: "ADEX" },
+    adc: { category: "adc", tag: "ADC" },
+    inbde: { category: "inbde", tag: "INBDE" },
+    ndecc: { category: "ndecc", tag: "NDECC" },
+    ore: { category: "ore", tag: "ORE" },
+    sdle: { category: "sdle", tag: "SDLE" },
+    uae: { category: "uae", tag: "UAE" },
+    operative: { category: "operative", tag: "Operative" },
+    endo: { category: "endo", tag: "Endo" },
+    endodontics: { category: "endo", tag: "Endo" },
+    prostho: { category: "prostho", tag: "Prostho" },
+    prosthodontics: { category: "prostho", tag: "Prostho" },
+    ortho: { category: "ortho", tag: "Ortho" },
+    orthodontics: { category: "ortho", tag: "Ortho" },
+    pedo: { category: "pedo", tag: "Pedo" },
+    perio: { category: "perio", tag: "Perio" },
+    general: { category: "general", tag: "General" },
+  };
 
-  // ------------------------------------
-  // 2. INJECT REGISTRY BLOG CARDS
-  //    This appends new cards to the existing 35 cards.
-  //    No need to edit blogs.html for new posts.
-  // ------------------------------------
+  function getNormalizedMeta(url = "", rawTag = "") {
+    const href = url.toLowerCase();
+    const tag = rawTag.trim().toLowerCase();
+
+    if (href.includes("blogs/adex/")) return TAG_META.adex;
+    if (href.includes("blogs/adc/")) return TAG_META.adc;
+    if (href.includes("blogs/inbde/")) return TAG_META.inbde;
+    if (href.includes("blogs/ndecc/")) return TAG_META.ndecc;
+    if (href.includes("blogs/ore/")) return TAG_META.ore;
+    if (href.includes("blogs/sdle/")) return TAG_META.sdle;
+    if (href.includes("blogs/uae/")) return TAG_META.uae;
+
+    if (tag === "operative") return TAG_META.operative;
+    if (tag === "endo" || tag === "endodontics") return TAG_META.endo;
+    if (tag === "prostho" || tag === "prosthodontics") return TAG_META.prostho;
+    if (tag === "ortho" || tag === "orthodontics") return TAG_META.ortho;
+    if (tag === "pedo") return TAG_META.pedo;
+    if (tag === "perio") return TAG_META.perio;
+
+    return TAG_META.general;
+  }
+
+  function buildSearchText(parts) {
+    return parts
+      .filter(Boolean)
+      .join(" ")
+      .replace(/\bendo\b/gi, "endo endodontics endodontic")
+      .replace(/\bortho\b/gi, "ortho orthodontics orthodontic")
+      .replace(/\bprostho\b/gi, "prostho prosthodontics prosthodontic")
+      .replace(/\bpedo\b/gi, "pedo pedodontics pediatric dentistry")
+      .replace(/\bperio\b/gi, "perio periodontics periodontology periodontal")
+      .toLowerCase()
+      .replace(/[-_/]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
   function injectDynamicBlogs() {
     BLOG_REGISTRY.forEach((blog) => {
-      // Skip if card already exists (safety)
       const existing = blogLibrary.querySelector(
-        `a.blog-card[href="${blog.url}"]`
+        `a.blog-card[href="${blog.url}"]`,
       );
       if (existing) return;
+
+      const normalized = getNormalizedMeta(blog.url, blog.tag || "");
 
       const link = document.createElement("a");
       link.href = blog.url;
       link.className = "blog-card is-hidden";
-      link.dataset.category = blog.category;
+      link.dataset.category = normalized.category;
+      link.dataset.searchText = buildSearchText([
+        normalized.tag,
+        normalized.category,
+        blog.tag,
+        blog.category,
+        blog.title,
+        blog.description,
+        blog.meta,
+        blog.url,
+      ]);
 
       const article = document.createElement("article");
       article.className = "subject-card";
@@ -223,7 +96,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const tagDiv = document.createElement("div");
       tagDiv.className = "sidebar-tag";
       tagDiv.style.width = "max-content";
-      tagDiv.textContent = blog.tag;
+      tagDiv.textContent = normalized.tag;
 
       const h3 = document.createElement("h3");
       h3.textContent = blog.title;
@@ -245,62 +118,109 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  function normalizeExistingCards(cards) {
+    cards.forEach((card) => {
+      const href = card.getAttribute("href") || "";
+      const tagEl = card.querySelector(".sidebar-tag");
+      const title = card.querySelector("h3")?.textContent || "";
+      const description = card.querySelector("p")?.textContent || "";
+      const meta = card.querySelector(".subject-ai")?.textContent || "";
+      const normalized = getNormalizedMeta(href, tagEl?.textContent || "");
+      const rawCategory = card.getAttribute("data-category") || "";
+
+      card.dataset.category = normalized.category;
+      card.dataset.searchText = buildSearchText([
+        normalized.tag,
+        normalized.category,
+        rawCategory,
+        tagEl?.textContent || "",
+        title,
+        description,
+        meta,
+        href,
+      ]);
+
+      if (tagEl) tagEl.textContent = normalized.tag;
+    });
+  }
+
   injectDynamicBlogs();
 
-  // After injection, collect all cards (old + new) and apply filters/search.
   const cards = Array.from(document.querySelectorAll(".blog-card"));
   if (!cards.length) return;
 
+  normalizeExistingCards(cards);
+
   let activeFilter = "all";
-  let visibleCount = 9;
+  const DEFAULT_VISIBLE_COUNT = 12;
+  let visibleCount = DEFAULT_VISIBLE_COUNT;
 
   function applyVisibility() {
     const query = (searchInput && searchInput.value ? searchInput.value : "")
       .toLowerCase()
       .trim();
 
+    const searchFilter = getSearchFilter(query);
+
     const filtered = cards.filter((card) => {
-      const cats = (card.dataset.category || "").toLowerCase();
-      const text = (card.innerText || "").toLowerCase();
-      const matchFilter = activeFilter === "all" || cats.includes(activeFilter);
-      const matchQuery = !query || text.includes(query);
+      const category = (card.dataset.category || "").toLowerCase();
+      const searchText = (card.dataset.searchText || card.textContent || "")
+        .toLowerCase()
+        .trim();
+
+      const matchFilter = activeFilter === "all" || category === activeFilter;
+
+      const matchQuery = !query
+        ? true
+        : searchFilter
+          ? category === searchFilter
+          : matchesSearchText(searchText, query);
+
       return matchFilter && matchQuery;
     });
 
-    // hide all
-    cards.forEach((c) => {
-      c.classList.add("is-hidden");
-      c.style.display = "none";
+    const shouldPaginate = activeFilter === "all" && !query;
+    const visibleCards = shouldPaginate
+      ? filtered.slice(0, visibleCount)
+      : filtered;
+
+    cards.forEach((card) => {
+      card.classList.add("is-hidden");
+      card.style.display = "none";
     });
 
-    // show first batch
-    filtered.slice(0, visibleCount).forEach((c) => {
-      c.classList.remove("is-hidden");
-      c.style.display = "";
+    visibleCards.forEach((card) => {
+      card.classList.remove("is-hidden");
+      card.style.display = "";
     });
 
-    // load more button visibility
     if (loadMoreBtn) {
       loadMoreBtn.style.display =
-        filtered.length > visibleCount ? "inline-block" : "none";
+        shouldPaginate && filtered.length > visibleCount
+          ? "inline-block"
+          : "none";
     }
   }
 
-  // Filter pills
   filters.forEach((btn) => {
     btn.addEventListener("click", () => {
       activeFilter = btn.dataset.filter || "all";
       filters.forEach((b) => b.classList.remove("is-active"));
       btn.classList.add("is-active");
-      visibleCount = 9;
+      visibleCount = DEFAULT_VISIBLE_COUNT;
       applyVisibility();
     });
   });
 
-  // Clickable tags on cards (e.g., OSCE, Viva, ADEX)
-  // Uses event delegation so it works for static + injected cards.
   const TAG_TO_FILTER = {
-    "study skills": "skills",
+    adex: "adex",
+    adc: "adc",
+    inbde: "inbde",
+    ndecc: "ndecc",
+    ore: "ore",
+    sdle: "sdle",
+    uae: "uae",
+    operative: "operative",
     endo: "endo",
     endodontics: "endo",
     prostho: "prostho",
@@ -309,24 +229,51 @@ document.addEventListener("DOMContentLoaded", () => {
     orthodontics: "ortho",
     pedo: "pedo",
     perio: "perio",
-    adex: "adex",
-    "adex exam": "adex",
-    osce: "osce",
-    viva: "viva",
-    theory: "theory",
-    operative: "operative",
-    dentaistudy: "skills",
+    general: "general",
   };
+
+  function getSearchFilter(query) {
+    const q = (query || "").toLowerCase().trim();
+
+    if (!q) return null;
+
+    if (TAG_TO_FILTER[q]) return TAG_TO_FILTER[q];
+    if (q.length < 3) return null;
+
+    const matchingCategories = [
+      ...new Set(
+        Object.keys(TAG_TO_FILTER)
+          .filter((key) => key.startsWith(q))
+          .map((key) => TAG_TO_FILTER[key]),
+      ),
+    ];
+
+    return matchingCategories.length === 1 ? matchingCategories[0] : null;
+  }
+
+  function matchesSearchText(searchText, query) {
+    const q = (query || "").toLowerCase().trim();
+
+    if (!q) return true;
+
+    if (q.includes(" ")) {
+      return searchText.includes(q);
+    }
+
+    return searchText
+      .split(/\s+/)
+      .filter(Boolean)
+      .some((word) => word.startsWith(q));
+  }
 
   function setActiveFilter(nextFilter) {
     activeFilter = nextFilter || "all";
 
-    // Sync pill UI
     const pill = filters.find((b) => (b.dataset.filter || "") === activeFilter);
     filters.forEach((b) => b.classList.remove("is-active"));
     if (pill) pill.classList.add("is-active");
 
-    visibleCount = 9;
+    visibleCount = DEFAULT_VISIBLE_COUNT;
     applyVisibility();
   }
 
@@ -336,34 +283,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const raw = (tagEl.textContent || "").trim().toLowerCase();
     const mapped = TAG_TO_FILTER[raw] || raw;
-
-    // Only act if it maps to a known pill (otherwise ignore)
     const exists = filters.some((b) => (b.dataset.filter || "") === mapped);
     if (!exists) return;
 
     setActiveFilter(mapped);
 
-    // Optional: nudge focus to the filter row for clarity
-    const search = document.getElementById("blog-search");
-    if (search) search.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    if (searchInput) {
+      searchInput.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
   });
-  
-  // Search box
+
   if (searchInput) {
     searchInput.addEventListener("input", () => {
-      visibleCount = 9;
+      visibleCount = DEFAULT_VISIBLE_COUNT;
       applyVisibility();
     });
   }
 
-  // Load more
   if (loadMoreBtn) {
     loadMoreBtn.addEventListener("click", () => {
-      visibleCount += 9;
+      visibleCount += DEFAULT_VISIBLE_COUNT;
       applyVisibility();
     });
   }
 
-  // Initial state
   applyVisibility();
 });

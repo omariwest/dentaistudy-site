@@ -675,6 +675,7 @@
           await loadConversation(activeConversationId);
           window.DentAIPDF?.reset?.();
           lastPdfContextHash = "";
+          lastActiveFileId = "";
 
           listEl
             .querySelectorAll(".sb-chat")
@@ -838,6 +839,7 @@
             setUrlChatId(null);
             thread.length = 0;
             lastPdfContextHash = "";
+            lastActiveFileId = "";
             window.DentAIPDF?.reset?.();
 
             await refreshChatList();
@@ -845,6 +847,7 @@
             window.ChatUI?.newChat?.();
             thread.length = 0;
             lastPdfContextHash = "";
+            lastActiveFileId = "";
             window.DentAIPDF?.reset?.();
 
             saveThread(thread);
@@ -932,7 +935,6 @@
                 lastPdfContextHash = pdfHash;
               } else if (!pdfHash) {
                 lastPdfContextHash = "";
-                lastActiveFileId = "";
               }
 
               const pdfDocs = window.DentAIPDF?.consumePending?.() || [];
