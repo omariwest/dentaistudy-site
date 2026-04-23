@@ -37,12 +37,11 @@
   height: 64px;
   margin: 0 auto 1.5rem;
   border-radius: 999px;
-  background: #eff3ff;
+  background: #0b2e5fff;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-
 .auth-logo-circle img {
   max-width: 40px;
   max-height: 40px;
@@ -564,5 +563,4 @@
     max-width: 100%;
   }
 }
-
 /* ------------------------------
