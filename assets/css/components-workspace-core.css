@@ -355,10 +355,20 @@
   .hero-actions-main .hero-cta-btn {
     flex: 1 1 0;
     min-width: 0;
-    padding: 9px 10px;
+    min-height: 48px;
+    padding: 0 12px;
     font-size: 13px;
-    gap: 4px;
+    gap: 5px;
     border-radius: 999px;
+    line-height: 1.1;
+  }
+
+  .hero-actions-main .hero-cta-btn-primary {
+    flex: 1.06 1 0;
+  }
+
+  .hero-actions-main .hero-cta-btn-secondary {
+    flex: 0.94 1 0;
   }
 
   .hero-actions-main .hero-cta-btn svg {
@@ -377,19 +387,36 @@
 
 @media (max-width: 400px) {
   .hero-actions-main {
+    flex-wrap: nowrap;
     gap: 8px;
-    align-items: stretch;
   }
 
   .hero-actions-main .hero-cta-btn {
-    padding: 10px 12px;
+    min-height: 50px;
+    padding: 0 8px;
+    font-size: 12px;
+    gap: 4px;
+  }
+
+  .hero-actions-main .hero-cta-btn-primary {
+    flex: 1.08 1 0;
+  }
+
+  .hero-actions-main .hero-cta-btn-secondary {
+    flex: 0.92 1 0;
+  }
+
+  .hero-actions-main .hero-cta-btn svg {
+    width: 13px;
+    height: 13px;
   }
 
   .hero-actions-main .hero-cta-btn span {
-    overflow: visible;
-    text-overflow: clip;
-    white-space: normal;
-    line-height: 1.15;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 1;
     text-align: center;
   }
 }
