@@ -961,6 +961,18 @@ body:has(.blog-body) .section-header .container-narrow {
   .reviews-grid {
     grid-template-columns: 1fr 1fr;
   }
+
+  .feature-item h3 {
+    font-size: 18px;
+  }
+
+  .workflow-step-card h3 {
+    font-size: 17px;
+  }
+
+  .subject-card h3 {
+    font-size: 1rem;
+  }
 }
 
 @media (max-width: 600px) {

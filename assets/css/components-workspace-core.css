@@ -355,21 +355,42 @@
   .hero-actions-main .hero-cta-btn {
     flex: 1 1 0;
     min-width: 0;
-    padding: 9px 12px;
-    font-size: 14px;
-    gap: 5px;
+    padding: 9px 10px;
+    font-size: 13px;
+    gap: 4px;
     border-radius: 999px;
   }
 
   .hero-actions-main .hero-cta-btn svg {
-    width: 15px;
-    height: 15px;
+    width: 14px;
+    height: 14px;
   }
 
   .hero-actions-main .hero-cta-btn span {
+    min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    letter-spacing: -0.01em;
+  }
+}
+
+@media (max-width: 400px) {
+  .hero-actions-main {
+    gap: 8px;
+    align-items: stretch;
+  }
+
+  .hero-actions-main .hero-cta-btn {
+    padding: 10px 12px;
+  }
+
+  .hero-actions-main .hero-cta-btn span {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+    line-height: 1.15;
+    text-align: center;
   }
 }
 
