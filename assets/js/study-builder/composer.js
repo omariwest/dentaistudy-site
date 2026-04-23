@@ -655,4 +655,22 @@
   autoGrow();
   setSendState();
   renderAttachments();
+
+  // Fix: sticky composer clipped by virtual keyboard on Android Chrome
+  if (window.visualViewport) {
+    const wrap = document.querySelector(".composer-wrap");
+    if (wrap) {
+      const repin = () => {
+        const offset = Math.max(
+          0,
+          window.innerHeight -
+            window.visualViewport.height -
+            window.visualViewport.offsetTop,
+        );
+        wrap.style.transform = offset > 0 ? `translateY(-${offset}px)` : "";
+      };
+      window.visualViewport.addEventListener("resize", repin);
+      window.visualViewport.addEventListener("scroll", repin);
+    }
+  }
 })();
