@@ -39,4 +39,4 @@ Static site · GitHub Pages · Supabase · Paddle
 
 ---
 
-Built by [@ammaralakkadi](https://github.com/ammaralakkadi)
+Built by [@omariwest](https://github.com/omariwest)
