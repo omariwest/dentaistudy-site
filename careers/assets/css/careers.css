@@ -69,6 +69,28 @@
   min-width: 0;
 }
 
+.career-row-closed {
+  color: #9ca3af;
+}
+
+.career-row-closed .career-role-title,
+.career-row-closed .career-role-summary {
+  color: #9ca3af;
+}
+
+.career-row-closed .career-tag {
+  border-color: #e5e7eb;
+  background: #f9fafb;
+  color: #9ca3af;
+}
+
+.career-role-status {
+  color: #9ca3af;
+  font-size: 14px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
 .career-role-title {
   margin: 0;
   color: var(--color-ink);
@@ -198,6 +220,9 @@
     border: 1px solid rgba(17, 24, 39, 0.12);
     border-radius: 12px;
     background: rgba(255, 255, 255, 0.84);
+  }
+  .career-role-status {
+    justify-self: start;
   }
 }
 
