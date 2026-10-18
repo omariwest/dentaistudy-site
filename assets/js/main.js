@@ -300,6 +300,108 @@ document.querySelectorAll(".copy-btn").forEach((btn) => {
   });
 });
 
+// Blog advertisement loader
+(() => {
+  const blogBody = document.querySelector("article.blog-body");
+  if (!blogBody) return;
+
+  const slots = Array.from(
+    document.querySelectorAll(".blog-ad-slot[data-ad-position]"),
+  );
+  const nativeMount = document.querySelector(".blog-native-ad__mount");
+
+  const isMobile = window.matchMedia("(max-width: 799px)").matches;
+
+  const bannerConfigs = {
+    1: isMobile
+      ? {
+          key: "943a7a0511bd45e05437c89b19845873",
+          width: 320,
+          height: 50,
+          src: "https://www.highperformanceformat.com/943a7a0511bd45e05437c89b19845873/invoke.js",
+        }
+      : {
+          key: "047c9fc095c58faee17f632f468b251f",
+          width: 728,
+          height: 90,
+          src: "https://www.highperformanceformat.com/047c9fc095c58faee17f632f468b251f/invoke.js",
+        },
+    2: isMobile
+      ? {
+          key: "ac210d9330bed410bd59f82703a6eb9a",
+          width: 320,
+          height: 50,
+          src: "https://www.highperformanceformat.com/ac210d9330bed410bd59f82703a6eb9a/invoke.js",
+        }
+      : {
+          key: "3f03578df5a36dee4f0bd3a6ae595987",
+          width: 728,
+          height: 90,
+          src: "https://www.highperformanceformat.com/3f03578df5a36dee4f0bd3a6ae595987/invoke.js",
+        },
+    3: {
+      key: "d494c0c8e0c4a60bc5a65dbc24709442",
+      width: 300,
+      height: 250,
+      src: "https://bauval.org/22/d494c0c8e0c4a60bc5a65dbc24709442",
+    },
+  };
+
+  function loadBanner(slot, config) {
+    return new Promise((resolve) => {
+      const mount = slot.querySelector(".blog-ad-slot__mount");
+      if (!mount || !config) {
+        resolve();
+        return;
+      }
+
+      window.atOptions = {
+        key: config.key,
+        format: "iframe",
+        height: config.height,
+        width: config.width,
+        params: {},
+      };
+
+      const script = document.createElement("script");
+      script.src = config.src;
+      script.async = false;
+      script.onload = resolve;
+      script.onerror = resolve;
+      mount.appendChild(script);
+    });
+  }
+
+  function loadNativeBanner() {
+    if (!nativeMount) return;
+
+    const script = document.createElement("script");
+    script.src = "https://bauval.org/21/e864f3f9ee9696aafa5c0b2e61dedce6";
+    script.async = true;
+    script.setAttribute("data-cfasync", "false");
+    nativeMount.appendChild(script);
+  }
+
+  function loadExternalAd(src) {
+    const script = document.createElement("script");
+    script.src = src;
+    script.async = true;
+    script.setAttribute("data-cfasync", "false");
+    document.body.appendChild(script);
+  }
+
+  loadExternalAd("https://bauval.org/14/55a3f7bf9e6f868088e91701f888aedb");
+  loadExternalAd("https://abscloud.org/1/558b2b91b83dad9283694412d50ab5c5");
+
+  (async () => {
+    for (const slot of slots) {
+      await loadBanner(slot, bannerConfigs[slot.dataset.adPosition]);
+    }
+
+    loadNativeBanner();
+  })();
+})();
+
 // Cookie banner
 (() => {
   const cookieBanner = document.querySelector(".cookie-banner");
@@ -390,8 +492,7 @@ document.querySelectorAll(".copy-btn").forEach((btn) => {
       : NaN;
     const hasPartnerPro =
       Number.isFinite(partnerProExpiresAt) && partnerProExpiresAt >= Date.now();
-    const isPaid =
-      tier === "pro" || tier === "pro_yearly" || hasPartnerPro;
+    const isPaid = tier === "pro" || tier === "pro_yearly" || hasPartnerPro;
 
     // Free plan button: logged-in users go straight to Study builder
     if (isFreePlan) {
