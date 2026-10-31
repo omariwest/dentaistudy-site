@@ -992,54 +992,20 @@
               const backendMsg =
                 (data && (data.message || data.error)) ||
                 (rawText ? rawText.slice(0, 500) : "");
-
-              const msg = backendMsg
-                ? `Something went wrong: ${backendMsg}`
-                : `Something went wrong. Status: ${response.status}`;
+              const msg =
+                data?.error === "OUTPUT_UNAVAILABLE"
+                  ? data.message || "I couldn't complete this response. Please try again."
+                  : response.status >= 500
+                    ? "Exam Coach is temporarily unavailable. Please try again."
+                    : backendMsg
+                      ? `Something went wrong: ${backendMsg}`
+                      : `Something went wrong. Status: ${response.status}`;
               window.ChatUI?.addAI(msg);
               postProcessLastAiBubble(msg);
-
-              if (isAuthed) {
-                await insertMessage("assistant", msg, []);
-                thread.push({
-                  role: "assistant",
-                  content: msg,
-                  attachments: [],
-                });
-                await refreshChatList();
-              } else {
-                thread.push({
-                  role: "assistant",
-                  content: msg,
-                  attachments: [],
-                });
-                saveThread(thread);
-              }
             } catch (err) {
-              const msg = `Error: ${
-                err?.message || "Error contacting AI server."
-              }`;
+              const msg = "Couldn't contact Exam Coach. Please try again.";
               window.ChatUI?.addAI(msg);
               postProcessLastAiBubble(msg);
-
-              if (isAuthed && activeConversationId) {
-                try {
-                  await insertMessage("assistant", msg, []);
-                  thread.push({
-                    role: "assistant",
-                    content: msg,
-                    attachments: [],
-                  });
-                  await refreshChatList();
-                } catch {}
-              } else {
-                thread.push({
-                  role: "assistant",
-                  content: msg,
-                  attachments: [],
-                });
-                saveThread(thread);
-              }
             }
           }, 0);
         },
