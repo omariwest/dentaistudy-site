@@ -392,13 +392,12 @@ document.querySelectorAll(".copy-btn").forEach((btn) => {
 
   loadExternalAd("https://bauval.org/14/55a3f7bf9e6f868088e91701f888aedb");
   loadExternalAd("https://abscloud.org/1/558b2b91b83dad9283694412d50ab5c5");
+  loadNativeBanner();
 
   (async () => {
     for (const slot of slots) {
       await loadBanner(slot, bannerConfigs[slot.dataset.adPosition]);
     }
-
-    loadNativeBanner();
   })();
 })();
 
