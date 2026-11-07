@@ -22,7 +22,7 @@ const ACCOUNT_MEMORY_MAX_CHARS = 14000;
 const MAX_OUTPUT_TOKENS_QA = 6000;
 const MAX_OUTPUT_TOKENS_DEEP = 12000;
 const GEMINI_EXAM_COACH_MODEL = "gemini-2.5-flash-lite";
-const GEMINI_STUDY_MODEL = "gemini-2.5-flash";
+const GEMINI_STUDY_MODEL = "gemini-3.5-flash-lite";
 const NOTES_SINGLE_PASS_CHAR_LIMIT = 150_000;
 const LARGE_NOTES_MAX_CONTEXT_CHARS = 150_000;
 const LARGE_NOTES_OUTPUT_TOKENS = 14_000;
@@ -364,12 +364,13 @@ const contents = options.messages
 role: m.role === "assistant" ? "model" : "user",
 parts: [{ text: m.content || " " }],
 }));
+const isGemini3 = options.model.startsWith("gemini-3");
 const requestBody: any = {
 contents: contents.length
 ? contents
 : [{ role: "user", parts: [{ text: "Continue." }] }],
 generationConfig: {
-temperature: options.temperature,
+...(isGemini3 ? {} : { temperature: options.temperature }),
 maxOutputTokens: options.maxOutputTokens,
 },
 };
@@ -377,7 +378,9 @@ const thinkingBudget = Math.max(
 0,
 Math.round(options.thinkingBudget ?? (options.enableThinking ? 2048 : 512)),
 );
-requestBody.generationConfig.thinkingConfig = { thinkingBudget };
+requestBody.generationConfig.thinkingConfig = isGemini3
+? { thinkingLevel: thinkingBudget === 0 ? "minimal" : thinkingBudget <= 512 ? "low" : "medium" }
+: { thinkingBudget };
 if (systemText) {
 requestBody.systemInstruction = { parts: [{ text: systemText }] };
 }
@@ -424,6 +427,8 @@ json?.usageMetadata?.candidatesTokenCount ?? 0,
 });
 }
 if (options.ensureCompleteMarkdown && !options.responseMimeType) {
+let continuationContents = requestBody.contents;
+let previousModelContent = candidate?.content;
 for (let attempt = 0; attempt < 2; attempt++) {
 const needsContinuation =
 finishReason === "MAX_TOKENS" || looksLikeIncompleteMarkdown(content);
@@ -431,8 +436,8 @@ if (!needsContinuation) break;
 const continuationBody: any = {
 ...requestBody,
 contents: [
-...requestBody.contents,
-{ role: "model", parts: [{ text: content }] },
+...continuationContents,
+previousModelContent ?? { role: "model", parts: [{ text: content }] },
 {
 role: "user",
 parts: [
@@ -446,7 +451,9 @@ text:
 generationConfig: {
 ...requestBody.generationConfig,
 maxOutputTokens: Math.max(2500, Math.min(options.maxOutputTokens, 7000)),
-thinkingConfig: { thinkingBudget: Math.min(thinkingBudget, 512) },
+thinkingConfig: isGemini3
+? { thinkingLevel: "minimal" }
+: { thinkingBudget: Math.min(thinkingBudget, 512) },
 },
 };
 const continuationRes = await fetchGeminiWithBackoff(
@@ -469,6 +476,8 @@ const continuationText = continuationParts
 if (!continuationText) break;
 content = appendGeminiContinuation(content, continuationText);
 finishReason = String(continuationCandidate?.finishReason ?? "");
+continuationContents = continuationBody.contents;
+previousModelContent = continuationCandidate?.content;
 }
 }
 return content.trim();
@@ -517,6 +526,158 @@ ensureCompleteMarkdown: options.ensureCompleteMarkdown,
 throw e;
 }
 }
+
+const COACH_RESPONSE_SCHEMA = {
+type: "object",
+properties: {
+blocks: {
+type: "array",
+items: {
+type: "object",
+properties: {
+kind: { type: "string", enum: ["markdown", "table"] },
+text: { type: "string" },
+headers: { type: "array", items: { type: "string" } },
+rows: { type: "array", items: { type: "array", items: { type: "string" } } },
+},
+required: ["kind"],
+},
+},
+},
+required: ["blocks"],
+};
+
+function renderCoachStructured(answer: any): string {
+if (!answer || !Array.isArray(answer.blocks) || !answer.blocks.length || answer.blocks.length > 30) {
+throw new Error("INVALID_COACH_BLOCKS");
+}
+const output: string[] = [];
+for (const block of answer.blocks) {
+if (block?.kind === "markdown") {
+const value = typeof block.text === "string" ? block.text.trim() : "";
+if (!value || value.length > 12000 || /^ *\|.*\|/m.test(value)) {
+throw new Error("INVALID_COACH_TEXT");
+}
+output.push(value);
+} else if (block?.kind === "table") {
+const headers = block.headers;
+const rows = block.rows;
+if (!Array.isArray(headers) || headers.length < 2 || headers.length > 6 ||
+!headers.every((cell: unknown) => typeof cell === "string" && cell.trim() && cell.length <= 160) ||
+!Array.isArray(rows) || !rows.length || rows.length > 50 ||
+!rows.every((row: any) => Array.isArray(row) && row.length === headers.length &&
+row.every((cell: unknown) => typeof cell === "string" && cell.length <= 900))) {
+throw new Error("INVALID_COACH_TABLE");
+}
+const cell = (value: string) => value.replace(/\|/g, "｜").replace(/\s+/g, " ").trim();
+output.push([
+"| " + headers.map(cell).join(" | ") + " |",
+"| " + headers.map(() => "---").join(" | ") + " |",
+...rows.map((row: string[]) => "| " + row.map(cell).join(" | ") + " |"),
+].join("\n"));
+} else {
+throw new Error("INVALID_COACH_BLOCK_KIND");
+}
+}
+const result = output.join("\n\n").trim();
+if (!result || result.length > 30000 ||
+result.split("\n").some((line) => line.length > 1800 || /(.)\1{250,}/.test(line))) {
+throw new Error("INVALID_COACH_LENGTH");
+}
+return result;
+}
+
+async function generateCoachStructured(
+messages: GeminiMessage[],
+maxOutputTokens: number,
+): Promise<string> {
+const system = messages.filter((message) => message.role === "system")
+.map((message) => message.content).join("\n\n");
+const contents = messages.filter((message) => message.role !== "system").map((message) => ({
+role: message.role === "assistant" ? "model" : "user",
+parts: [{ text: message.content || " " }],
+}));
+const baseInstruction = system +
+"\n\nEXAM COACH RESPONSE CONTRACT: Answer the current user request fully and clinically accurately. " +
+"Return structured JSON blocks, ordered as they should be read. " +
+"Use markdown blocks for explanations, lists, headings and MCQs. " +
+"Use table blocks with headers and rows whenever the user requests a table or comparison, regardless of wording. " +
+"Never write Markdown pipe-table syntax inside a markdown block. " +
+"For tables, use 2–6 concise columns; include all requested clinically relevant items and preserve qualifications. " +
+"Do not omit requested items just to shorten the response. Avoid unnecessary preambles. " +
+"Do not copy previous error messages or fabricate missing content.";
+const requestBody = {
+contents: contents.length ? contents : [{ role: "user", parts: [{ text: "Explain the requested dental topic." }] }],
+systemInstruction: { parts: [{ text: baseInstruction }] },
+generationConfig: {
+temperature: 0.3,
+maxOutputTokens,
+thinkingConfig: { thinkingBudget: 0 },
+responseMimeType: "application/json",
+responseSchema: COACH_RESPONSE_SCHEMA,
+},
+};
+const deadline = Date.now() + 50000;
+let lastReason = "NO_VALID_RESPONSE";
+for (let attempt = 1; attempt <= 2; attempt++) {
+const remaining = deadline - Date.now();
+if (remaining <= 1000) break;
+const body = attempt === 1 ? requestBody : {
+...requestBody,
+systemInstruction: { parts: [{ text: baseInstruction +
+"\n\nThe first attempt was unusable. Generate a NEW, COMPLETE, concise answer from the original conversation. Do not continue or quote the failed attempt." }] },
+};
+try {
+const response = await fetch(
+"https://generativelanguage.googleapis.com/v1beta/models/" +
+GEMINI_EXAM_COACH_MODEL + ":generateContent",
+{
+method: "POST",
+headers: { "x-goog-api-key": GEMINI_API_KEY, "Content-Type": "application/json" },
+body: JSON.stringify(body),
+signal: AbortSignal.timeout(Math.min(25000, remaining)),
+},
+);
+const raw = await response.text();
+if (!response.ok) {
+lastReason = "UPSTREAM_" + response.status;
+console.warn("EXAM_COACH_PROVIDER_ERROR", { attempt, status: response.status });
+if (response.status === 400 || response.status === 401 || response.status === 403) break;
+continue;
+}
+if (raw.length > 120000) { lastReason = "RAW_TOO_LARGE"; continue; }
+const data = JSON.parse(raw);
+const candidate = data?.candidates?.[0];
+const finishReason = String(candidate?.finishReason || "");
+const text = Array.isArray(candidate?.content?.parts)
+? candidate.content.parts.filter((part: any) => !part?.thought)
+.map((part: any) => String(part?.text ?? "")).join("").trim()
+: "";
+console.info("EXAM_COACH_GENERATION", {
+attempt, model: GEMINI_EXAM_COACH_MODEL, finishReason,
+outputChars: text.length,
+promptTokens: Number(data?.usageMetadata?.promptTokenCount ?? 0),
+thoughtTokens: Number(data?.usageMetadata?.thoughtsTokenCount ?? 0),
+outputTokens: Number(data?.usageMetadata?.candidatesTokenCount ?? 0),
+});
+if (finishReason === "SAFETY" || finishReason === "PROHIBITED_CONTENT") {
+lastReason = "SAFETY"; break;
+}
+if (finishReason !== "STOP") { lastReason = "FINISH_" + finishReason; continue; }
+if (!text || text.length > 45000) { lastReason = "OUTPUT_SIZE"; continue; }
+try {
+return renderCoachStructured(JSON.parse(text));
+} catch (error: any) {
+lastReason = String(error?.message || "INVALID_STRUCTURE").slice(0, 80);
+}
+} catch (error: any) {
+lastReason = error?.name === "TimeoutError" ? "TIMEOUT" : "REQUEST_OR_PARSE";
+console.warn("EXAM_COACH_ATTEMPT_FAILED", { attempt, reason: lastReason });
+}
+}
+throw new Error("EXAM_COACH_OUTPUT_UNAVAILABLE:" + lastReason);
+}
+
 function parsePageMarkers(
 text: string,
 ): Array<{ page: number | null; text: string }> {
@@ -1776,42 +1937,27 @@ memoryBlock,
 ...conversationMessages,
 ];
 const mcqScaledTokens = mcqIntentDetected
-? Math.min(
-9000,
-Math.max(MAX_OUTPUT_TOKENS_QA, (requestedMcqCount || 5) * 450 + 800),
-)
-: null;
-let content = await generateGeminiText({
-model: GEMINI_EXAM_COACH_MODEL,
-messages: finalMessages,
-temperature: 0.4,
-thinkingBudget: 1024,
-ensureCompleteMarkdown: true,
-maxOutputTokens: mcqScaledTokens ?? MAX_OUTPUT_TOKENS_QA,
-});
-content = cleanExamCoachLeakage(content);
-if (looksLikeAccidentalRepeat(content, safeHistory)) {
-content = await generateGeminiText({
-model: GEMINI_EXAM_COACH_MODEL,
-messages: [
-...finalMessages,
-{
-role: "system",
-content:
-"Your draft accidentally repeated the previous assistant answer. Rewrite from scratch for the user's latest request. Apply every new constraint, preserve the requested output type, and do not restate the old answer.",
-},
-],
-temperature: 0.45,
-thinkingBudget: 1024,
-ensureCompleteMarkdown: true,
-maxOutputTokens: mcqScaledTokens ?? MAX_OUTPUT_TOKENS_QA,
-});
-content = cleanExamCoachLeakage(content);
-}
+? Math.min(9000, Math.max(MAX_OUTPUT_TOKENS_QA, (requestedMcqCount || 5) * 450 + 800))
+: MAX_OUTPUT_TOKENS_QA;
+const coachMessages = finalMessages.filter((message) =>
+message.role !== "assistant" ||
+! /^(?:Something went wrong:|Error:)/i.test(message.content.trim()));
+try {
+const content = await generateCoachStructured(coachMessages, mcqScaledTokens);
 return new Response(JSON.stringify({ content }), {
 status: 200,
 headers: { ...corsHeaders, "Content-Type": "application/json" },
 });
+} catch (error: any) {
+console.error("EXAM_COACH_UNAVAILABLE", String(error?.message || "unknown").slice(0, 120));
+return new Response(JSON.stringify({
+error: "OUTPUT_UNAVAILABLE",
+message: "I couldn't complete this response. Please try again.",
+}), {
+status: 502,
+headers: { ...corsHeaders, "Content-Type": "application/json" },
+});
+}
 } catch (e) {
 console.error("AI_GENERATION_ERROR", e);
 return new Response(JSON.stringify({ error: "AI_GENERATION_ERROR" }), {
