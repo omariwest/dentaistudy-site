@@ -4,10 +4,7 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SUPABASE_SERVICE_ROLE_KEY =
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 
-const TEST_EMAILS = new Set([
-  "amarsaaliomer@gmail.com",
-  "ammarsaifaldeen2@gmail.com",
-]);
+const TEST_EMAILS = new Set(["amarsaaliomer@gmail.com"]);
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -216,6 +213,7 @@ Deno.serve(async (req) => {
         p_utm_medium: clean(body?.utm_medium),
         p_utm_campaign: clean(body?.utm_campaign),
         p_utm_content: clean(body?.utm_content),
+        p_is_test: isTestAccount,
       },
     );
 
