@@ -1,6 +1,6 @@
 -- DentAIstudy Task 47: 90-day exam cohort promotional Pro access
 -- Private operational data: browser roles receive no direct table/function access.
--- Founder QA emails are reusable across all three cohort links and are excluded from seat caps and the global spend guard.
+-- The founder QA account is reusable across all three cohort links and is excluded from seat caps and the global spend guard.
 
 create extension if not exists pg_cron;
 grant usage on schema cron to postgres;
@@ -198,7 +198,8 @@ create or replace function public.promo_redeem(
   p_utm_source text default null,
   p_utm_medium text default null,
   p_utm_campaign text default null,
-  p_utm_content text default null
+  p_utm_content text default null,
+  p_is_test boolean default false
 )
 returns jsonb
 language plpgsql
@@ -210,8 +211,7 @@ declare
   v_existing public.promo_redemptions%rowtype;
   v_count integer := 0;
   v_expires_at timestamptz;
-  v_email text := '';
-  v_is_test boolean := false;
+  v_is_test boolean := coalesce(p_is_test, false);
 begin
   perform public.promo_evaluate_experiment();
 
@@ -229,15 +229,6 @@ begin
   if not found then
     return jsonb_build_object('ok', false, 'reason', 'INVALID_CODE');
   end if;
-
-  select lower(coalesce(email, '')) into v_email
-  from auth.users
-  where id = p_user_id;
-
-  v_is_test := v_email = any (array[
-    'amarsaaliomer@gmail.com',
-    'ammarsaifaldeen2@gmail.com'
-  ]::text[]);
 
   select * into v_existing
   from public.promo_redemptions
@@ -422,11 +413,11 @@ end;
 $$;
 
 revoke execute on function public.promo_evaluate_experiment() from public, anon, authenticated;
-revoke execute on function public.promo_redeem(uuid, text, text, text, text, text) from public, anon, authenticated;
+revoke execute on function public.promo_redeem(uuid, text, text, text, text, text, boolean) from public, anon, authenticated;
 revoke execute on function public.promo_record_ai_usage(uuid, text, text, text, integer, integer, integer, numeric) from public, anon, authenticated;
 
 grant execute on function public.promo_evaluate_experiment() to service_role;
-grant execute on function public.promo_redeem(uuid, text, text, text, text, text) to service_role;
+grant execute on function public.promo_redeem(uuid, text, text, text, text, text, boolean) to service_role;
 grant execute on function public.promo_record_ai_usage(uuid, text, text, text, integer, integer, integer, numeric) to service_role;
 
 select cron.schedule(

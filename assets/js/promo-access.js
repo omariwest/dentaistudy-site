@@ -31,20 +31,55 @@ document.addEventListener("DOMContentLoaded", async () => {
     ADC3FREE: "ADC",
   };
 
-  const setPrimary = (label, href) => {
+  let primaryHandler = null;
+
+  const setPrimary = (label, href, handler = null) => {
+    if (primaryHandler) {
+      primaryEl.removeEventListener("click", primaryHandler);
+    }
+
+    primaryHandler = handler;
     primaryEl.textContent = label;
     primaryEl.href = href;
     primaryEl.hidden = false;
+
+    if (primaryHandler) {
+      primaryEl.addEventListener("click", primaryHandler);
+    }
+  };
+
+  const hidePrimary = () => {
+    if (primaryHandler) {
+      primaryEl.removeEventListener("click", primaryHandler);
+      primaryHandler = null;
+    }
+    primaryEl.hidden = true;
   };
 
   const hideSecondary = () => {
     secondaryEl.hidden = true;
   };
 
-  const showSignedOutActions = () => {
-    const next = `${window.location.pathname}${window.location.search}`;
+  const setNote = (message = "") => {
+    if (!noteEl) return;
+    noteEl.textContent = message;
+    noteEl.hidden = !message;
+  };
+
+  const activationNext = () => {
+    const target = new URL(window.location.href);
+    target.searchParams.set("activate", "1");
+    return `${target.pathname}${target.search}${target.hash}`;
+  };
+
+  const showSignedOutOffer = () => {
+    const next = activationNext();
     const encodedNext = encodeURIComponent(next);
-    setPrimary("Log in to activate", `login.html?next=${encodedNext}`);
+
+    setPrimary(
+      "Activate 90 days of Pro",
+      `login.html?next=${encodedNext}`,
+    );
     secondaryLinkEl.href = `signup.html?next=${encodedNext}`;
     secondaryEl.hidden = false;
   };
@@ -55,6 +90,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       message ||
       "This DentAIstudy promotion is no longer accepting new activations.";
     hideSecondary();
+    setNote("");
     setPrimary("Continue to DentAIstudy", "index.html");
   };
 
@@ -63,7 +99,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     subtitleEl.textContent =
       message || "This promotion cannot be activated on this account.";
     hideSecondary();
+    setNote("");
     setPrimary("Continue to DentAIstudy", "study.html");
+  };
+
+  const showTemporaryUnavailable = () => {
+    titleEl.textContent = "Promotion temporarily unavailable";
+    subtitleEl.textContent =
+      "We couldn't verify this promotion right now. Please try again.";
+    hideSecondary();
+    setNote("");
+    setPrimary("Try again", window.location.href);
   };
 
   const showSuccess = (expiresAt, alreadyActive = false) => {
@@ -80,14 +126,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       ? "Your promotional Pro access is active"
       : "DentAIstudy Pro is active";
     subtitleEl.textContent = expiry
-      ? `You have full Pro access through ${expiry}. No card is connected and there is nothing to cancel.`
-      : "Your promotional Pro access is active. No card is connected and there is nothing to cancel.";
+      ? `Your full Pro access is active through ${expiry}.`
+      : "Your full promotional Pro access is active.";
     hideSecondary();
     setPrimary("Open Study Suite", "study.html");
-    if (noteEl) {
-      noteEl.textContent =
-        "At the end of the promotional period, your account returns to the normal Free plan unless you choose to subscribe separately.";
-    }
+    setNote(
+      "No card is connected. The promotion does not renew or charge automatically.",
+    );
   };
 
   async function callPromo(action, session) {
@@ -113,6 +158,85 @@ document.addEventListener("DOMContentLoaded", async () => {
     return { response, data };
   }
 
+  async function redeem(session) {
+    titleEl.textContent = `Activating ${cohortLabels[code]} Pro access`;
+    subtitleEl.textContent = "Activating your 90-day promotional access…";
+    hideSecondary();
+    hidePrimary();
+    setNote("");
+
+    try {
+      const redeemResult = await callPromo("redeem", session);
+      const result = redeemResult.data;
+
+      if (
+        redeemResult.response.status === 401 ||
+        result?.reason === "AUTH_REQUIRED"
+      ) {
+        titleEl.textContent = `90 days of DentAIstudy Pro for ${cohortLabels[code]} candidates`;
+        subtitleEl.textContent =
+          "Sign in or create an account to activate this promotion.";
+        setNote(
+          "No card is required. Promotional access does not renew or charge automatically.",
+        );
+        showSignedOutOffer();
+        return;
+      }
+
+      if (result?.ok) {
+        await window.dasSupabase.auth.refreshSession();
+        showSuccess(result.expires_at, false);
+        return;
+      }
+
+      if (
+        result?.reason === "ALREADY_USED" &&
+        String(result?.code || "").toUpperCase() === code &&
+        Date.parse(String(result?.expires_at || "")) > Date.now()
+      ) {
+        await window.dasSupabase.auth.refreshSession();
+        showSuccess(result.expires_at, true);
+        return;
+      }
+
+      if (result?.reason === "EXPIRED") {
+        showEnded(result.message);
+        return;
+      }
+
+      if (result?.reason === "CAP_REACHED") {
+        titleEl.textContent = "Current promotion allocation claimed";
+        subtitleEl.textContent =
+          result.message ||
+          "The current promotional allocation has been claimed.";
+        hideSecondary();
+        setNote("");
+        setPrimary("Continue to DentAIstudy", "index.html");
+        return;
+      }
+
+      if (result?.reason === "NOT_ELIGIBLE") {
+        showUnavailable(result.message);
+        return;
+      }
+
+      if (result?.reason === "ALREADY_USED") {
+        showUnavailable(
+          "This DentAIstudy account has already used an exam promotion. Promotional access can only be activated once per account.",
+        );
+        return;
+      }
+
+      showUnavailable(
+        result?.message ||
+          "This promotion could not be activated. Please continue with your current DentAIstudy plan.",
+      );
+    } catch (error) {
+      console.error("[promo-access]", error);
+      showTemporaryUnavailable();
+    }
+  }
+
   if (!endpoint || !cohortLabels[code]) {
     showEnded("This promotion link is invalid or has expired.");
     return;
@@ -127,7 +251,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const status = statusResult.data;
 
     if (!statusResult.response.ok || !status) {
-      showEnded("This promotion is temporarily unavailable.");
+      showTemporaryUnavailable();
       return;
     }
 
@@ -140,83 +264,35 @@ document.addEventListener("DOMContentLoaded", async () => {
           status.message ||
           "The current promotional allocation has been claimed.";
         hideSecondary();
+        setNote("");
         setPrimary("Continue to DentAIstudy", "index.html");
       }
       return;
     }
 
     subtitleEl.textContent =
-      "Activate 90 days of full DentAIstudy Pro access. No card, no charge, and no automatic renewal.";
+      "Get 90 days of full DentAIstudy Pro access. No card and no automatic renewal.";
+    setNote(
+      "The promotion starts only after you choose to activate it.",
+    );
 
     if (!session) {
-      showSignedOutActions();
+      showSignedOutOffer();
       return;
     }
 
-    subtitleEl.textContent = "Activating your promotional Pro access…";
+    if (params.get("activate") === "1") {
+      await redeem(session);
+      return;
+    }
+
     hideSecondary();
-    primaryEl.hidden = true;
-
-    const redeemResult = await callPromo("redeem", session);
-    const result = redeemResult.data;
-
-    if (redeemResult.response.status === 401 || result?.reason === "AUTH_REQUIRED") {
-      showSignedOutActions();
-      return;
-    }
-
-    if (result?.ok) {
-      await window.dasSupabase.auth.refreshSession();
-      showSuccess(result.expires_at, false);
-      return;
-    }
-
-    if (
-      result?.reason === "ALREADY_USED" &&
-      String(result?.code || "").toUpperCase() === code &&
-      Date.parse(String(result?.expires_at || "")) > Date.now()
-    ) {
-      await window.dasSupabase.auth.refreshSession();
-      showSuccess(result.expires_at, true);
-      return;
-    }
-
-    if (result?.reason === "EXPIRED") {
-      showEnded(result.message);
-      return;
-    }
-
-    if (result?.reason === "CAP_REACHED") {
-      titleEl.textContent = "Current promotion allocation claimed";
-      subtitleEl.textContent =
-        result.message ||
-        "The current promotional allocation has been claimed.";
-      setPrimary("Continue to DentAIstudy", "index.html");
-      return;
-    }
-
-    if (result?.reason === "NOT_ELIGIBLE") {
-      showUnavailable(result.message);
-      return;
-    }
-
-    if (result?.reason === "ALREADY_USED") {
-      showUnavailable(
-        "This DentAIstudy account has already used an exam promotion. Promotional access can only be activated once per account.",
-      );
-      return;
-    }
-
-    showUnavailable(
-      result?.message ||
-        "This promotion could not be activated. Please continue with your current DentAIstudy plan.",
-    );
+    setPrimary("Activate 90 days of Pro", "#", async (event) => {
+      event.preventDefault();
+      await redeem(session);
+    });
   } catch (error) {
     console.error("[promo-access]", error);
-    titleEl.textContent = "Promotion temporarily unavailable";
-    subtitleEl.textContent =
-      "We couldn't verify this promotion right now. Please try again shortly.";
-    hideSecondary();
-    setPrimary("Try again", window.location.href);
+    showTemporaryUnavailable();
   }
 });
