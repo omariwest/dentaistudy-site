@@ -21,6 +21,67 @@ const functionsBaseUrl = SUPABASE_URL.replace(
 // Expose URLs for other scripts (read-only)
 window.dasSupabaseUrl = SUPABASE_URL;
 window.dasSupabaseFunctionsBase = functionsBaseUrl;
+
+const DAS_AUTH_NEXT_KEY = "das.auth.next.v1";
+
+function dasNormalizeAuthNext(raw, fallback = "study.html") {
+  const value = String(raw || "").trim();
+  if (!value) return fallback;
+
+  try {
+    const target = new URL(value, window.location.origin);
+    if (
+      target.origin !== window.location.origin ||
+      !["http:", "https:"].includes(target.protocol)
+    ) {
+      return fallback;
+    }
+
+    return `${target.pathname}${target.search}${target.hash}`;
+  } catch (_) {
+    return fallback;
+  }
+}
+
+window.dasGetSafeAuthNext = function (fallback = "study.html") {
+  const params = new URLSearchParams(window.location.search);
+  const queryNext = params.get("next");
+
+  if (queryNext) {
+    return dasNormalizeAuthNext(queryNext, fallback);
+  }
+
+  try {
+    const pending = sessionStorage.getItem(DAS_AUTH_NEXT_KEY);
+    return dasNormalizeAuthNext(pending, fallback);
+  } catch (_) {
+    return fallback;
+  }
+};
+
+window.dasClearPendingAuthNext = function () {
+  try {
+    sessionStorage.removeItem(DAS_AUTH_NEXT_KEY);
+  } catch (_) {}
+};
+
+function dasSyncPendingAuthNext(fileName) {
+  if (fileName !== "login.html" && fileName !== "signup.html") return;
+
+  const params = new URLSearchParams(window.location.search);
+  const queryNext = params.get("next");
+
+  try {
+    if (queryNext) {
+      sessionStorage.setItem(
+        DAS_AUTH_NEXT_KEY,
+        dasNormalizeAuthNext(queryNext, "study.html"),
+      );
+    } else {
+      sessionStorage.removeItem(DAS_AUTH_NEXT_KEY);
+    }
+  } catch (_) {}
+}
 // -----------------------------------------------------------
 // Avatar metadata preservation (prevents Google from "winning")
 // Place this right after: window.dasSupabaseFunctionsBase = functionsBaseUrl;
@@ -86,6 +147,20 @@ async function dasSetupGoogleAuth() {
 
   const fileName =
     (window.location.pathname || "").split("/").pop() || "index.html";
+
+  dasSyncPendingAuthNext(fileName);
+
+  if (fileName === "study.html") {
+    const pendingNext = window.dasGetSafeAuthNext?.("study.html") || "study.html";
+    if (pendingNext !== "study.html" && pendingNext !== "/study.html") {
+      const { data: pendingSession } = await client.auth.getSession();
+      if (pendingSession?.session) {
+        window.dasClearPendingAuthNext?.();
+        window.location.replace(pendingNext);
+        return;
+      }
+    }
+  }
 
   const oneTapPages = {
     "index.html": "signin",
@@ -173,7 +248,10 @@ async function dasSetupGoogleAuth() {
         return;
       }
 
-      window.location.href = "study.html";
+      const destination =
+        window.dasGetSafeAuthNext?.("study.html") || "study.html";
+      window.dasClearPendingAuthNext?.();
+      window.location.href = destination;
     } catch (err) {
       console.error("Unexpected Google One Tap error:", err);
     }
