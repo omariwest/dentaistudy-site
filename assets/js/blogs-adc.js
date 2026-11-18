@@ -2,6 +2,96 @@
 window.BLOG_REGISTRY = window.BLOG_REGISTRY || [];
 window.BLOG_REGISTRY.push(
   {
+    title: "ADC Exam Dates 2027: Written, Practical & Application Calendar",
+    url: "blogs/adc/adc-exam-dates-2027.html",
+    tag: "ADC",
+    description:
+      "Official 2027 ADC exam dates for written and practical sittings, application windows, initial assessment deadlines, locations, and year-round planning.",
+    meta: "15 min read • ADC exam",
+    category: "adc 2027 adc exam dates 2027",
+  },
+  {
+    title: "ADC March 2027 Written Exam: Dates, Eligibility & Application Deadline",
+    url: "blogs/adc/adc-march-2027-written-exam.html",
+    tag: "ADC",
+    description:
+      "Confirmed March 2027 ADC written exam dates, the December 2026 application window, eligibility, booking rules, and practical exam progression.",
+    meta: "14 min read • ADC exam",
+    category: "adc 2027 adc march 2027 written exam",
+  },
+  {
+    title: "ADC September 2027 Written Exam: Dates & June Applications",
+    url: "blogs/adc/adc-september-2027-written-exam.html",
+    tag: "ADC",
+    description:
+      "Confirmed September 2027 ADC written exam dates, initial assessment deadline, June application window and booking steps.",
+    meta: "15 min read • ADC exam",
+    category: "adc 2027 adc september 2027 written exam",
+  },
+  {
+    title: "ADC Practical Exam Dates 2027: Periods 1–3 & Date Selection",
+    url: "blogs/adc/adc-practical-exam-dates-2027.html",
+    tag: "ADC",
+    description:
+      "Confirmed 2027 ADC practical exam periods, application and date-selection windows, eligibility, Melbourne venue rules, and travel planning.",
+    meta: "13 min read • ADC exam",
+    category: "adc 2027 adc practical exam dates 2027",
+  },
+  {
+    title: "ADC Practical Exam Waitlist 2027: Priority and Eligibility Rules",
+    url: "blogs/adc/adc-practical-waitlist-2027.html",
+    tag: "ADC",
+    description:
+      "ADC practical exam waitlist 2027: Period 1 priority stages, eligibility, short-notice seats, no-consecutive-period rule and what happens if dates fill.",
+    meta: "8 min read • ADC exam",
+    category: "adc 2027 adc practical waitlist 2027",
+  },
+  {
+    title: "ADC Initial Assessment 2027: Documents, Eligibility & Deadlines",
+    url: "blogs/adc/adc-initial-assessment-2027.html",
+    tag: "ADC",
+    description:
+      "ADC initial assessment 2027: eligibility, required documents, current fee, seven-year validity, renewal rules and written-exam planning deadlines.",
+    meta: "7 min read • ADC exam",
+    category: "adc 2027 adc initial assessment 2027",
+  },
+  {
+    title: "ADC Written Exam Booking 2027: Pearson VUE Procedure",
+    url: "blogs/adc/adc-written-booking-pearson-vue-2027.html",
+    tag: "ADC",
+    description:
+      "ADC written exam booking 2027: ADC Connect, Pearson location selection, seat-hold rules, same-centre rule, fees and March/September windows.",
+    meta: "7 min read • ADC exam",
+    category: "adc 2027 adc written booking pearson vue 2027",
+  },
+  {
+    title: "ADC Exam Fees 2027: Written, Practical & Assessment Costs",
+    url: "blogs/adc/adc-exam-fees-2027.html",
+    tag: "ADC",
+    description:
+      "Current ADC fees for 2027 dentist planning, including initial assessment, written and practical examinations, review costs, refunds and pathway totals.",
+    meta: "13 min read • ADC exam",
+    category: "adc 2027 adc exam fees 2027",
+  },
+  {
+    title: "ADC Practical Exam Results 2027: Timing, Validity & Next Steps",
+    url: "blogs/adc/adc-practical-results-2027.html",
+    tag: "ADC",
+    description:
+      "ADC practical exam results 2027: ADC Connect timing, written-validity planning, retakes and Dental Board registration next steps.",
+    meta: "7 min read • ADC exam",
+    category: "adc 2027 adc practical results 2027",
+  },
+  {
+    title: "ADC Practical Eligibility 2027: Valid Written & Initial Assessment",
+    url: "blogs/adc/adc-practical-eligibility-2027.html",
+    tag: "ADC",
+    description:
+      "ADC practical eligibility 2027: seven-year initial assessment, five-year written validity, consecutive-period rule, invitations and expiry planning.",
+    meta: "8 min read • ADC exam",
+    category: "adc 2027 adc practical eligibility 2027",
+  },
+  {
     title: "The Definitive 2026 ADC Assessment Pathway Guide",
     url: "blogs/adc/adc-2026-complete-assessment-pathway.html",
     tag: "ADC",
