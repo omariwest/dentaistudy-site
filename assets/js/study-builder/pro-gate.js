@@ -44,11 +44,19 @@
     const partnerProExpiresAt = partnerProUntil
       ? new Date(`${partnerProUntil}T23:59:59.999Z`).getTime()
       : NaN;
+    const hasPartnerPro =
+      Number.isFinite(partnerProExpiresAt) &&
+      partnerProExpiresAt >= Date.now();
 
-    return Number.isFinite(partnerProExpiresAt) &&
-        partnerProExpiresAt >= Date.now()
-      ? "pro"
-      : tier;
+    const promoProUntil = String(appMeta.promo_pro_until || "").trim();
+    const promoProExpiresAt =
+      appMeta.promo_program === true && promoProUntil
+        ? Date.parse(promoProUntil)
+        : NaN;
+    const hasPromoPro =
+      Number.isFinite(promoProExpiresAt) && promoProExpiresAt >= Date.now();
+
+    return hasPartnerPro || hasPromoPro ? "pro" : tier;
   }
 
   function isProTier(tier) {
