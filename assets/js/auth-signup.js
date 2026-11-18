@@ -108,7 +108,10 @@ document.addEventListener("DOMContentLoaded", () => {
           "success",
         );
         setTimeout(() => {
-          window.location.href = "study.html";
+          const destination =
+            window.dasGetSafeAuthNext?.("study.html") || "study.html";
+          window.dasClearPendingAuthNext?.();
+          window.location.href = destination;
         }, 1200);
       } else {
         // Email confirmation is ON → tell user to check email.
