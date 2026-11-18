@@ -40,6 +40,7 @@ create table public.promo_redemptions (
   code text not null references public.promo_codes(code),
   cohort text not null check (cohort in ('ore', 'inbde', 'adc')),
   user_id uuid not null unique references auth.users(id) on delete cascade,
+  is_test boolean not null default false,
   redeemed_at timestamptz not null default now(),
   expires_at timestamptz not null,
   utm_source text,
@@ -61,6 +62,7 @@ create table public.promo_ai_usage (
     references public.promo_experiment(id) on delete cascade,
   code text not null references public.promo_codes(code),
   user_id uuid not null references auth.users(id) on delete cascade,
+  is_test boolean not null default false,
   task text not null,
   model text not null,
   prompt_tokens integer not null default 0 check (prompt_tokens >= 0),
@@ -207,6 +209,8 @@ declare
   v_existing public.promo_redemptions%rowtype;
   v_count integer := 0;
   v_expires_at timestamptz;
+  v_email text := '';
+  v_is_test boolean := false;
 begin
   perform public.promo_evaluate_experiment();
 
@@ -225,12 +229,21 @@ begin
     return jsonb_build_object('ok', false, 'reason', 'INVALID_CODE');
   end if;
 
+  select lower(coalesce(email, '')) into v_email
+  from auth.users
+  where id = p_user_id;
+
+  v_is_test := v_email = any (array[
+    'amarsaaliomer@gmail.com',
+    'ammarsaifaldeen2@gmail.com'
+  ]::text[]);
+
   select * into v_existing
   from public.promo_redemptions
   where user_id = p_user_id
   limit 1;
 
-  if found then
+  if found and not (v_is_test and v_existing.is_test) then
     return jsonb_build_object(
       'ok', false,
       'reason', 'ALREADY_USED',
@@ -240,7 +253,7 @@ begin
     );
   end if;
 
-  if v_exp.status = 'closed' or now() >= v_exp.redeem_until then
+  if not v_is_test and (v_exp.status = 'closed' or now() >= v_exp.redeem_until) then
     return jsonb_build_object(
       'ok', false,
       'reason', 'EXPIRED',
@@ -250,9 +263,10 @@ begin
 
   select count(*)::integer into v_count
   from public.promo_redemptions
-  where code = v_code.code;
+  where code = v_code.code
+    and is_test = false;
 
-  if v_count >= v_exp.current_cap then
+  if not v_is_test and v_count >= v_exp.current_cap then
     return jsonb_build_object(
       'ok', false,
       'reason', 'CAP_REACHED',
@@ -263,11 +277,33 @@ begin
 
   v_expires_at := now() + interval '90 days';
 
+  if found and v_is_test and v_existing.is_test then
+    update public.promo_redemptions
+    set code = v_code.code,
+        cohort = v_code.cohort,
+        redeemed_at = now(),
+        expires_at = v_expires_at,
+        utm_source = nullif(left(btrim(coalesce(p_utm_source, '')), 120), ''),
+        utm_medium = nullif(left(btrim(coalesce(p_utm_medium, '')), 120), ''),
+        utm_campaign = nullif(left(btrim(coalesce(p_utm_campaign, '')), 120), ''),
+        utm_content = nullif(left(btrim(coalesce(p_utm_content, '')), 120), '')
+    where user_id = p_user_id;
+
+    return jsonb_build_object(
+      'ok', true,
+      'code', v_code.code,
+      'cohort', v_code.cohort,
+      'expires_at', v_expires_at,
+      'is_test', true
+    );
+  end if;
+
   insert into public.promo_redemptions (
     experiment_id,
     code,
     cohort,
     user_id,
+    is_test,
     redeemed_at,
     expires_at,
     utm_source,
@@ -280,6 +316,7 @@ begin
     v_code.code,
     v_code.cohort,
     p_user_id,
+    v_is_test,
     now(),
     v_expires_at,
     nullif(left(btrim(coalesce(p_utm_source, '')), 120), ''),
@@ -292,7 +329,8 @@ begin
     'ok', true,
     'code', v_code.code,
     'cohort', v_code.cohort,
-    'expires_at', v_expires_at
+    'expires_at', v_expires_at,
+    'is_test', v_is_test
   );
 exception
   when unique_violation then
@@ -329,18 +367,18 @@ declare
   v_code text := upper(btrim(coalesce(p_code, '')));
   v_cost numeric := greatest(coalesce(p_estimated_cost_usd, 0), 0);
   v_has_active_redemption boolean := false;
+  v_is_test boolean := false;
   v_state jsonb;
 begin
-  select exists (
-    select 1
-    from public.promo_redemptions
-    where user_id = p_user_id
-      and code = v_code
-      and expires_at > now()
-  )
-  into v_has_active_redemption;
+  select true, is_test
+  into v_has_active_redemption, v_is_test
+  from public.promo_redemptions
+  where user_id = p_user_id
+    and code = v_code
+    and expires_at > now()
+  limit 1;
 
-  if not v_has_active_redemption then
+  if not coalesce(v_has_active_redemption, false) then
     return jsonb_build_object('ok', false, 'reason', 'NO_ACTIVE_PROMO');
   end if;
 
@@ -348,6 +386,7 @@ begin
     experiment_id,
     code,
     user_id,
+    is_test,
     task,
     model,
     prompt_tokens,
@@ -359,6 +398,7 @@ begin
     1,
     v_code,
     p_user_id,
+    v_is_test,
     left(coalesce(nullif(btrim(p_task), ''), 'unknown'), 80),
     left(coalesce(nullif(btrim(p_model), ''), 'unknown'), 80),
     greatest(coalesce(p_prompt_tokens, 0), 0),
@@ -367,10 +407,12 @@ begin
     v_cost
   );
 
-  update public.promo_experiment
-  set estimated_spend_usd = estimated_spend_usd + v_cost,
-      updated_at = now()
-  where id = 1;
+  if not v_is_test then
+    update public.promo_experiment
+    set estimated_spend_usd = estimated_spend_usd + v_cost,
+        updated_at = now()
+    where id = 1;
+  end if;
 
   v_state := public.promo_evaluate_experiment();
 
