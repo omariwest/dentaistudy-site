@@ -2,6 +2,24 @@
 window.BLOG_REGISTRY = window.BLOG_REGISTRY || [];
 window.BLOG_REGISTRY.push(
   {
+    title: "ADEX Exam Dates 2027: CDCA-WREB-CITA Sites and Registration",
+    url: "blogs/adex/adex-exam-dates-2027.html",
+    tag: "ADEX",
+    description:
+      "Official guide to 2027 ADEX dental exam dates: how the real-time site calendar works, outside-candidate seats, registration, TBA dates and location rules.",
+    meta: "15 min read • ADEX exam",
+    category: "adex 2027 adex exam dates 2027",
+  },
+  {
+    title: "ADEX 2027 Candidate Guide: DLOSCE, Exam Components and Eligibility",
+    url: "blogs/adex/adex-candidate-guide-dlosce-2027.html",
+    tag: "ADEX",
+    description:
+      "ADEX candidate rules for the 2026–27 season: DLOSCE integration, clinical components, eligibility, retakes and jurisdiction-specific requirements.",
+    meta: "15 min read • ADEX exam",
+    category: "adex 2027 adex candidate guide dlosce 2027",
+  },
+  {
     title: "ADEX Exam 2025 – What Candidates Must Know",
     url: "blogs/adex/adex-what-is-the-exam.html",
     tag: "ADEX",

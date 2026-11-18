@@ -2,6 +2,15 @@
 window.BLOG_REGISTRY = window.BLOG_REGISTRY || [];
 window.BLOG_REGISTRY.push(
   {
+    title: "EDREE 2027: UAE Dental Residency Exam and Application Planning",
+    url: "blogs/uae/edree-2027-uae-dental-residency-exam.html",
+    tag: "UAE",
+    description:
+      "EDREE 2027 planning guide: current UAEU/NIHS exam format, fee, eligibility, attempt rule, result timing and UAE dental residency application planning.",
+    meta: "8 min read • UAE exam",
+    category: "uae 2027 edree 2027 uae dental residency exam",
+  },
+  {
     title: "DHA Dubai Dental Exam 2026: Complete Guide",
     url: "blogs/uae/dha-dubai-dental-exam-2026-complete-guide.html",
     tag: "UAE",

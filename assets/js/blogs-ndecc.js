@@ -2,6 +2,150 @@
 window.BLOG_REGISTRY = window.BLOG_REGISTRY || [];
 window.BLOG_REGISTRY.push(
   {
+    title: "ACJ Exam Dates 2027: May and November Sessions & Deadlines",
+    url: "blogs/ndecc/acj-exam-dates-2027.html",
+    tag: "NDECC",
+    description:
+      "Confirmed 2027 NDEB ACJ exam dates for May and November, registration openings, deadlines, locations, two-window rules, and planning tips.",
+    meta: "12 min read • NDECC exam",
+    category: "ndecc 2027 acj exam dates 2027",
+  },
+  {
+    title: "NDECC Exam Dates 2027: Calendar, Ottawa Sessions & Registration",
+    url: "blogs/ndecc/ndecc-exam-dates-2027.html",
+    tag: "NDECC",
+    description:
+      "NDECC exam dates 2027: Jan–Mar and Mar–Jun Ottawa evaluation periods, registration deadlines, withdrawal fees and the five-year rule from May 2027.",
+    meta: "12 min read • NDECC exam",
+    category: "ndecc 2027 ndecc exam dates 2027",
+  },
+  {
+    title: "AFK Exam Dates 2027: February, August & Registration Deadlines",
+    url: "blogs/ndecc/afk-exam-dates-2027.html",
+    tag: "NDECC",
+    description:
+      "Confirmed 2027 AFK exam dates for February and August, including regional registration openings, deadlines, locations and Prometric scheduling.",
+    meta: "11 min read • NDECC exam",
+    category: "ndecc 2027 afk exam dates 2027",
+  },
+  {
+    title: "AFK Registration 2027: Booking, Seat Availability & Deadlines",
+    url: "blogs/ndecc/afk-registration-2027.html",
+    tag: "NDECC",
+    description:
+      "A precise guide to AFK registration 2027 for international dentists: NDEBConnect steps, Prometric scheduling, second registration window, transfers, and seat availability.",
+    meta: "10 min read • NDECC exam",
+    category: "ndecc 2027 afk registration 2027",
+  },
+  {
+    title: "NDEB 2027 Exam Calendar: Compare AFK, ACJ, NDECC & OSCE",
+    url: "blogs/ndecc/ndeb-exam-calendar-2027.html",
+    tag: "NDECC",
+    description:
+      "NDEB exam dates 2027: master calendar for AFK, ACJ, NDECC and Virtual OSCE with deadlines, regions, sequence rules and planning examples.",
+    meta: "12 min read • NDECC exam",
+    category: "ndecc 2027 ndeb exam calendar 2027",
+  },
+  {
+    title: "ACJ Registration 2027: Prometric Booking, Deadlines & Transfers",
+    url: "blogs/ndecc/acj-registration-2027.html",
+    tag: "NDECC",
+    description:
+      "Complete 2027 NDEB ACJ registration guide: NDEBConnect opening dates, Prometric scheduling, two-window rules, location transfers and withdrawal deadlines.",
+    meta: "11 min read • NDECC exam",
+    category: "ndecc 2027 acj registration 2027",
+  },
+  {
+    title: "NDECC Registration 2027: Eligibility, Ottawa Booking & Documents",
+    url: "blogs/ndecc/ndecc-registration-2027.html",
+    tag: "NDECC",
+    description:
+      "NDECC registration 2027: ACJ eligibility, three registration stages, Ottawa dates, fee, profile documents, accommodations and five-year rules.",
+    meta: "10 min read • NDECC exam",
+    category: "ndecc 2027 ndecc registration 2027",
+  },
+  {
+    title: "NDECC Results 2027: Where to Check, Timing & Next Steps",
+    url: "blogs/ndecc/ndecc-results-2027.html",
+    tag: "NDECC",
+    description:
+      "Official guide to NDECC results 2027: evaluation-session timing, NDEBConnect checks, component retakes and Virtual OSCE next steps.",
+    meta: "13 min read • NDECC exam",
+    category: "ndecc 2027 ndecc results 2027",
+  },
+  {
+    title: "NDECC Protocol 2027: Candidate Rules, Preparation & Grading",
+    url: "blogs/ndecc/ndecc-protocol-2027.html",
+    tag: "NDECC",
+    description:
+      "NDECC Protocol guide for 2027 candidates: current protocol status, Clinical Skills and Situational Judgement rules, grading and exam checklists.",
+    meta: "12 min read • NDECC exam",
+    category: "ndecc 2027 ndecc protocol 2027",
+  },
+  {
+    title: "NDEB Equivalency Timeline 2027: Planning AFK, ACJ and NDECC",
+    url: "blogs/ndecc/ndeb-equivalency-timeline-2027.html",
+    tag: "NDECC",
+    description:
+      "Realistic 2027 NDEB Equivalency Process timeline covering credential verification, AFK, ACJ, NDECC registration stages, the five-year clock and Virtual OSCE.",
+    meta: "13 min read • NDECC exam",
+    category: "ndecc 2027 ndeb equivalency timeline 2027",
+  },
+  {
+    title: "AFK Results 2027: Score Reports, Passing & Next Steps",
+    url: "blogs/ndecc/afk-results-2027.html",
+    tag: "NDECC",
+    description:
+      "AFK results 2027: Pass/Fail scoring, the rescaled passing standard, failed-candidate score reports, verification, attempt limits and ACJ next steps.",
+    meta: "7 min read • NDECC exam",
+    category: "ndecc 2027 afk results 2027",
+  },
+  {
+    title: "ACJ Results 2027: Score Reports and Retake Decisions",
+    url: "blogs/ndecc/acj-results-2027.html",
+    tag: "NDECC",
+    description:
+      "ACJ results 2027: Pass/Fail scoring, the rescaled passing standard, score verification, attempt limits and NDECC next steps.",
+    meta: "7 min read • NDECC exam",
+    category: "ndecc 2027 acj results 2027",
+  },
+  {
+    title: "NDECC Clinical Skills 2027: Procedures and Candidate Checklist",
+    url: "blogs/ndecc/ndecc-clinical-skills-2027.html",
+    tag: "NDECC",
+    description:
+      "NDECC Clinical Skills 2027: seven procedures, grading, infection-control rules, equipment, exam-day checklist and retake rules from current NDEB guidance.",
+    meta: "9 min read • NDECC exam",
+    category: "ndecc 2027 ndecc clinical skills 2027",
+  },
+  {
+    title: "NDECC Situational Judgement 2027: Tasks, Preparation & Scoring",
+    url: "blogs/ndecc/ndecc-situational-judgement-2027.html",
+    tag: "NDECC",
+    description:
+      "NDECC Situational Judgement 2027: 10 stations, five competency areas, written and conversation tasks, passing rule, grading and official preparation resources.",
+    meta: "8 min read • NDECC exam",
+    category: "ndecc 2027 ndecc situational judgement 2027",
+  },
+  {
+    title: "AFK 2027 Format and Syllabus: Questions, Timing & Topics",
+    url: "blogs/ndecc/afk-format-syllabus-2027.html",
+    tag: "NDECC",
+    description:
+      "AFK 2027 format: 200 single-answer MCQs, two two-hour parts, current NDEB blueprint percentages, delivery, scoring and preparation resources.",
+    meta: "7 min read • NDECC exam",
+    category: "ndecc 2027 afk format syllabus 2027",
+  },
+  {
+    title: "ACJ 2027 Exam Format and Scoring: What Candidates Face",
+    url: "blogs/ndecc/acj-format-scoring-2027.html",
+    tag: "NDECC",
+    description:
+      "ACJ 2027 format and scoring: 120–150 questions, 5.5 hours, blueprint weights, multi-answer scoring, passing standard and current NDEB rules.",
+    meta: "7 min read • NDECC exam",
+    category: "ndecc 2027 acj format scoring 2027",
+  },
+  {
     title: "Complete 2026 NDECC Guide: Equivalency Process & Exam Protocols",
     url: "blogs/ndecc/ndecc-2026-complete-guide.html",
     tag: "NDECC",

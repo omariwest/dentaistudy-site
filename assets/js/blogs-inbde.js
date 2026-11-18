@@ -2,6 +2,33 @@
 window.BLOG_REGISTRY = window.BLOG_REGISTRY || [];
 window.BLOG_REGISTRY.push(
   {
+    title: "INBDE Exam Dates 2027: How Prometric Scheduling Actually Works",
+    url: "blogs/inbde/inbde-exam-dates-2027.html",
+    tag: "INBDE",
+    description:
+      "INBDE 2027 scheduling explained: no fixed national dates, six-month eligibility, Prometric booking, two test days and rescheduling rules.",
+    meta: "7 min read • INBDE exam",
+    category: "inbde 2027 inbde exam dates 2027",
+  },
+  {
+    title: "INBDE Exam Fees 2027: Application and Rescheduling Costs",
+    url: "blogs/inbde/inbde-exam-fees-2027.html",
+    tag: "INBDE",
+    description:
+      "INBDE fees for 2027 planning: current exam and international processing fees, reports, audit, extension and Prometric rescheduling costs.",
+    meta: "7 min read • INBDE exam",
+    category: "inbde 2027 inbde exam fees 2027",
+  },
+  {
+    title: "INBDE Results 2027: Score Reports, Timing and What Happens Next",
+    url: "blogs/inbde/inbde-results-2027.html",
+    tag: "INBDE",
+    description:
+      "INBDE results 2027: result timing, Pass/Fail reporting, scale-score context, failed-candidate feedback, audits and current retest rules.",
+    meta: "7 min read • INBDE exam",
+    category: "inbde 2027 inbde results 2027",
+  },
+  {
     title: "The 2024 INBDE Standard Change — What Actually Happened",
     url: "blogs/inbde/inbde-2024-standard-change.html",
     tag: "INBDE",
