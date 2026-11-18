@@ -22,6 +22,7 @@
       defer
     ></script>
     <script src="assets/js/auth-client.js" defer></script>
+    <script src="assets/js/auth-guard.js" defer></script>
     <script src="assets/js/promo-access.js" defer></script>
     <script src="assets/js/main.js" defer></script>
   </head>
@@ -64,6 +65,9 @@
           <a href="blogs.html"><span>Blogs</span></a>
           <a href="pricing.html"><span>Pricing</span></a>
           <div class="slide-nav-divider" role="separator" aria-hidden="true"></div>
+          <a href="profile.html" hidden><span>My profile</span></a>
+          <a href="settings.html" hidden><span>Account settings</span></a>
+          <div class="slide-nav-divider" role="separator" aria-hidden="true"></div>
           <a href="login.html" class="slide-login-link"><span>Log in</span></a>
         </div>
       </nav>
@@ -81,7 +85,7 @@
 
           <div class="auth-form">
             <a
-              class="auth-submit btn btn-primary"
+              class="auth-submit auth-submit-compact btn btn-primary"
               id="promo-primary"
               href="index.html"
               hidden
