@@ -246,6 +246,17 @@
   width: 100%;
 }
 
+.auth-submit.auth-submit-compact {
+  width: fit-content;
+  display: flex;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.auth-submit.auth-submit-compact:hover {
+  transform: none;
+}
+
 .auth-divider {
   display: flex;
   align-items: center;

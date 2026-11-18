@@ -1085,8 +1085,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         "Your Pro access is included with the DentAIstudy Partner Program. No billing action is needed.";
       const promoExpiryLabel = formatPromoExpiry(appMeta);
       const promoBillingMessage = promoExpiryLabel
-        ? `Your Pro access is included through a DentAIstudy exam promotion until ${promoExpiryLabel}. Billing and cancellation are unavailable for promotional access. No payment method is connected.`
-        : "Your Pro access is included through a DentAIstudy exam promotion. Billing and cancellation are unavailable for promotional access. No payment method is connected.";
+        ? `Promotional Pro active until ${promoExpiryLabel}. No payment method is connected.`
+        : "Promotional Pro access is active. No payment method is connected.";
 
       const deleteAccountBtn = document.getElementById("delete-account-btn");
       const deleteAccountStatus = document.getElementById(
@@ -1154,7 +1154,10 @@ document.addEventListener("DOMContentLoaded", async () => {
           button.title =
             "Unavailable for promotional Pro access. No billing account is connected.";
         });
-        setManageStatus(promoBillingMessage);
+        if (manageStatusEl) {
+          manageStatusEl.textContent = "";
+          manageStatusEl.hidden = true;
+        }
       }
 
       // Paddle IDs should be stored by your webhook (see server edit below)
