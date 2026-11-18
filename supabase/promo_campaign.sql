@@ -2,6 +2,8 @@
 -- Private operational data: browser roles receive no direct table/function access.
 
 create extension if not exists pg_cron with schema pg_catalog;
+grant usage on schema cron to postgres;
+grant all privileges on all tables in schema cron to postgres;
 
 create table public.promo_experiment (
   id smallint primary key default 1 check (id = 1),
