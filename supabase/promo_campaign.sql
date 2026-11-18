@@ -1,5 +1,6 @@
 -- DentAIstudy Task 47: 90-day exam cohort promotional Pro access
 -- Private operational data: browser roles receive no direct table/function access.
+-- Founder QA emails are reusable across all three cohort links and are excluded from seat caps and the global spend guard.
 
 create extension if not exists pg_cron with schema pg_catalog;
 grant usage on schema cron to postgres;
@@ -277,7 +278,7 @@ begin
 
   v_expires_at := now() + interval '90 days';
 
-  if found and v_is_test and v_existing.is_test then
+  if v_existing.id is not null and v_is_test and v_existing.is_test then
     update public.promo_redemptions
     set code = v_code.code,
         cohort = v_code.cohort,
