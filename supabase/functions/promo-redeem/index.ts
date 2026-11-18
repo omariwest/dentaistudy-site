@@ -191,10 +191,13 @@ Deno.serve(async (req) => {
     }
 
     if (
-      tier === "pro" ||
-      tier === "pro_yearly" ||
-      paddleStatus === "trialing" ||
-      partnerActive
+      !isTestAccount &&
+      (
+        tier === "pro" ||
+        tier === "pro_yearly" ||
+        paddleStatus === "trialing" ||
+        partnerActive
+      )
     ) {
       return json({
         ok: false,
