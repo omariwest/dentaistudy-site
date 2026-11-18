@@ -2,6 +2,15 @@
 window.BLOG_REGISTRY = window.BLOG_REGISTRY || [];
 window.BLOG_REGISTRY.push(
   {
+    title: "SDLE 2027: Registration, Prometric Booking and Exam Fees",
+    url: "blogs/sdle/sdle-2027-registration-prometric-fees.html",
+    tag: "SDLE",
+    description:
+      "SDLE 2027 guide: official exam windows, Mumaris+ eligibility, Prometric booking, current service fee, exam format, pass score and attempt rules.",
+    meta: "8 min read • SDLE exam",
+    category: "sdle 2027 sdle 2027 registration prometric fees",
+  },
+  {
     title: "SDLE 2026 – Complete Guide for Dentists",
     url: "blogs/sdle/sdle-2026-complete-guide.html",
     tag: "SDLE",
