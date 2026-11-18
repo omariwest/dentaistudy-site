@@ -491,7 +491,15 @@ document.querySelectorAll(".copy-btn").forEach((btn) => {
       : NaN;
     const hasPartnerPro =
       Number.isFinite(partnerProExpiresAt) && partnerProExpiresAt >= Date.now();
-    const isPaid = tier === "pro" || tier === "pro_yearly" || hasPartnerPro;
+    const promoProUntil = String(appMeta.promo_pro_until || "").trim();
+    const promoProExpiresAt =
+      appMeta.promo_program === true && promoProUntil
+        ? Date.parse(promoProUntil)
+        : NaN;
+    const hasPromoPro =
+      Number.isFinite(promoProExpiresAt) && promoProExpiresAt >= Date.now();
+    const isPaid =
+      tier === "pro" || tier === "pro_yearly" || hasPartnerPro || hasPromoPro;
 
     // Free plan button: logged-in users go straight to Study builder
     if (isFreePlan) {

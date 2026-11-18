@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>DentAIstudy Pro Promotion</title>
+    <meta
+      name="description"
+      content="Activate a limited DentAIstudy Pro exam promotion."
+    />
+    <meta name="robots" content="noindex,nofollow" />
+
+    <link rel="stylesheet" href="assets/css/style-v3.css" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon-512.png" />
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+      defer
+    ></script>
+    <script src="assets/js/auth-client.js" defer></script>
+    <script src="assets/js/promo-access.js" defer></script>
+    <script src="assets/js/main.js" defer></script>
+  </head>
+
+  <body>
+    <div class="main-wrapper">
+      <header class="site-header">
+        <div class="container header-inner">
+          <button class="menu-toggle" aria-label="Open menu">
+            <span></span><span></span><span></span>
+          </button>
+
+          <a class="brand" href="index.html">
+            <span>Dent</span><span>AIstudy</span>
+          </a>
+
+          <nav class="header-nav">
+            <a href="subjects.html">Subjects</a>
+            <a href="exams.html">Exams</a>
+            <a href="study-library.html">Library</a>
+            <a href="blogs.html">Blogs</a>
+            <a href="pricing.html">Pricing</a>
+          </nav>
+
+          <div class="header-right">
+            <a href="login.html" class="btn btn-outline header-login">Log in</a>
+            <a href="signup.html" class="btn btn-primary header-signup">
+              Sign up
+            </a>
+          </div>
+        </div>
+      </header>
+
+      <div class="slide-nav-backdrop"></div>
+      <nav class="slide-nav">
+        <div class="slide-nav-links">
+          <a href="subjects.html"><span>Subjects</span></a>
+          <a href="exams.html"><span>Exams</span></a>
+          <a href="study-library.html"><span>Library</span></a>
+          <a href="blogs.html"><span>Blogs</span></a>
+          <a href="pricing.html"><span>Pricing</span></a>
+          <div class="slide-nav-divider" role="separator" aria-hidden="true"></div>
+          <a href="login.html" class="slide-login-link"><span>Log in</span></a>
+        </div>
+      </nav>
+
+      <main class="auth-container">
+        <div class="auth-card">
+          <div class="auth-logo-circle">
+            <img src="assets/img/favicon.png" alt="DentAIstudy logo" />
+          </div>
+
+          <h1 class="auth-title" id="promo-title">DentAIstudy Pro promotion</h1>
+          <p class="auth-subtitle" id="promo-subtitle">
+            Checking this promotion…
+          </p>
+
+          <div class="auth-form">
+            <a
+              class="auth-submit btn btn-primary"
+              id="promo-primary"
+              href="index.html"
+              hidden
+            >
+              Continue to DentAIstudy
+            </a>
+
+            <p class="auth-switch" id="promo-secondary" hidden>
+              New to DentAIstudy?
+              <a id="promo-secondary-link" href="signup.html">Create an account</a>
+            </p>
+
+            <p class="auth-terms" id="promo-note">
+              No card is required. Promotional access does not renew or charge
+              automatically.
+            </p>
+          </div>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

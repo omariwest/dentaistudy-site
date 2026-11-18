@@ -23,6 +23,70 @@ const MAX_OUTPUT_TOKENS_QA = 6000;
 const MAX_OUTPUT_TOKENS_DEEP = 12000;
 const GEMINI_EXAM_COACH_MODEL = "gemini-2.5-flash-lite";
 const GEMINI_STUDY_MODEL = "gemini-3.5-flash-lite";
+
+type GeminiUsageEvent = {
+model: string;
+promptTokens: number;
+outputTokens: number;
+thinkingTokens: number;
+estimatedCostUsd: number;
+};
+type GeminiUsageObserver = (usage: GeminiUsageEvent) => Promise<void>;
+
+function estimateGeminiCostUsd(
+model: string,
+promptTokens: number,
+outputTokens: number,
+thinkingTokens: number,
+): number {
+const rates =
+model === "gemini-3.5-flash-lite"
+? { input: 0.30, output: 2.50 }
+: { input: 0.10, output: 0.40 };
+const inputCost = Math.max(0, promptTokens) * rates.input / 1_000_000;
+const outputCost =
+(Math.max(0, outputTokens) + Math.max(0, thinkingTokens)) *
+rates.output /
+1_000_000;
+return Number((inputCost + outputCost).toFixed(8));
+}
+
+async function reportGeminiUsage(
+observer: GeminiUsageObserver | undefined,
+model: string,
+usageMetadata: any,
+): Promise<void> {
+if (!observer || !usageMetadata) return;
+const promptTokens = Math.max(
+0,
+Number(usageMetadata?.promptTokenCount ?? 0) || 0,
+);
+const outputTokens = Math.max(
+0,
+Number(usageMetadata?.candidatesTokenCount ?? 0) || 0,
+);
+const thinkingTokens = Math.max(
+0,
+Number(usageMetadata?.thoughtsTokenCount ?? 0) || 0,
+);
+try {
+await observer({
+model,
+promptTokens,
+outputTokens,
+thinkingTokens,
+estimatedCostUsd: estimateGeminiCostUsd(
+model,
+promptTokens,
+outputTokens,
+thinkingTokens,
+),
+});
+} catch (error) {
+console.error("PROMO_USAGE_RECORD_FAILED", error);
+}
+}
+
 const NOTES_SINGLE_PASS_CHAR_LIMIT = 150_000;
 const LARGE_NOTES_MAX_CONTEXT_CHARS = 150_000;
 const LARGE_NOTES_OUTPUT_TOKENS = 14_000;
@@ -352,6 +416,7 @@ responseSchema?: unknown;
 enableThinking?: boolean;
 thinkingBudget?: number;
 ensureCompleteMarkdown?: boolean;
+onUsage?: GeminiUsageObserver;
 }): Promise<string> {
 const systemText = options.messages
 .filter((m) => m.role === "system")
@@ -406,6 +471,7 @@ raw: raw.slice(0, 500),
 },
 );
 }
+await reportGeminiUsage(options.onUsage, options.model, json?.usageMetadata);
 const candidate = json?.candidates?.[0];
 const parts = candidate?.content?.parts;
 let content = Array.isArray(parts)
@@ -466,6 +532,11 @@ const continuationJson = continuationRaw
 ? JSON.parse(continuationRaw)
 : null;
 if (!continuationRes.ok) break;
+await reportGeminiUsage(
+options.onUsage,
+options.model,
+continuationJson?.usageMetadata,
+);
 const continuationCandidate = continuationJson?.candidates?.[0];
 const continuationParts = continuationCandidate?.content?.parts;
 if (!Array.isArray(continuationParts)) break;
@@ -493,6 +564,7 @@ responseSchema?: unknown;
 enableThinking?: boolean;
 thinkingBudget?: number;
 ensureCompleteMarkdown?: boolean;
+onUsage?: GeminiUsageObserver;
 }): Promise<string> {
 try {
 return await generateGeminiText({
@@ -505,6 +577,7 @@ responseSchema: options.responseSchema,
 enableThinking: options.enableThinking,
 thinkingBudget: options.thinkingBudget,
 ensureCompleteMarkdown: options.ensureCompleteMarkdown,
+onUsage: options.onUsage,
 });
 } catch (e: any) {
 const status = Number(e?.status ?? null);
@@ -521,6 +594,7 @@ responseMimeType: options.responseMimeType,
 responseSchema: options.responseSchema,
 thinkingBudget: options.thinkingBudget,
 ensureCompleteMarkdown: options.ensureCompleteMarkdown,
+onUsage: options.onUsage,
 });
 }
 throw e;
@@ -590,6 +664,7 @@ return result;
 async function generateCoachStructured(
 messages: GeminiMessage[],
 maxOutputTokens: number,
+onUsage?: GeminiUsageObserver,
 ): Promise<string> {
 const system = messages.filter((message) => message.role === "system")
 .map((message) => message.content).join("\n\n");
@@ -647,6 +722,11 @@ continue;
 }
 if (raw.length > 120000) { lastReason = "RAW_TOO_LARGE"; continue; }
 const data = JSON.parse(raw);
+await reportGeminiUsage(
+onUsage,
+GEMINI_EXAM_COACH_MODEL,
+data?.usageMetadata,
+);
 const candidate = data?.candidates?.[0];
 const finishReason = String(candidate?.finishReason || "");
 const text = Array.isArray(candidate?.content?.parts)
@@ -965,6 +1045,7 @@ async function topUpFlashcards(params: {
 sourceText: string;
 existingFronts: string[];
 needed: number;
+onUsage?: GeminiUsageObserver;
 }): Promise<Array<{ front: string; back: string }>> {
 const avoidList = params.existingFronts
 .slice(0, 30)
@@ -977,6 +1058,7 @@ temperature: 0.4,
 maxOutputTokens: Math.min(6000, Math.max(1800, params.needed * 260 + 500)),
 responseMimeType: "application/json",
 responseSchema: FLASHCARD_RESPONSE_SCHEMA,
+onUsage: params.onUsage,
 messages: [
 {
 role: "system",
@@ -1008,6 +1090,7 @@ sourceText: string;
 existingQuestions: string[];
 needed: number;
 difficulty: string;
+onUsage?: GeminiUsageObserver;
 }): Promise<ReturnType<typeof normalizeQuizQuestions>> {
 const avoidList = params.existingQuestions
 .slice(0, 30)
@@ -1020,6 +1103,7 @@ temperature: params.difficulty === "hard" ? 0.35 : 0.25,
 maxOutputTokens: Math.min(8000, Math.max(2000, params.needed * 380 + 500)),
 responseMimeType: "application/json",
 responseSchema: QUIZ_RESPONSE_SCHEMA,
+onUsage: params.onUsage,
 messages: [
 {
 role: "system",
@@ -1240,6 +1324,7 @@ if (data?.user) userId = data.user.id;
 let subscriptionTier = "free";
 let isProUser = false;
 let quotaUserMeta: any = null;
+let activePromoCode: string | null = null;
 if (userId) {
 const { data } = await supabaseAdmin.auth.admin.getUserById(userId);
 if (data?.user) {
@@ -1253,11 +1338,47 @@ const partnerProExpiresAt = partnerProUntil
 const hasPartnerPro =
 Number.isFinite(partnerProExpiresAt) &&
 partnerProExpiresAt >= Date.now();
-const isPro = tier === "pro" || tier === "pro_yearly" || hasPartnerPro;
-subscriptionTier = hasPartnerPro && tier === "free" ? "pro" : tier;
+
+const promoProUntil = String(appMeta.promo_pro_until || "").trim();
+const promoProExpiresAt = promoProUntil
+? Date.parse(promoProUntil)
+: Number.NaN;
+const hasPromoPro =
+appMeta.promo_program === true &&
+Number.isFinite(promoProExpiresAt) &&
+promoProExpiresAt >= Date.now();
+activePromoCode =
+hasPromoPro && tier === "free" && !hasPartnerPro
+? String(appMeta.promo_code || "").trim().toUpperCase() || null
+: null;
+
+const isPro =
+tier === "pro" ||
+tier === "pro_yearly" ||
+hasPartnerPro ||
+hasPromoPro;
+subscriptionTier =
+(hasPartnerPro || hasPromoPro) && tier === "free" ? "pro" : tier;
 isProUser = isPro;
 }
 }
+
+const promoUsageObserver: GeminiUsageObserver | undefined =
+userId && activePromoCode
+? async (usage) => {
+const { error } = await supabaseAdmin.rpc("promo_record_ai_usage", {
+p_user_id: userId,
+p_code: activePromoCode,
+p_task: task,
+p_model: usage.model,
+p_prompt_tokens: usage.promptTokens,
+p_output_tokens: usage.outputTokens,
+p_thinking_tokens: usage.thinkingTokens,
+p_estimated_cost_usd: usage.estimatedCostUsd,
+});
+if (error) throw error;
+}
+: undefined;
 if (
 (task === "flashcards" ||
 task === "quiz" ||
@@ -1404,6 +1525,7 @@ headers: { ...corsHeaders, "Content-Type": "application/json" },
 let studyMap = await generateGeminiTextWithFallback({
 model: GEMINI_STUDY_MODEL,
 fallbackModel: GEMINI_EXAM_COACH_MODEL,
+onUsage: promoUsageObserver,
 thinkingBudget: 0,
 ensureCompleteMarkdown: true,
 temperature: 0.3,
@@ -1458,6 +1580,7 @@ headers: { ...corsHeaders, "Content-Type": "application/json" },
 let notes = await generateGeminiTextWithFallback({
 model: GEMINI_STUDY_MODEL,
 fallbackModel: GEMINI_EXAM_COACH_MODEL,
+onUsage: promoUsageObserver,
 thinkingBudget: 0,
 ensureCompleteMarkdown: true,
 temperature: 0.25,
@@ -1512,6 +1635,7 @@ Math.max(3200, requestedCardCount * 220 + 600),
 const aiText = await generateGeminiTextWithFallback({
 model: GEMINI_STUDY_MODEL,
 fallbackModel: GEMINI_EXAM_COACH_MODEL,
+onUsage: promoUsageObserver,
 temperature: 0.38,
 maxOutputTokens: flashcardMaxTokens,
 responseMimeType: "application/json",
@@ -1557,6 +1681,7 @@ const topUp = await topUpFlashcards({
 sourceText,
 existingFronts: cards.map((card) => card.front),
 needed: Math.min(MAX_FLASHCARD_COUNT, needed + countBuffer(needed)),
+onUsage: promoUsageObserver,
 });
 const seen = new Set(cards.map((card) => card.front.toLowerCase()));
 for (const card of topUp) {
@@ -1646,6 +1771,7 @@ Math.max(4600, requestedQuestionCount * 380 + 600),
 const aiText = await generateGeminiTextWithFallback({
 model: GEMINI_STUDY_MODEL,
 fallbackModel: GEMINI_EXAM_COACH_MODEL,
+onUsage: promoUsageObserver,
 temperature: difficulty === "hard" ? 0.35 : 0.25,
 maxOutputTokens: quizMaxTokens,
 responseMimeType: "application/json",
@@ -1691,6 +1817,7 @@ sourceText,
 existingQuestions: questions.map((question) => question.question),
 needed: Math.min(MAX_QUIZ_COUNT, needed + countBuffer(needed)),
 difficulty,
+onUsage: promoUsageObserver,
 });
 const seen = new Set(
 questions.map((question) => question.question.toLowerCase()),
@@ -1943,7 +2070,11 @@ const coachMessages = finalMessages.filter((message) =>
 message.role !== "assistant" ||
 ! /^(?:Something went wrong:|Error:)/i.test(message.content.trim()));
 try {
-const content = await generateCoachStructured(coachMessages, mcqScaledTokens);
+const content = await generateCoachStructured(
+coachMessages,
+mcqScaledTokens,
+promoUsageObserver,
+);
 return new Response(JSON.stringify({ content }), {
 status: 200,
 headers: { ...corsHeaders, "Content-Type": "application/json" },
