@@ -1347,7 +1347,8 @@ const hasPromoPro =
 appMeta.promo_program === true &&
 Number.isFinite(promoProExpiresAt) &&
 promoProExpiresAt >= Date.now();
-activePromoCode = hasPromoPro
+activePromoCode =
+hasPromoPro && tier === "free" && !hasPartnerPro
 ? String(appMeta.promo_code || "").trim().toUpperCase() || null
 : null;
 
