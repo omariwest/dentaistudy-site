@@ -2,6 +2,69 @@
 window.BLOG_REGISTRY = window.BLOG_REGISTRY || [];
 window.BLOG_REGISTRY.push(
   {
+    title: "ORE Exam Dates 2027: Part 1 and Part 2 Confirmed Sittings",
+    url: "blogs/ore/ore-exam-dates-2027.html",
+    tag: "ORE",
+    description:
+      "Confirmed ORE Part 1 and Part 2 sittings for early 2027, with current places, fees and booking rules.",
+    meta: "10 min read • ORE exam",
+    category: "ore 2027 ore exam dates 2027",
+  },
+  {
+    title: "ORE Part 1 Booking 2027: February/April Dates and Exam Seats",
+    url: "blogs/ore/ore-part-1-booking-2027.html",
+    tag: "ORE",
+    description:
+      "ORE Part 1 booking 2027: February and April sittings, 600 seats per sitting, MyGDC booking rules, fee, venues and priority considerations.",
+    meta: "9 min read • ORE exam",
+    category: "ore 2027 ore part 1 booking 2027",
+  },
+  {
+    title: "ORE Part 2 Booking 2027: January, March and April Sittings",
+    url: "blogs/ore/ore-part-2-booking-2027.html",
+    tag: "ORE",
+    description:
+      "ORE Part 2 booking 2027: January, March and April sittings, 200 seats each, current fee, priority booking, MyGDC rules and five-year deadline.",
+    meta: "8 min read • ORE exam",
+    category: "ore 2027 ore part 2 booking 2027",
+  },
+  {
+    title: "ORE Exam Fees 2027: Part 1, Part 2 and Total Exam Costs",
+    url: "blogs/ore/ore-exam-fees-2027.html",
+    tag: "ORE",
+    description:
+      "Current ORE fees for 2027 planning, including application, Part 1, Part 2, Medical Emergencies retake, refunds and total-cost planning.",
+    meta: "12 min read • ORE exam",
+    category: "ore 2027 ore exam fees 2027",
+  },
+  {
+    title: "ORE Booking 2027: MyGDC, Waiting for Seats and Cancellations",
+    url: "blogs/ore/ore-booking-system-2027.html",
+    tag: "ORE",
+    description:
+      "How the GDC ORE booking system works in 2027: MyGDC access, preview and payment windows, priority access, cancellations and reopened seats.",
+    meta: "14 min read • ORE exam",
+    category: "ore 2027 ore booking system 2027",
+  },
+  {
+    title: "ORE 2027 Changes: UCL Exam Provider, Capacity and New Booking",
+    url: "blogs/ore/ore-2027-ucl-booking-changes.html",
+    tag: "ORE",
+    description:
+      "ORE 2027 changes under UCL Consultants: expanded capacity, current fees, MyGDC booking, the announced new portal and unchanged candidate rules.",
+    meta: "11 min read • ORE exam",
+    category: "ore 2027 ore 2027 ucl booking changes",
+  },
+  {
+    title: "ORE Priority Booking 2027: Five-Year Limit & Refugee Arrangements",
+    url: "blogs/ore/ore-priority-booking-2027.html",
+    tag: "ORE",
+    description:
+      "Official GDC rules for ORE priority booking in 2027: the five-year Part 2 deadline, refugee arrangements, current payment guidance, fees and steps.",
+    meta: "15 min read • ORE exam",
+    category: "ore 2027 ore priority booking 2027",
+  },
+  {
     title: "ORE 2026 – Complete Guide for Overseas Dentists",
     url: "blogs/ore/ore-2026-complete-guide.html",
     tag: "ORE",
