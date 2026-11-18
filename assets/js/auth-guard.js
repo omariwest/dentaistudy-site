@@ -49,6 +49,28 @@ function hasActivePartnerPro(appMeta) {
   return Number.isFinite(expiresAt) && expiresAt >= Date.now();
 }
 
+function hasActivePromoPro(appMeta) {
+  if (appMeta?.promo_program !== true) return false;
+
+  const value = String(appMeta?.promo_pro_until || "").trim();
+  if (!value) return false;
+
+  const expiresAt = Date.parse(value);
+  return Number.isFinite(expiresAt) && expiresAt >= Date.now();
+}
+
+function formatPromoExpiry(appMeta) {
+  const value = String(appMeta?.promo_pro_until || "").trim();
+  const expiresAt = value ? new Date(value) : null;
+  if (!expiresAt || !Number.isFinite(expiresAt.getTime())) return "";
+
+  return expiresAt.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
 function readCachedStudyIdentity() {
   try {
     const raw = localStorage.getItem(DAS_STUDY_IDENTITY_CACHE_KEY);
@@ -509,10 +531,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Plan / subscription tier (provider-neutral)
     const subscriptionTier = appMeta.subscription_tier || "free";
     const partnerProActive = hasActivePartnerPro(appMeta);
-    const isPaidPlan = isDasProTier(subscriptionTier) || partnerProActive;
+    const promoProActive = hasActivePromoPro(appMeta);
+    const isPaidPlan =
+      isDasProTier(subscriptionTier) || partnerProActive || promoProActive;
     const isPartnerGrantedPro =
       partnerProActive && !isDasProTier(subscriptionTier);
-    const effectiveTier = isPartnerGrantedPro ? "pro" : subscriptionTier;
+    const isPromoGrantedPro =
+      promoProActive &&
+      !partnerProActive &&
+      !isDasProTier(subscriptionTier);
+    const effectiveTier =
+      isPartnerGrantedPro || isPromoGrantedPro ? "pro" : subscriptionTier;
 
     // Expose the effective entitlement for other modules (composer, etc.)
     window.DentAIUser = { tier: effectiveTier, isPro: isPaidPlan };
@@ -523,6 +552,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       subscriptionTier,
       fromAppMeta: appMeta.subscription_tier,
       partnerProActive,
+      promoProActive,
       isPaidPlan,
     });
 
@@ -1053,6 +1083,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       );
       const partnerBillingMessage =
         "Your Pro access is included with the DentAIstudy Partner Program. No billing action is needed.";
+      const promoExpiryLabel = formatPromoExpiry(appMeta);
+      const promoBillingMessage = promoExpiryLabel
+        ? `Your Pro access is included through a DentAIstudy exam promotion until ${promoExpiryLabel}. Billing and cancellation are unavailable for promotional access. No payment method is connected.`
+        : "Your Pro access is included through a DentAIstudy exam promotion. Billing and cancellation are unavailable for promotional access. No payment method is connected.";
 
       const deleteAccountBtn = document.getElementById("delete-account-btn");
       const deleteAccountStatus = document.getElementById(
@@ -1071,6 +1105,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (settingsPlanNote && settingsPlanUpgrade && settingsPlanManage) {
         if (isPartnerGrantedPro) {
           settingsPlanNote.textContent = partnerBillingMessage;
+          settingsPlanUpgrade.style.display = "none";
+          settingsPlanManage.style.display = "flex";
+        } else if (isPromoGrantedPro) {
+          settingsPlanNote.textContent = promoBillingMessage;
           settingsPlanUpgrade.style.display = "none";
           settingsPlanManage.style.display = "flex";
         } else if (isPaidPlan) {
@@ -1108,13 +1146,29 @@ document.addEventListener("DOMContentLoaded", async () => {
         '[data-das-manage-plan="cancel"]',
       );
 
+      if (isPromoGrantedPro) {
+        [billingBtn, cancelBtn].forEach((button) => {
+          if (!button) return;
+          button.disabled = true;
+          button.setAttribute("aria-disabled", "true");
+          button.title =
+            "Unavailable for promotional Pro access. No billing account is connected.";
+        });
+        setManageStatus(promoBillingMessage);
+      }
+
       // Paddle IDs should be stored by your webhook (see server edit below)
       const paddleCustomerId =
         meta.paddle_customer_id || appMeta.paddle_customer_id || null;
 
       // After paddleCustomerId/paddleSubscriptionId are computed (inside isSettings block)
       try {
-        if (window.Paddle && !window.dasPaddleInitialized) {
+        if (
+          window.Paddle &&
+          !window.dasPaddleInitialized &&
+          !isPartnerGrantedPro &&
+          !isPromoGrantedPro
+        ) {
           window.Paddle.Initialize({
             token: "live_5dddba89244dee1c26f561c5b75",
             pwCustomer: paddleCustomerId?.startsWith("ctm_")
@@ -1136,6 +1190,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
           if (isPartnerGrantedPro) {
             setManageStatus(partnerBillingMessage);
+            return;
+          }
+          if (isPromoGrantedPro) {
+            setManageStatus(promoBillingMessage);
             return;
           }
 
@@ -1227,7 +1285,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             console.error("[billing] failed", err);
             setManageStatus("Couldn’t open billing portal. Try again.", true);
           } finally {
-            billingBtn.disabled = false;
+            billingBtn.disabled = isPromoGrantedPro;
             billingBtn.textContent = oldText;
           }
         });
@@ -1239,6 +1297,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
           if (isPartnerGrantedPro) {
             setManageStatus(partnerBillingMessage);
+            return;
+          }
+          if (isPromoGrantedPro) {
+            setManageStatus(promoBillingMessage);
             return;
           }
 
@@ -1340,7 +1402,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             console.error("[cancel] failed", err);
             setManageStatus("Couldn't open billing portal. Try again.", true);
           } finally {
-            cancelBtn.disabled = false;
+            cancelBtn.disabled = isPromoGrantedPro;
             cancelBtn.textContent = oldText;
           }
         });
