@@ -55,10 +55,18 @@ document.addEventListener("DOMContentLoaded", () => {
     showMessage("Creating your account...");
 
     try {
+      const destination =
+        window.dasGetSafeAuthNext?.("study.html") || "study.html";
+      const emailRedirectTo = new URL(
+        destination,
+        window.location.origin,
+      ).toString();
+
       const { data, error } = await window.dasSupabase.auth.signUp({
         email,
         password,
         options: {
+          emailRedirectTo,
           // 🔹 User metadata stored on signup
           data: {
             full_name: fullName,
@@ -108,8 +116,6 @@ document.addEventListener("DOMContentLoaded", () => {
           "success",
         );
         setTimeout(() => {
-          const destination =
-            window.dasGetSafeAuthNext?.("study.html") || "study.html";
           window.dasClearPendingAuthNext?.();
           window.location.href = destination;
         }, 1200);
