@@ -121,7 +121,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   titleEl.textContent = `90 days of DentAIstudy Pro for ${cohortLabels[code]} candidates`;
 
   try {
-    const statusResult = await callPromo("status", null);
+    const { data: sessionData } = await window.dasSupabase.auth.getSession();
+    const session = sessionData?.session || null;
+    const statusResult = await callPromo("status", session);
     const status = statusResult.data;
 
     if (!statusResult.response.ok || !status) {
@@ -145,9 +147,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     subtitleEl.textContent =
       "Activate 90 days of full DentAIstudy Pro access. No card, no charge, and no automatic renewal.";
-
-    const { data: sessionData } = await window.dasSupabase.auth.getSession();
-    const session = sessionData?.session || null;
 
     if (!session) {
       showSignedOutActions();
