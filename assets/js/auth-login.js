@@ -87,7 +87,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
       showMessage("Logged in. Redirecting to your workspace...", "success");
       // go to Study builder after login
-      window.location.href = "study.html";
+      const destination =
+        window.dasGetSafeAuthNext?.("study.html") || "study.html";
+      window.dasClearPendingAuthNext?.();
+      window.location.href = destination;
     } catch (err) {
       console.error(err);
       showMessage("Something went wrong. Please try again.", "error");
