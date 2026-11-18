@@ -1,6 +1,6 @@
 -- DentAIstudy Task 47: 90-day exam cohort promotional Pro access
 -- Private operational data: browser roles receive no direct table/function access.
--- Founder QA emails are reusable across all three cohort links and are excluded from seat caps and the global spend guard.
+-- The founder QA account is reusable across all three cohort links and is excluded from seat caps and the global spend guard.
 
 create extension if not exists pg_cron;
 grant usage on schema cron to postgres;
