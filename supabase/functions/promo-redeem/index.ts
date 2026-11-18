@@ -4,6 +4,11 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SUPABASE_SERVICE_ROLE_KEY =
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 
+const TEST_EMAILS = new Set([
+  "amarsaaliomer@gmail.com",
+  "ammarsaifaldeen2@gmail.com",
+]);
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -73,9 +78,21 @@ Deno.serve(async (req) => {
     const { count: redemptionCount, error: countError } = await admin
       .from("promo_redemptions")
       .select("id", { count: "exact", head: true })
-      .eq("code", code);
+      .eq("code", code)
+      .eq("is_test", false);
 
     if (countError) throw countError;
+
+    const authHeader = req.headers.get("Authorization") ?? "";
+    let authenticatedUser: any = null;
+    if (authHeader.toLowerCase().startsWith("bearer ")) {
+      const jwt = authHeader.slice(7).trim();
+      const { data: userData } = await admin.auth.getUser(jwt);
+      authenticatedUser = userData?.user ?? null;
+    }
+    const isTestAccount = TEST_EMAILS.has(
+      String(authenticatedUser?.email ?? "").trim().toLowerCase(),
+    );
 
     const experiment =
       stateData && typeof stateData === "object" ? stateData : {};
@@ -84,6 +101,16 @@ Deno.serve(async (req) => {
     const atCap = Number(redemptionCount ?? 0) >= currentCap;
 
     if (action === "status") {
+      if (isTestAccount) {
+        return json({
+          ok: true,
+          available: true,
+          state: "available",
+          cohort: promoCode.cohort,
+          test_account: true,
+        });
+      }
+
       if (status === "closed") {
         return json({
           ok: true,
@@ -120,16 +147,8 @@ Deno.serve(async (req) => {
       return json({ error: "Unsupported promotion action." }, 400);
     }
 
-    const authHeader = req.headers.get("Authorization") ?? "";
-    if (!authHeader.toLowerCase().startsWith("bearer ")) {
-      return json({ ok: false, reason: "AUTH_REQUIRED" }, 401);
-    }
-
-    const jwt = authHeader.slice(7).trim();
-    const { data: userData, error: userError } = await admin.auth.getUser(jwt);
-    const user = userData?.user;
-
-    if (userError || !user) {
+    const user = authenticatedUser;
+    if (!user) {
       return json({ ok: false, reason: "AUTH_REQUIRED" }, 401);
     }
 
@@ -140,13 +159,13 @@ Deno.serve(async (req) => {
 
     const { data: existing, error: existingError } = await admin
       .from("promo_redemptions")
-      .select("code,cohort,expires_at")
+      .select("code,cohort,expires_at,is_test")
       .eq("user_id", user.id)
       .maybeSingle();
 
     if (existingError) throw existingError;
 
-    if (existing) {
+    if (existing && !(isTestAccount && existing.is_test === true)) {
       const expiresAt = String(existing.expires_at);
       const metadata = {
         ...appMeta,
@@ -230,6 +249,7 @@ Deno.serve(async (req) => {
       promo_cohort: redeemed.cohort,
       promo_redeemed_at: new Date().toISOString(),
       promo_pro_until: expiresAt,
+      promo_test_account: redeemed.is_test === true,
     };
 
     const { error: metadataError } = await admin.auth.admin.updateUserById(
@@ -247,6 +267,7 @@ Deno.serve(async (req) => {
       code: redeemed.code,
       cohort: redeemed.cohort,
       expires_at: expiresAt,
+      test_account: redeemed.is_test === true,
     });
   } catch (error) {
     console.error("[promo-redeem]", error);
