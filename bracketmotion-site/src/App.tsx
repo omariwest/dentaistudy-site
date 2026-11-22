@@ -883,11 +883,23 @@ function ClinicalAiReviewCard({
   planningReady,
   planApproved,
   setupApproved,
+  sessionActive,
+  review,
+  loading,
+  error,
+  onRun,
+  onSignIn,
 }: {
   mode: AiReviewMode;
   planningReady: boolean;
   planApproved: boolean;
   setupApproved: boolean;
+  sessionActive: boolean;
+  review: ClinicalAiReviewResult | null;
+  loading: boolean;
+  error: string;
+  onRun: () => void;
+  onSignIn: () => void;
 }) {
   const stageMode = mode === "stage_review";
   const gateReady = stageMode
@@ -903,12 +915,25 @@ function ClinicalAiReviewCard({
             {stageMode ? "Mechanics review" : "Clinical plan review"}
           </h2>
         </div>
-        <span className="ai-review-status">Authentication pending</span>
+        <span
+          className={`ai-review-status${sessionActive && gateReady ? " is-ready" : ""}${error ? " is-error" : ""}`}
+        >
+          {loading
+            ? "Reviewing…"
+            : error
+              ? "Review unavailable"
+              : sessionActive
+                ? gateReady
+                  ? "Ready"
+                  : "Gate locked"
+                : "Sign in required"}
+        </span>
       </div>
 
       <p className="ai-review-card__intro">
-        BracketMotion can send a structured case to the authenticated server-side
-        reasoning endpoint and receive a source-grounded draft for clinician review.
+        BracketMotion sends only the structured case to the authenticated server-side
+        reasoning endpoint. The returned draft stays separate from clinician approvals
+        and 3D geometry.
       </p>
 
       <div className="ai-review-boundaries">
@@ -942,18 +967,67 @@ function ClinicalAiReviewCard({
         <button
           className="ai-review-button"
           type="button"
-          disabled
-          title="Task 10 connects authenticated BracketMotion sessions to this deployed endpoint."
+          disabled={loading || (sessionActive && !gateReady)}
+          onClick={sessionActive ? onRun : onSignIn}
         >
-          Sign in required
+          {!sessionActive
+            ? "Sign in to review"
+            : loading
+              ? "Reviewing…"
+              : review
+                ? "Refresh review"
+                : "Run AI review"}
         </button>
       </div>
 
+      {error && <div className="ai-review-error" role="alert">{error}</div>}
+
+      {review && (
+        <div className="ai-review-output">
+          <div className="ai-review-output__summary">
+            <span>Draft assessment</span>
+            <strong>{review.case_summary || "Clinical review"}</strong>
+            <p>{review.clinical_assessment || "No assessment returned."}</p>
+          </div>
+
+          {!!review.concerns?.length && (
+            <div className="ai-review-output__section">
+              <span>Concerns to review</span>
+              {review.concerns.slice(0, 4).map((concern, index) => (
+                <div className="ai-review-output__item" key={`${concern.issue}-${index}`}>
+                  <strong>{concern.issue || "Clinical concern"}</strong>
+                  <p>{concern.why_it_matters}</p>
+                  {!!concern.source_ids?.length && (
+                    <small>{concern.source_ids.join(" · ")}</small>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {!!review.missing_information?.length && (
+            <div className="ai-review-output__section">
+              <span>Missing information</span>
+              <ul>
+                {review.missing_information.slice(0, 5).map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <div className="ai-review-output__boundary">
+            {review.boundary ||
+              "Draft clinical decision support only. Clinician review is required."}
+          </div>
+        </div>
+      )}
+
       <div className="ai-review-source-note">
-        <strong>Live endpoint deployed</strong>
+        <strong>Controlled endpoint</strong>
         <p>
-          The clinical reasoning service is already server-side and approval-gated.
-          Task 10 only supplies the authenticated BracketMotion session needed to call it safely.
+          Authentication and approval gates are enforced again on the server. A failed
+          review never changes the case, plan approval or setup approval.
         </p>
       </div>
     </section>
@@ -965,6 +1039,12 @@ function TreatmentPlanView({
   scopeIssue,
   plan,
   planApproved,
+  sessionActive,
+  aiReview,
+  aiReviewLoading,
+  aiReviewError,
+  onRunAiReview,
+  onSignIn,
   onPlanChange,
   onApprove,
 }: {
@@ -972,6 +1052,12 @@ function TreatmentPlanView({
   scopeIssue: string;
   plan: TreatmentPlanState;
   planApproved: boolean;
+  sessionActive: boolean;
+  aiReview: ClinicalAiReviewResult | null;
+  aiReviewLoading: boolean;
+  aiReviewError: string;
+  onRunAiReview: () => void;
+  onSignIn: () => void;
   onPlanChange: (field: keyof TreatmentPlanState, value: string) => void;
   onApprove: () => void;
 }) {
@@ -1084,6 +1170,12 @@ function TreatmentPlanView({
         planningReady={planningReady}
         planApproved={planApproved}
         setupApproved={false}
+        sessionActive={sessionActive}
+        review={aiReview}
+        loading={aiReviewLoading}
+        error={aiReviewError}
+        onRun={onRunAiReview}
+        onSignIn={onSignIn}
       />
 
       <section className={`plan-approval-panel${planApproved ? " is-approved" : ""}`}>
@@ -1106,6 +1198,214 @@ function TreatmentPlanView({
         >
           {planApproved ? "Approved" : planComplete ? "Approve clinical plan" : "Complete plan first"}
         </button>
+      </section>
+    </div>
+  );
+}
+
+function AuthDialog({
+  open,
+  session,
+  onClose,
+}: {
+  open: boolean;
+  session: BracketMotionSession | null;
+  onClose: () => void;
+}) {
+  const [mode, setMode] = useState<"login" | "signup">("login");
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    setMessage("");
+    setPassword("");
+  }, [open, mode]);
+
+  if (!open) return null;
+
+  const submit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setMessage("");
+    setLoading(true);
+
+    try {
+      if (mode === "login") {
+        const { error } = await supabase.auth.signInWithPassword({
+          email: email.trim(),
+          password,
+        });
+
+        if (error) throw error;
+        onClose();
+        return;
+      }
+
+      if (!fullName.trim()) {
+        setMessage("Enter your name to create the account.");
+        return;
+      }
+
+      const { data, error } = await supabase.auth.signUp({
+        email: email.trim(),
+        password,
+        options: {
+          emailRedirectTo: new URL("/app", window.location.origin).toString(),
+          data: {
+            full_name: fullName.trim(),
+            default_level: "undergraduate",
+            favorite_subjects: ["operative", "endodontics", "orthodontics"],
+            preferred_output_styles: [
+              "bullet_points",
+              "osce_checklists",
+              "short_notes",
+            ],
+          },
+        },
+      });
+
+      if (error) throw error;
+
+      if (data.session) {
+        onClose();
+      } else {
+        setMessage("Account created. Check your email to confirm it, then sign in.");
+        setMode("login");
+      }
+    } catch (cause) {
+      const raw = cause instanceof Error ? cause.message.toLowerCase() : "";
+      setMessage(
+        raw.includes("invalid login credentials")
+          ? "These details do not match a DentAIstudy account."
+          : raw.includes("user already registered")
+            ? "An account already exists with this email. Sign in instead."
+            : "Authentication failed. Check your details and try again.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const signOut = async () => {
+    setLoading(true);
+    setMessage("");
+
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      onClose();
+    } catch {
+      setMessage("Could not sign out. Try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="auth-dialog-backdrop" role="presentation" onMouseDown={onClose}>
+      <section
+        className="auth-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="auth-dialog-title"
+        onMouseDown={(event) => event.stopPropagation()}
+      >
+        <div className="auth-dialog__header">
+          <div>
+            <span>DentAIstudy account</span>
+            <h2 id="auth-dialog-title">
+              {session ? "Account" : mode === "login" ? "Sign in to BracketMotion" : "Create your account"}
+            </h2>
+          </div>
+          <button type="button" aria-label="Close account dialog" onClick={onClose}>×</button>
+        </div>
+
+        {session ? (
+          <div className="auth-dialog__account">
+            <div>
+              <span>Signed in as</span>
+              <strong>{session.user.email || "DentAIstudy user"}</strong>
+            </div>
+            <p>Your saved BracketMotion cases are private to this Supabase account.</p>
+            {message && <div className="auth-dialog__message is-error">{message}</div>}
+            <button
+              className="app-primary-action"
+              type="button"
+              disabled={loading}
+              onClick={signOut}
+            >
+              {loading ? "Signing out…" : "Sign out"}
+            </button>
+          </div>
+        ) : (
+          <form className="auth-dialog__form" onSubmit={submit}>
+            <p>
+              Use the same account as DentAIstudy. Saved cases and clinical AI calls
+              stay tied to your authenticated user ID.
+            </p>
+
+            {mode === "signup" && (
+              <label>
+                <span>Full name</span>
+                <input
+                  value={fullName}
+                  onChange={(event) => setFullName(event.target.value)}
+                  autoComplete="name"
+                  required
+                  type="text"
+                />
+              </label>
+            )}
+
+            <label>
+              <span>Email</span>
+              <input
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                autoComplete="email"
+                required
+                type="email"
+              />
+            </label>
+
+            <label>
+              <span>Password</span>
+              <input
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                autoComplete={mode === "login" ? "current-password" : "new-password"}
+                minLength={6}
+                required
+                type="password"
+              />
+            </label>
+
+            {message && <div className="auth-dialog__message">{message}</div>}
+
+            <button className="app-primary-action" type="submit" disabled={loading}>
+              {loading
+                ? mode === "login"
+                  ? "Signing in…"
+                  : "Creating account…"
+                : mode === "login"
+                  ? "Sign in"
+                  : "Create account"}
+            </button>
+
+            <button
+              className="auth-dialog__switch"
+              type="button"
+              onClick={() => setMode((current) => current === "login" ? "signup" : "login")}
+            >
+              {mode === "login"
+                ? "Need an account? Create one"
+                : "Already have an account? Sign in"}
+            </button>
+          </form>
+        )}
       </section>
     </div>
   );
