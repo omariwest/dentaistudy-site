@@ -107,7 +107,7 @@ Preview/deployment: Vercel.
 - [x] Add exactly Windows + macOS install buttons.
 - [x] Remove browser-open CTA completely.
 - [x] Add empty demo placeholder.
-- [ ] Publish Task 1 Vercel preview.
+- [x] Publish Task 1 Vercel preview.
 - [ ] User approves Task 1.
 
 ### Task 2 — Header + hero refinement
@@ -150,7 +150,7 @@ Preview/deployment: Vercel.
 
 **Task 1 — Foundation + visual skeleton.**
 
-Stop after Task 1 and wait for user approval.
+Task 1 implementation is complete. Stop and wait for user approval before Task 2.
 
 ## Rule
 
@@ -158,3 +158,9 @@ Stop after Task 1 and wait for user approval.
 2. Update it in GitHub every approved step.
 3. Mark only work that truly exists.
 4. Detailed research stays outside this file.
+
+
+### Task 1 preview
+
+- Vercel: https://bracketmotion-preview-git-bracketmotion-amarsaaliomer-6121.vercel.app
+- Latest verified Task 1 commit: `cc014040d07371aea99199b60b1da542e83fbcc1`
