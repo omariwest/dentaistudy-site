@@ -1780,8 +1780,10 @@ function ScanUploadCard({
 
 export default function ScanWorkflow({
   onSetupApprovalChange,
+  clinicalView = "setup",
 }: {
   onSetupApprovalChange?: (approved: boolean) => void;
+  clinicalView?: "setup" | "stages";
 }) {
   const [assets, setAssets] = useState<ScanAsset[]>([]);
   const [loadingJaw, setLoadingJaw] = useState<Jaw | null>(null);
@@ -2254,6 +2256,24 @@ export default function ScanWorkflow({
     setTargetTransforms(next);
     setSetupApproved(false);
   };
+
+  if (clinicalView === "stages") {
+    return setupApproved ? (
+      <StageWorkspace
+        assets={assets}
+        segments={segments}
+        jawTransforms={jawTransforms}
+        targetTransforms={targetTransforms}
+        applianceLayers={applianceLayers}
+        endpoints={mechanicEndpoints}
+      />
+    ) : (
+      <div className="stage-blocked">
+        <strong>3D setup approval required.</strong>
+        <p>Return to Setup and approve the target before reviewing treatment stages.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="scan-workflow">
