@@ -1870,6 +1870,15 @@ export default function ScanWorkflow({
             <span>02</span>
             Target setup
           </button>
+          <button
+            className={workflowMode === "appliance" ? "is-active" : ""}
+            type="button"
+            disabled={!setupApproved}
+            onClick={() => setWorkflowMode("appliance")}
+          >
+            <span>03</span>
+            Appliances
+          </button>
         </div>
       )}
 
@@ -2078,7 +2087,7 @@ export default function ScanWorkflow({
             </aside>
           </div>
         </div>
-      ) : (
+      ) : workflowMode === "target" ? (
         <div className="target-setup">
           <div className="target-setup__toolbar">
             <div className="target-toolbar-group">
@@ -2341,6 +2350,280 @@ export default function ScanWorkflow({
                   {setupApproved ? "Approved" : "Approve 3D setup"}
                 </button>
               </section>
+            </aside>
+          </div>
+        </div>
+      ) : (
+        <div className="appliance-workspace">
+          <div className="appliance-workspace__toolbar">
+            <div className="appliance-layer-buttons" aria-label="Appliance layers">
+              {(
+                [
+                  ["brackets", "Brackets"],
+                  ["archwire", "Archwire"],
+                  ["powerChain", "Power chain"],
+                  ["coilSpring", "Closed coil"],
+                  ["elastics", "Elastics"],
+                  ["closingLoop", "Closing loop"],
+                ] as Array<[keyof ApplianceLayerState, string]>
+              ).map(([key, label]) => (
+                <button
+                  className={applianceLayers[key] ? "is-active" : ""}
+                  type="button"
+                  onClick={() =>
+                    setApplianceLayers((current) => ({
+                      ...current,
+                      [key]: !current[key],
+                    }))
+                  }
+                  key={key}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="appliance-workspace__body">
+            <div className="appliance-canvas">
+              <Canvas camera={{ fov: 36, near: 0.01, far: 100000 }} dpr={[1, 1.5]}>
+                <color attach="background" args={["#bfc1c9"]} />
+                <TargetSetupScene
+                  assets={assets}
+                  segments={segments}
+                  jawTransforms={jawTransforms}
+                  targetTransforms={targetTransforms}
+                  selectedId={null}
+                  transformMode="translate"
+                  displayTarget
+                  collisionIds={setupAnalysis.collisionIds}
+                  contactIds={setupAnalysis.contactIds}
+                  onSelect={() => undefined}
+                  onTransform={() => undefined}
+                />
+                <ApplianceLayer
+                  assets={assets}
+                  segments={segments}
+                  jawTransforms={jawTransforms}
+                  targetTransforms={targetTransforms}
+                  layers={applianceLayers}
+                  endpoints={mechanicEndpoints}
+                />
+              </Canvas>
+
+              <div className="scan-canvas__hint">
+                Generic fixed-appliance visualization on the approved target · rotate, pan and zoom to inspect
+              </div>
+            </div>
+
+            <aside className="appliance-panel">
+              <div className="appliance-panel__status">
+                <span>Fixed appliance</span>
+                <strong>Generic 0.022 visual model</strong>
+                <small>
+                  Brand-neutral brackets and mechanics. This layer visualizes placement and direction, not exact delivered force.
+                </small>
+              </div>
+
+              <section className="appliance-panel__section">
+                <div className="appliance-panel__heading">
+                  <span>Base appliance</span>
+                  <strong>Full fixed appliance</strong>
+                </div>
+                <div className="appliance-summary-grid">
+                  <div>
+                    <span>Brackets</span>
+                    <strong>{applianceLayers.brackets ? "Shown" : "Hidden"}</strong>
+                  </div>
+                  <div>
+                    <span>Archwire</span>
+                    <strong>{applianceLayers.archwire ? "Shown" : "Hidden"}</strong>
+                  </div>
+                </div>
+              </section>
+
+              <section className="appliance-panel__section">
+                <div className="appliance-panel__heading">
+                  <span>Active mechanics</span>
+                  <strong>Visualization endpoints</strong>
+                </div>
+
+                {applianceLayers.powerChain && (
+                  <div className="mechanic-editor">
+                    <strong>Power chain</strong>
+                    <div className="mechanic-endpoints">
+                      <label>
+                        <span>From</span>
+                        <select
+                          value={mechanicEndpoints.chainStart}
+                          onChange={(event) =>
+                            setMechanicEndpoints((current) => ({
+                              ...current,
+                              chainStart: event.target.value,
+                            }))
+                          }
+                        >
+                          {allSegmentLabels.map((label) => (
+                            <option value={label} key={label}>{label}</option>
+                          ))}
+                        </select>
+                      </label>
+                      <label>
+                        <span>To</span>
+                        <select
+                          value={mechanicEndpoints.chainEnd}
+                          onChange={(event) =>
+                            setMechanicEndpoints((current) => ({
+                              ...current,
+                              chainEnd: event.target.value,
+                            }))
+                          }
+                        >
+                          {sameArchLabels(mechanicEndpoints.chainStart).map((label) => (
+                            <option value={label} key={label}>{label}</option>
+                          ))}
+                        </select>
+                      </label>
+                    </div>
+                  </div>
+                )}
+
+                {applianceLayers.coilSpring && (
+                  <div className="mechanic-editor">
+                    <strong>Closed-coil spring</strong>
+                    <div className="mechanic-endpoints">
+                      <label>
+                        <span>From</span>
+                        <select
+                          value={mechanicEndpoints.coilStart}
+                          onChange={(event) =>
+                            setMechanicEndpoints((current) => ({
+                              ...current,
+                              coilStart: event.target.value,
+                            }))
+                          }
+                        >
+                          {allSegmentLabels.map((label) => (
+                            <option value={label} key={label}>{label}</option>
+                          ))}
+                        </select>
+                      </label>
+                      <label>
+                        <span>To</span>
+                        <select
+                          value={mechanicEndpoints.coilEnd}
+                          onChange={(event) =>
+                            setMechanicEndpoints((current) => ({
+                              ...current,
+                              coilEnd: event.target.value,
+                            }))
+                          }
+                        >
+                          {sameArchLabels(mechanicEndpoints.coilStart).map((label) => (
+                            <option value={label} key={label}>{label}</option>
+                          ))}
+                        </select>
+                      </label>
+                    </div>
+                  </div>
+                )}
+
+                {applianceLayers.elastics && (
+                  <div className="mechanic-editor">
+                    <strong>Interarch elastic</strong>
+                    <div className="mechanic-endpoints">
+                      <label>
+                        <span>Upper</span>
+                        <select
+                          value={mechanicEndpoints.elasticUpper}
+                          onChange={(event) =>
+                            setMechanicEndpoints((current) => ({
+                              ...current,
+                              elasticUpper: event.target.value,
+                            }))
+                          }
+                        >
+                          {upperSegmentLabels.map((label) => (
+                            <option value={label} key={label}>{label}</option>
+                          ))}
+                        </select>
+                      </label>
+                      <label>
+                        <span>Lower</span>
+                        <select
+                          value={mechanicEndpoints.elasticLower}
+                          onChange={(event) =>
+                            setMechanicEndpoints((current) => ({
+                              ...current,
+                              elasticLower: event.target.value,
+                            }))
+                          }
+                        >
+                          {lowerSegmentLabels.map((label) => (
+                            <option value={label} key={label}>{label}</option>
+                          ))}
+                        </select>
+                      </label>
+                    </div>
+                  </div>
+                )}
+
+                {applianceLayers.closingLoop && (
+                  <div className="mechanic-editor">
+                    <strong>Basic closing loop</strong>
+                    <div className="mechanic-endpoints">
+                      <label>
+                        <span>From</span>
+                        <select
+                          value={mechanicEndpoints.loopStart}
+                          onChange={(event) =>
+                            setMechanicEndpoints((current) => ({
+                              ...current,
+                              loopStart: event.target.value,
+                            }))
+                          }
+                        >
+                          {allSegmentLabels.map((label) => (
+                            <option value={label} key={label}>{label}</option>
+                          ))}
+                        </select>
+                      </label>
+                      <label>
+                        <span>To</span>
+                        <select
+                          value={mechanicEndpoints.loopEnd}
+                          onChange={(event) =>
+                            setMechanicEndpoints((current) => ({
+                              ...current,
+                              loopEnd: event.target.value,
+                            }))
+                          }
+                        >
+                          {sameArchLabels(mechanicEndpoints.loopStart).map((label) => (
+                            <option value={label} key={label}>{label}</option>
+                          ))}
+                        </select>
+                      </label>
+                    </div>
+                  </div>
+                )}
+
+                {!applianceLayers.powerChain &&
+                  !applianceLayers.coilSpring &&
+                  !applianceLayers.elastics &&
+                  !applianceLayers.closingLoop && (
+                    <p className="appliance-panel__empty">
+                      Turn on a supported active mechanic from the toolbar to place and inspect it.
+                    </p>
+                  )}
+              </section>
+
+              <div className="appliance-boundary-note">
+                <strong>Visualization boundary</strong>
+                <p>
+                  Brackets, wire, chain, coil, elastics and loop are generic geometry. Exact bracket prescription, force magnitude and biological response are not inferred here.
+                </p>
+              </div>
             </aside>
           </div>
         </div>
