@@ -844,6 +844,7 @@ function TargetSetupScene({
   segments,
   jawTransforms,
   targetTransforms,
+  plannedExtractionIds,
   selectedId,
   transformMode,
   displayTarget,
@@ -856,6 +857,7 @@ function TargetSetupScene({
   segments: ToothSegment[];
   jawTransforms: Record<Exclude<Jaw, "bite">, RigidTransform>;
   targetTransforms: Record<string, RigidTransform>;
+  plannedExtractionIds: Set<string>;
   selectedId: string | null;
   transformMode: SetupMode;
   displayTarget: boolean;
@@ -919,7 +921,11 @@ function TargetSetupScene({
             </mesh>
 
             {segments
-              .filter((segment) => segment.jaw === jaw)
+              .filter(
+                (segment) =>
+                  segment.jaw === jaw &&
+                  (!displayTarget || !plannedExtractionIds.has(segment.id)),
+              )
               .map((segment) => (
                 <TargetTooth
                   asset={asset}
