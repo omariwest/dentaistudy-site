@@ -442,6 +442,103 @@ a {
 }
 
 
+
+
+/* Legal pages */
+.legal-page {
+  min-height: calc(100vh - 200px);
+  padding: clamp(64px, 8vw, 104px) 0 96px;
+}
+
+.legal-content {
+  max-width: 800px;
+}
+
+.legal-header {
+  max-width: 740px;
+  margin: 0 auto 54px;
+  text-align: center;
+}
+
+.legal-header h1 {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(2.8rem, 6vw, 5.2rem);
+  font-weight: 790;
+  line-height: 0.98;
+  letter-spacing: -0.07em;
+}
+
+.legal-updated {
+  margin: 18px 0 0;
+  color: var(--subtle);
+  font-size: 0.84rem;
+}
+
+.legal-updated a {
+  color: var(--accent);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.legal-article {
+  padding: clamp(26px, 5vw, 48px);
+  border: 1px solid rgba(17, 24, 39, 0.075);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 24px 70px rgba(31, 25, 63, 0.055);
+}
+
+.legal-article .legal-intro {
+  margin-top: 0;
+  color: var(--ink);
+  font-size: 1.06rem;
+  font-weight: 520;
+  line-height: 1.72;
+}
+
+.legal-article h2 {
+  margin: 38px 0 12px;
+  color: var(--ink);
+  font-size: 1.22rem;
+  font-weight: 760;
+  line-height: 1.25;
+  letter-spacing: -0.035em;
+}
+
+.legal-article p,
+.legal-article li {
+  color: #374151;
+  font-size: 0.95rem;
+  line-height: 1.78;
+}
+
+.legal-article p {
+  margin: 0 0 14px;
+}
+
+.legal-article ul {
+  margin: 0 0 16px;
+  padding-left: 1.25rem;
+}
+
+.legal-article li + li {
+  margin-top: 7px;
+}
+
+.legal-article a {
+  color: var(--accent);
+  font-weight: 650;
+  text-decoration: underline;
+  text-decoration-color: rgba(109, 76, 245, 0.32);
+  text-underline-offset: 3px;
+}
+
+.legal-article a:hover {
+  color: var(--accent-hover);
+}
+
+
 @media (max-width: 1024px) {
   .header-actions {
     display: none;
@@ -592,6 +689,23 @@ a {
 
   .footer-links a {
     min-height: 42px;
+  }
+
+  .legal-page {
+    padding: 44px 0 64px;
+  }
+
+  .legal-header {
+    margin-bottom: 34px;
+  }
+
+  .legal-article {
+    padding: 24px 20px;
+    border-radius: 22px;
+  }
+
+  .legal-article h2 {
+    margin-top: 32px;
   }
 }
 
