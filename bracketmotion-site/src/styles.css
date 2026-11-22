@@ -3049,6 +3049,177 @@ a {
   outline-offset: 2px;
 }
 
+
+/* Controlled clinical AI review */
+.ai-review-card {
+  width: min(980px, 100%);
+  margin: 0 auto 14px;
+  padding: 16px 18px;
+  border: 1px solid #dfe3e9;
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+.ai-review-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.ai-review-card__header > div {
+  min-width: 0;
+}
+
+.ai-review-card__header > div > span {
+  color: #858d99;
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.ai-review-card__header h2 {
+  margin: 4px 0 0;
+  font-size: 0.86rem;
+  letter-spacing: -0.02em;
+}
+
+.ai-review-status {
+  display: inline-flex;
+  min-height: 28px;
+  flex: 0 0 auto;
+  align-items: center;
+  padding: 0 9px;
+  border-radius: 999px;
+  color: #6d7580;
+  background: #f0f2f5;
+  font-size: 0.57rem;
+  font-weight: 760;
+  white-space: nowrap;
+}
+
+.ai-review-card__intro {
+  margin: 9px 0 0;
+  color: #6f7782;
+  font-size: 0.64rem;
+  line-height: 1.5;
+}
+
+.ai-review-boundaries {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.ai-review-boundaries > div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  padding: 9px 10px;
+  border: 1px solid #e6e8ec;
+  border-radius: 9px;
+  background: #f8f9fb;
+}
+
+.ai-review-boundaries span,
+.ai-review-gate > div > span {
+  color: #858d98;
+  font-size: 0.53rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.ai-review-boundaries strong,
+.ai-review-gate strong {
+  font-size: 0.67rem;
+}
+
+.ai-review-boundaries small {
+  color: #7b838f;
+  font-size: 0.56rem;
+  line-height: 1.4;
+}
+
+.ai-review-gate {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-top: 10px;
+  padding: 10px 11px;
+  border: 1px solid #e2def3;
+  border-radius: 9px;
+  background: #fbfaff;
+}
+
+.ai-review-gate > div {
+  min-width: 0;
+}
+
+.ai-review-gate p {
+  margin: 4px 0 0;
+  color: #747c88;
+  font-size: 0.58rem;
+  line-height: 1.45;
+}
+
+.ai-review-button {
+  min-height: 32px;
+  flex: 0 0 auto;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 7px;
+  color: #ffffff;
+  background: #7b8490;
+  font-size: 0.6rem;
+  font-weight: 740;
+}
+
+.ai-review-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+.ai-review-source-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 9px;
+  color: #737b86;
+  font-size: 0.56rem;
+  line-height: 1.4;
+}
+
+.ai-review-source-note strong {
+  flex: 0 0 auto;
+  color: #58606b;
+  font-size: 0.57rem;
+}
+
+.ai-review-source-note p {
+  margin: 0;
+}
+
+.stage-panel__source-note button {
+  width: 100%;
+  min-height: 31px;
+  margin-top: 8px;
+  border: 0;
+  border-radius: 7px;
+  color: #ffffff;
+  background: #7b8490;
+  font-size: 0.59rem;
+  font-weight: 730;
+}
+
+.stage-panel__source-note button:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
 /* Treatment plan + approval */
 .plan-blocked-card {
   width: min(980px, 100%);
@@ -3385,6 +3556,32 @@ a {
 }
 
 @media (max-width: 640px) {
+  .ai-review-card {
+    padding: 14px 12px;
+  }
+
+  .ai-review-card__header,
+  .ai-review-gate {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .ai-review-status {
+    align-self: flex-start;
+  }
+
+  .ai-review-boundaries {
+    grid-template-columns: 1fr;
+  }
+
+  .ai-review-button {
+    width: 100%;
+  }
+
+  .ai-review-source-note {
+    display: grid;
+  }
+
   .stage-workspace {
     gap: 8px;
     padding: 8px;
