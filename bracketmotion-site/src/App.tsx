@@ -557,12 +557,16 @@ function CaseRecordsView({
 function FindingsView({
   scopeIssue,
   onScopeIssue,
+  findings,
+  onFindingChange,
   planningReady,
   missingCount,
   onBackToCase,
 }: {
   scopeIssue: string;
   onScopeIssue: (value: string) => void;
+  findings: FindingsState;
+  onFindingChange: (field: keyof FindingsState, value: string) => void;
   planningReady: boolean;
   missingCount: number;
   onBackToCase: () => void;
@@ -598,31 +602,31 @@ function FindingsView({
         <div className="finding-grid">
           <label>
             <span>Oral hygiene</span>
-            <select defaultValue="Acceptable"><option>Acceptable</option><option>Concern</option></select>
+            <select value={findings.oralHygiene} onChange={(event) => onFindingChange("oralHygiene", event.target.value)}><option>Acceptable</option><option>Concern</option></select>
           </label>
           <label>
             <span>Gingival / periodontal status</span>
-            <select defaultValue="Healthy"><option>Healthy</option><option>Concern</option></select>
+            <select value={findings.periodontalStatus} onChange={(event) => onFindingChange("periodontalStatus", event.target.value)}><option>Healthy</option><option>Concern</option></select>
           </label>
           <label>
             <span>Active caries / untreated pathology</span>
-            <select defaultValue="No"><option>No</option><option>Yes</option></select>
+            <select value={findings.activeCaries} onChange={(event) => onFindingChange("activeCaries", event.target.value)}><option>No</option><option>Yes</option></select>
           </label>
           <label>
             <span>Restorative / prosthetic considerations</span>
-            <select defaultValue="None"><option>None</option><option>Present</option></select>
+            <select value={findings.restorativeConsiderations} onChange={(event) => onFindingChange("restorativeConsiderations", event.target.value)}><option>None</option><option>Present</option></select>
           </label>
           <label>
             <span>Missing permanent teeth</span>
-            <input defaultValue="None" type="text" />
+            <input value={findings.missingTeeth} onChange={(event) => onFindingChange("missingTeeth", event.target.value)} type="text" />
           </label>
           <label>
             <span>Impacted / unerupted teeth</span>
-            <input defaultValue="None" type="text" />
+            <input value={findings.impactedTeeth} onChange={(event) => onFindingChange("impactedTeeth", event.target.value)} type="text" />
           </label>
           <label className="finding-grid__wide">
             <span>Teeth unsuitable for routine orthodontic movement</span>
-            <input defaultValue="None" type="text" />
+            <input value={findings.unsuitableTeeth} onChange={(event) => onFindingChange("unsuitableTeeth", event.target.value)} type="text" />
           </label>
         </div>
       </section>
@@ -639,23 +643,23 @@ function FindingsView({
         <div className="finding-grid">
           <label>
             <span>Profile</span>
-            <select defaultValue="Straight"><option>Convex</option><option>Straight</option><option>Concave</option></select>
+            <select value={findings.profile} onChange={(event) => onFindingChange("profile", event.target.value)}><option>Convex</option><option>Straight</option><option>Concave</option></select>
           </label>
           <label>
             <span>Lip competence</span>
-            <select defaultValue="Competent"><option>Competent</option><option>Incompetent</option></select>
+            <select value={findings.lipCompetence} onChange={(event) => onFindingChange("lipCompetence", event.target.value)}><option>Competent</option><option>Incompetent</option></select>
           </label>
           <label>
             <span>Facial vertical pattern</span>
-            <select defaultValue="Average"><option>Low</option><option>Average</option><option>High</option></select>
+            <select value={findings.facialVerticalPattern} onChange={(event) => onFindingChange("facialVerticalPattern", event.target.value)}><option>Low</option><option>Average</option><option>High</option></select>
           </label>
           <label>
             <span>Facial asymmetry</span>
-            <select defaultValue="None"><option>None</option><option>Present</option></select>
+            <select value={findings.facialAsymmetry} onChange={(event) => onFindingChange("facialAsymmetry", event.target.value)}><option>None</option><option>Present</option></select>
           </label>
           <label className="finding-grid__wide">
             <span>Smile / incisor display concern</span>
-            <input defaultValue="None" type="text" />
+            <input value={findings.smileConcern} onChange={(event) => onFindingChange("smileConcern", event.target.value)} type="text" />
           </label>
         </div>
       </section>
@@ -672,63 +676,63 @@ function FindingsView({
         <div className="finding-grid">
           <label>
             <span>Molar relationship — right</span>
-            <select defaultValue="Class I"><option>Class I</option><option>Class II</option><option>Class III</option></select>
+            <select value={findings.molarRight} onChange={(event) => onFindingChange("molarRight", event.target.value)}><option>Class I</option><option>Class II</option><option>Class III</option></select>
           </label>
           <label>
             <span>Molar relationship — left</span>
-            <select defaultValue="Class I"><option>Class I</option><option>Class II</option><option>Class III</option></select>
+            <select value={findings.molarLeft} onChange={(event) => onFindingChange("molarLeft", event.target.value)}><option>Class I</option><option>Class II</option><option>Class III</option></select>
           </label>
           <label>
             <span>Canine relationship — right</span>
-            <select defaultValue="Class I"><option>Class I</option><option>Class II</option><option>Class III</option></select>
+            <select value={findings.canineRight} onChange={(event) => onFindingChange("canineRight", event.target.value)}><option>Class I</option><option>Class II</option><option>Class III</option></select>
           </label>
           <label>
             <span>Canine relationship — left</span>
-            <select defaultValue="Class I"><option>Class I</option><option>Class II</option><option>Class III</option></select>
+            <select value={findings.canineLeft} onChange={(event) => onFindingChange("canineLeft", event.target.value)}><option>Class I</option><option>Class II</option><option>Class III</option></select>
           </label>
           <label>
             <span>Overjet</span>
-            <div className="field-with-unit"><input defaultValue="4" type="number" /><small>mm</small></div>
+            <div className="field-with-unit"><input value={findings.overjet} onChange={(event) => onFindingChange("overjet", event.target.value)} type="number" /><small>mm</small></div>
           </label>
           <label>
             <span>Overbite</span>
-            <div className="field-with-unit"><input defaultValue="45" type="number" /><small>%</small></div>
+            <div className="field-with-unit"><input value={findings.overbite} onChange={(event) => onFindingChange("overbite", event.target.value)} type="number" /><small>%</small></div>
           </label>
           <label>
             <span>Maxillary crowding / spacing</span>
-            <div className="field-with-unit"><input defaultValue="-3" type="number" /><small>mm</small></div>
+            <div className="field-with-unit"><input value={findings.maxillaryCrowding} onChange={(event) => onFindingChange("maxillaryCrowding", event.target.value)} type="number" /><small>mm</small></div>
           </label>
           <label>
             <span>Mandibular crowding / spacing</span>
-            <div className="field-with-unit"><input defaultValue="-4" type="number" /><small>mm</small></div>
+            <div className="field-with-unit"><input value={findings.mandibularCrowding} onChange={(event) => onFindingChange("mandibularCrowding", event.target.value)} type="number" /><small>mm</small></div>
           </label>
           <label>
             <span>Upper dental midline to face</span>
-            <input defaultValue="Coincident" type="text" />
+            <input value={findings.upperMidline} onChange={(event) => onFindingChange("upperMidline", event.target.value)} type="text" />
           </label>
           <label>
             <span>Lower dental midline to face</span>
-            <input defaultValue="1 mm left" type="text" />
+            <input value={findings.lowerMidline} onChange={(event) => onFindingChange("lowerMidline", event.target.value)} type="text" />
           </label>
           <label>
             <span>Upper-to-lower midline discrepancy</span>
-            <div className="field-with-unit"><input defaultValue="1" type="number" /><small>mm</small></div>
+            <div className="field-with-unit"><input value={findings.midlineDiscrepancy} onChange={(event) => onFindingChange("midlineDiscrepancy", event.target.value)} type="number" /><small>mm</small></div>
           </label>
           <label>
             <span>Curve of Spee</span>
-            <select defaultValue="Mild"><option>Flat</option><option>Mild</option><option>Moderate</option><option>Deep</option></select>
+            <select value={findings.curveOfSpee} onChange={(event) => onFindingChange("curveOfSpee", event.target.value)}><option>Flat</option><option>Mild</option><option>Moderate</option><option>Deep</option></select>
           </label>
           <label>
             <span>Anterior / posterior crossbite</span>
-            <input defaultValue="None" type="text" />
+            <input value={findings.crossbite} onChange={(event) => onFindingChange("crossbite", event.target.value)} type="text" />
           </label>
           <label>
             <span>Scissor bite</span>
-            <input defaultValue="None" type="text" />
+            <input value={findings.scissorBite} onChange={(event) => onFindingChange("scissorBite", event.target.value)} type="text" />
           </label>
           <label className="finding-grid__wide">
             <span>Important rotations / displacements</span>
-            <input defaultValue="Mild lower anterior rotations." type="text" />
+            <input value={findings.rotations} onChange={(event) => onFindingChange("rotations", event.target.value)} type="text" />
           </label>
         </div>
       </section>
@@ -745,23 +749,23 @@ function FindingsView({
         <div className="finding-grid">
           <label>
             <span>Skeletal AP pattern</span>
-            <select defaultValue="Class I"><option>Class I</option><option>Class II</option><option>Class III</option></select>
+            <select value={findings.skeletalAp} onChange={(event) => onFindingChange("skeletalAp", event.target.value)}><option>Class I</option><option>Class II</option><option>Class III</option></select>
           </label>
           <label>
             <span>Vertical skeletal pattern</span>
-            <select defaultValue="Average"><option>Low</option><option>Average</option><option>High</option></select>
+            <select value={findings.skeletalVertical} onChange={(event) => onFindingChange("skeletalVertical", event.target.value)}><option>Low</option><option>Average</option><option>High</option></select>
           </label>
           <label>
             <span>Maxillary incisors</span>
-            <select defaultValue="Normal"><option>Retroclined</option><option>Normal</option><option>Proclined</option></select>
+            <select value={findings.maxillaryIncisors} onChange={(event) => onFindingChange("maxillaryIncisors", event.target.value)}><option>Retroclined</option><option>Normal</option><option>Proclined</option></select>
           </label>
           <label>
             <span>Mandibular incisors</span>
-            <select defaultValue="Normal"><option>Retroclined</option><option>Normal</option><option>Proclined</option></select>
+            <select value={findings.mandibularIncisors} onChange={(event) => onFindingChange("mandibularIncisors", event.target.value)}><option>Retroclined</option><option>Normal</option><option>Proclined</option></select>
           </label>
           <label className="finding-grid__wide">
             <span>Important cephalometric concern</span>
-            <input defaultValue="None" type="text" />
+            <input value={findings.cephConcern} onChange={(event) => onFindingChange("cephConcern", event.target.value)} type="text" />
           </label>
         </div>
       </section>
