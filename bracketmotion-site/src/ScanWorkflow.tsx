@@ -988,7 +988,11 @@ function ScanUploadCard({
   );
 }
 
-export default function ScanWorkflow() {
+export default function ScanWorkflow({
+  onSetupApprovalChange,
+}: {
+  onSetupApprovalChange?: (approved: boolean) => void;
+}) {
   const [assets, setAssets] = useState<ScanAsset[]>([]);
   const [loadingJaw, setLoadingJaw] = useState<Jaw | null>(null);
   const [error, setError] = useState("");
@@ -1067,6 +1071,10 @@ export default function ScanWorkflow() {
     },
     [],
   );
+
+  useEffect(() => {
+    onSetupApprovalChange?.(setupApproved);
+  }, [onSetupApprovalChange, setupApproved]);
 
   useEffect(() => {
     assetsRef.current = assets;
