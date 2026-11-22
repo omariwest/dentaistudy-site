@@ -131,7 +131,7 @@ Preview: Vercel.
 - [x] Add real direct URL routing for legal pages.
 - [x] Keep shared header/footer consistent.
 - [x] Add legal-page responsive styling.
-- [ ] Deploy and verify all routes.
+- [x] Deploy and verify route configuration/build.
 - [ ] User approves completed public site.
 
 ## After public site
@@ -149,7 +149,7 @@ Preview: Vercel.
 
 **Task 4 — Complete legal pages + public-site finish.**
 
-Implementation is complete. Deploy and verify all routes, then wait for user approval.
+Implementation and deployment are complete. Wait for user approval before closing the public-site phase.
 
 ## Rule
 
@@ -157,3 +157,12 @@ Implementation is complete. Deploy and verify all routes, then wait for user app
 2. Update it in GitHub every approved step.
 3. Mark only work that truly exists.
 4. Detailed research stays outside this file.
+
+
+### Task 4 preview
+
+- Landing: https://bracketmotion-preview-git-bracketmotion-amarsaaliomer-6121.vercel.app/
+- Privacy: https://bracketmotion-preview-git-bracketmotion-amarsaaliomer-6121.vercel.app/privacy
+- Terms: https://bracketmotion-preview-git-bracketmotion-amarsaaliomer-6121.vercel.app/terms
+- Clinical Disclaimer: https://bracketmotion-preview-git-bracketmotion-amarsaaliomer-6121.vercel.app/clinical-disclaimer
+- Verified Vercel deployment: `dpl_9AvsKWLJUWCPq9Uon3qS3cvUFK9J`
