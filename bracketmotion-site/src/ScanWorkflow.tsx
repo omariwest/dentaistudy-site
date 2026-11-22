@@ -1836,22 +1836,34 @@ export default function ScanWorkflow({
           <h2>
             {workflowMode === "segment"
               ? "Import, align and segment the arches."
-              : "Review and approve the final 3D target."}
+              : workflowMode === "target"
+                ? "Review and approve the final 3D target."
+                : "Visualize the fixed appliance on the approved target."}
           </h2>
           <p>
             {workflowMode === "segment"
               ? "STL/PLY files are processed locally in the browser during this workflow."
-              : "Target transforms stay clinician-controlled and are checked against the current aligned scan geometry."}
+              : workflowMode === "target"
+                ? "Target transforms stay clinician-controlled and are checked against the current aligned scan geometry."
+                : "Generic brackets, wire and supported mechanics are layered onto the approved patient geometry."}
           </p>
         </div>
         <div className="scan-workflow__status">
-          <span>{workflowMode === "segment" ? movableCount : setupAnalysis.movedCount}</span>
+          <span>
+            {workflowMode === "segment"
+              ? movableCount
+              : workflowMode === "target"
+                ? setupAnalysis.movedCount
+                : Object.values(applianceLayers).filter(Boolean).length}
+          </span>
           <small>
             {workflowMode === "segment"
               ? "movable tooth segments"
-              : setupApproved
-                ? "setup approved"
-                : "teeth moved in target"}
+              : workflowMode === "target"
+                ? setupApproved
+                  ? "setup approved"
+                  : "teeth moved in target"
+                : "visible appliance layers"}
           </small>
         </div>
       </div>
