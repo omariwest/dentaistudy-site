@@ -1599,8 +1599,6 @@ function ClinicalAppPage() {
   const [setupApproved, setSetupApproved] = useState(false);
   const [plan, setPlan] = useState<TreatmentPlanState>(demoPlan);
   const [records, setRecords] = useState<Record<RecordKey, boolean>>(demoRecords);
-  const [scanInitialState, setScanInitialState] =
-    useState<ScanPersistenceState | null>(null);
   const [scanState, setScanState] = useState<ScanPersistenceState | null>(null);
   const [stageState, setStageState] = useState<StagePersistenceState | null>(null);
   const [saveState, setSaveState] =
@@ -1681,7 +1679,6 @@ function ClinicalAppPage() {
         setPlan(demoPlan);
         setPlanApproved(false);
         setSetupApproved(false);
-        setScanInitialState(null);
         setScanState(null);
         setStageState(null);
         setAiReview(null);
@@ -1744,7 +1741,6 @@ function ClinicalAppPage() {
     setSetupApproved(false);
     setPlan(demoPlan);
     setRecords(demoRecords);
-    setScanInitialState(null);
     setScanState(null);
     setStageState(null);
     setAiReview(null);
@@ -1789,7 +1785,6 @@ function ClinicalAppPage() {
     setPlan({ ...emptyPlan, ...storedPlan });
     setPlanApproved(row.plan_approved === true);
     setSetupApproved(row.setup_approved === true);
-    setScanInitialState(storedScan);
     setScanState(storedScan);
     setStageState(storedStages);
     setAiReview(null);
@@ -2264,7 +2259,7 @@ function ClinicalAppPage() {
               clinicalSection={activeSection as "Setup" | "Stages"}
               caseId={caseId}
               userId={userId}
-              initialScanState={scanInitialState}
+              initialScanState={scanState}
             />
           )}
         </section>
