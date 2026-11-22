@@ -1,5 +1,13 @@
 const CACHE_NAME = "bracketmotion-shell-v1";
-const APP_SHELL = ["/", "/app", "/manifest.webmanifest", "/icons/bracketmotion-icon.svg"];
+const APP_SHELL = [
+  "/",
+  "/app",
+  "/manifest.webmanifest",
+  "/icons/bracketmotion-icon.svg",
+  "/icons/icon-180.png",
+  "/icons/icon-192.png",
+  "/icons/icon-512.png",
+];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
