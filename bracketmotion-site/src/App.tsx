@@ -1,5 +1,7 @@
-import { useMemo, useRef, useState } from "react";
-import ClinicalViewer, { type ClinicalViewerHandle } from "./ClinicalViewer";
+import { lazy, Suspense, useMemo, useRef, useState } from "react";
+import type { ClinicalViewerHandle } from "./ClinicalViewer";
+
+const ClinicalViewer = lazy(() => import("./ClinicalViewer"));
 
 type Platform = "Windows" | "macOS";
 
@@ -813,7 +815,16 @@ function SetupWorkspace() {
       </div>
 
       <div className="app-viewport app-viewport--interactive">
-        <ClinicalViewer ref={viewerRef} onSelectionChange={setSelectedTooth} />
+        <Suspense
+          fallback={
+            <div className="clinical-viewer__message" role="status">
+              <strong>Preparing 3D workspace…</strong>
+              <span>Loading the viewer only when the clinical setup is opened.</span>
+            </div>
+          }
+        >
+          <ClinicalViewer ref={viewerRef} onSelectionChange={setSelectedTooth} />
+        </Suspense>
 
         <div className="app-viewport__corner">
           <span>3D proof of concept</span>
