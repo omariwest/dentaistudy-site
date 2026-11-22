@@ -3104,8 +3104,17 @@ a {
     border-left: 0;
   }
 
+  .appliance-workspace__toolbar {
+    overflow-x: visible;
+  }
+
   .appliance-layer-buttons {
-    width: max-content;
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .appliance-layer-buttons button {
+    flex: 1 1 calc(33.333% - 4px);
   }
 
   .target-setup {
