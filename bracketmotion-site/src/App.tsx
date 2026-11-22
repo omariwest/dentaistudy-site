@@ -620,6 +620,154 @@ function FindingsView({
   );
 }
 
+
+type TreatmentPlanState = {
+  problemList: string;
+  goals: string;
+  primaryStrategy: string;
+  alternativeStrategy: string;
+};
+
+function TreatmentPlanView({
+  planningReady,
+  scopeIssue,
+  plan,
+  planApproved,
+  onPlanChange,
+  onApprove,
+}: {
+  planningReady: boolean;
+  scopeIssue: string;
+  plan: TreatmentPlanState;
+  planApproved: boolean;
+  onPlanChange: (field: keyof TreatmentPlanState, value: string) => void;
+  onApprove: () => void;
+}) {
+  if (!planningReady) {
+    return (
+      <div className="case-workflow-page">
+        <div className="case-workflow-page__header">
+          <div>
+            <span className="case-page-kicker">Treatment plan</span>
+            <h1>Planning is not available yet.</h1>
+            <p>Complete the mandatory records and clear the V1 scope screen before a treatment plan can be reviewed.</p>
+          </div>
+        </div>
+
+        <div className="plan-blocked-card" role="status">
+          <strong>{scopeIssue ? "Out of V1 scope" : "Case not planning-ready"}</strong>
+          <p>
+            {scopeIssue
+              ? `${scopeIssue} is outside the frozen BracketMotion V1 boundary.`
+              : "Return to Case and Findings to complete the missing requirements."}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="case-workflow-page">
+      <div className="case-workflow-page__header">
+        <div>
+          <span className="case-page-kicker">Treatment plan</span>
+          <h1>Review the strategy before any tooth moves.</h1>
+          <p>The plan remains clinician-controlled. Task 9 will generate this structure from controlled Gemini reasoning.</p>
+        </div>
+        <span className={`plan-approval-badge${planApproved ? " is-approved" : ""}`}>
+          {planApproved ? "Clinical plan approved" : "Approval required"}
+        </span>
+      </div>
+
+      <section className="case-section" aria-labelledby="problem-list-title">
+        <div className="case-section__heading">
+          <div>
+            <span>01</span>
+            <h2 id="problem-list-title">Problem list</h2>
+          </div>
+          <p>Only clinically relevant problems that drive the plan.</p>
+        </div>
+        <textarea
+          className="plan-textarea"
+          value={plan.problemList}
+          onChange={(event) => onPlanChange("problemList", event.target.value)}
+          rows={4}
+        />
+      </section>
+
+      <section className="case-section" aria-labelledby="goals-title">
+        <div className="case-section__heading">
+          <div>
+            <span>02</span>
+            <h2 id="goals-title">Treatment goals</h2>
+          </div>
+          <p>Define the intended correction before mechanics are selected.</p>
+        </div>
+        <textarea
+          className="plan-textarea"
+          value={plan.goals}
+          onChange={(event) => onPlanChange("goals", event.target.value)}
+          rows={4}
+        />
+      </section>
+
+      <div className="plan-strategy-grid">
+        <section className="case-section plan-strategy-card is-primary" aria-labelledby="primary-strategy-title">
+          <div className="case-section__heading">
+            <div>
+              <span>03</span>
+              <h2 id="primary-strategy-title">Primary strategy</h2>
+            </div>
+            <span className="strategy-label">Primary</span>
+          </div>
+          <textarea
+            className="plan-textarea"
+            value={plan.primaryStrategy}
+            onChange={(event) => onPlanChange("primaryStrategy", event.target.value)}
+            rows={7}
+          />
+        </section>
+
+        <section className="case-section plan-strategy-card" aria-labelledby="alternative-strategy-title">
+          <div className="case-section__heading">
+            <div>
+              <span>04</span>
+              <h2 id="alternative-strategy-title">Alternative strategy</h2>
+            </div>
+            <span className="strategy-label is-secondary">Alternative</span>
+          </div>
+          <textarea
+            className="plan-textarea"
+            value={plan.alternativeStrategy}
+            onChange={(event) => onPlanChange("alternativeStrategy", event.target.value)}
+            rows={7}
+          />
+        </section>
+      </div>
+
+      <section className={`plan-approval-panel${planApproved ? " is-approved" : ""}`}>
+        <div>
+          <span>Clinical approval gate</span>
+          <strong>{planApproved ? "Plan approved" : "Approve before 3D setup"}</strong>
+          <p>
+            {planApproved
+              ? "The setup workspace is unlocked. Any later plan edit will revoke this approval."
+              : "BracketMotion does not generate or approve final tooth positions until the clinician approves this strategy."}
+          </p>
+        </div>
+        <button
+          className="app-primary-action plan-approve-button"
+          type="button"
+          onClick={onApprove}
+          disabled={planApproved}
+        >
+          {planApproved ? "Approved" : "Approve clinical plan"}
+        </button>
+      </section>
+    </div>
+  );
+}
+
 function SetupWorkspace() {
   return (
     <>
@@ -680,6 +828,13 @@ function ClinicalAppPage() {
   const [showCaseHub, setShowCaseHub] = useState(false);
   const [caseLabel, setCaseLabel] = useState("Demo Case");
   const [scopeIssue, setScopeIssue] = useState("");
+  const [planApproved, setPlanApproved] = useState(false);
+  const [plan, setPlan] = useState<TreatmentPlanState>({
+    problemList: "Mild maxillary crowding; moderate mandibular crowding; mild lower anterior rotations; 4 mm overjet; 45% overbite.",
+    goals: "Resolve crowding and rotations; coordinate the arches; maintain a Class I molar/canine relationship; normalize overjet and overbite while preserving facial balance.",
+    primaryStrategy: "Non-extraction fixed-appliance treatment. Align and level both arches with progressive NiTi wires, coordinate arch form, then finish on stainless steel with controlled settling as needed.",
+    alternativeStrategy: "Consider limited space creation if alignment cannot be achieved within the approved arch-form and incisor-position goals. Reassess space requirements before progressing beyond alignment.",
+  });
   const [records, setRecords] = useState<Record<RecordKey, boolean>>({
     history: true,
     exam: true,
@@ -700,14 +855,26 @@ function ClinicalAppPage() {
     setRecords((current) => ({ ...current, [key]: true }));
   };
 
+  const updatePlan = (field: keyof TreatmentPlanState, value: string) => {
+    setPlan((current) => ({ ...current, [field]: value }));
+    setPlanApproved(false);
+  };
+
   const openSection = (section: ClinicalSection) => {
     setShowCaseHub(false);
+
+    if ((section === "Setup" || section === "Stages") && !planApproved) {
+      setActiveSection("Plan");
+      return;
+    }
+
     setActiveSection(section);
   };
 
   const openDemoCase = () => {
     setCaseLabel("Demo Case");
     setScopeIssue("");
+    setPlanApproved(false);
     setRecords({
       history: true,
       exam: true,
@@ -724,6 +891,13 @@ function ClinicalAppPage() {
   const startNewCase = () => {
     setCaseLabel("Untitled Case");
     setScopeIssue("");
+    setPlanApproved(false);
+    setPlan({
+      problemList: "",
+      goals: "",
+      primaryStrategy: "",
+      alternativeStrategy: "",
+    });
     setRecords({
       history: false,
       exam: false,
@@ -861,10 +1035,22 @@ function ClinicalAppPage() {
           ) : activeSection === "Findings" ? (
             <FindingsView
               scopeIssue={scopeIssue}
-              onScopeIssue={setScopeIssue}
+              onScopeIssue={(value) => {
+                setScopeIssue(value);
+                setPlanApproved(false);
+              }}
               planningReady={planningReady}
               missingCount={missingCount}
               onBackToCase={() => setActiveSection("Case")}
+            />
+          ) : activeSection === "Plan" ? (
+            <TreatmentPlanView
+              planningReady={planningReady}
+              scopeIssue={scopeIssue}
+              plan={plan}
+              planApproved={planApproved}
+              onPlanChange={updatePlan}
+              onApprove={() => setPlanApproved(true)}
             />
           ) : (
             <SetupWorkspace />
@@ -897,7 +1083,7 @@ function ClinicalAppPage() {
           <div className="app-inspector__section app-inspector__section--compact">
             <div className="app-inspector__row">
               <span>Clinical plan</span>
-              <strong>Not approved</strong>
+              <strong>{planApproved ? "Approved" : "Not approved"}</strong>
             </div>
             <div className="app-inspector__row">
               <span>3D setup</span>
@@ -910,9 +1096,13 @@ function ClinicalAppPage() {
               className="app-primary-action"
               type="button"
               disabled={!planningReady}
-              onClick={() => setActiveSection("Plan")}
+              onClick={() => setActiveSection(planApproved ? "Setup" : "Plan")}
             >
-              {planningReady ? "Continue to plan" : "Complete required records"}
+              {!planningReady
+                ? "Complete required records"
+                : planApproved
+                  ? "Continue to 3D setup"
+                  : "Review clinical plan"}
             </button>
           </div>
         </aside>
