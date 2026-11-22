@@ -860,7 +860,7 @@ function TargetSetupScene({
   const objectRefs = useRef(new Map<string, Group>());
   const [registryVersion, setRegistryVersion] = useState(0);
 
-  const registerObject = (id: string, object: Group | null) => {
+  const registerObject = useCallback((id: string, object: Group | null) => {
     const current = objectRefs.current.get(id);
 
     if (object) {
@@ -875,7 +875,7 @@ function TargetSetupScene({
       objectRefs.current.delete(id);
       setRegistryVersion((value) => value + 1);
     }
-  };
+  }, []);
 
   const selectedObject = selectedId
     ? objectRefs.current.get(selectedId) || null
