@@ -2516,7 +2516,7 @@ export default function ScanWorkflow({
     const collisionIds = new Set<string>();
     const contactIds = new Set<string>();
 
-    segments.forEach((segment) => {
+    treatmentSegments.forEach((segment) => {
       const asset = assets.find((item) => item.jaw === segment.jaw);
       if (!asset) return;
 
@@ -2625,7 +2625,14 @@ export default function ScanWorkflow({
       movedCount,
       unitWarning,
     };
-  }, [assets, jawTransforms, segments, targetTransforms]);
+  }, [
+    assets,
+    jawTransforms,
+    plannedExtractions,
+    segments,
+    targetTransforms,
+    treatmentSegments,
+  ]);
 
   const selectedSegment =
     segments.find((segment) => segment.id === selectedTargetId) || null;
