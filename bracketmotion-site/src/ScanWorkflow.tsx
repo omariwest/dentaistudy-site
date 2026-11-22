@@ -1817,10 +1817,20 @@ function ScanUploadCard({
 
 export default function ScanWorkflow({
   onSetupApprovalChange,
+  onPersistenceChange,
+  onStageStateChange,
   clinicalView = "setup",
+  caseId = null,
+  userId = null,
+  initialState = null,
 }: {
   onSetupApprovalChange?: (approved: boolean) => void;
+  onPersistenceChange?: (state: ScanPersistenceState) => void;
+  onStageStateChange?: (state: StagePersistenceState) => void;
   clinicalView?: "setup" | "stages";
+  caseId?: string | null;
+  userId?: string | null;
+  initialState?: ScanPersistenceState | null;
 }) {
   const [assets, setAssets] = useState<ScanAsset[]>([]);
   const [loadingJaw, setLoadingJaw] = useState<Jaw | null>(null);
@@ -1865,6 +1875,132 @@ export default function ScanWorkflow({
     loopEnd: "",
   });
   const assetsRef = useRef<ScanAsset[]>([]);
+  const hydrationTokenRef = useRef(0);
+  const hydratingRef = useRef(false);
+
+  useEffect(() => {
+    const token = hydrationTokenRef.current + 1;
+    hydrationTokenRef.current = token;
+    hydratingRef.current = true;
+    setError("");
+    setLoadingJaw(null);
+    setActiveFaces(new Set());
+    setActiveSegmentId(null);
+    setSelectedTargetId(null);
+    setAlignJaw(null);
+    setWorkflowMode("segment");
+
+    assetsRef.current.forEach((asset) => asset.geometry.dispose());
+    setAssets([]);
+
+    if (!caseId || !initialState) {
+      setSegments([]);
+      setJawTransforms({
+        upper: identityTransform(),
+        lower: identityTransform(),
+      });
+      setTargetTransforms({});
+      setSetupApproved(false);
+      setApplianceLayers({
+        brackets: true,
+        archwire: true,
+        powerChain: false,
+        coilSpring: false,
+        elastics: false,
+        closingLoop: false,
+      });
+      setMechanicEndpoints({
+        chainStart: "",
+        chainEnd: "",
+        coilStart: "",
+        coilEnd: "",
+        elasticUpper: "",
+        elasticLower: "",
+        loopStart: "",
+        loopEnd: "",
+      });
+      hydratingRef.current = false;
+      return;
+    }
+
+    const restore = async () => {
+      try {
+        const restoredAssets: ScanAsset[] = [];
+
+        for (const jaw of ["upper", "lower", "bite"] as Jaw[]) {
+          const saved = initialState.files?.[jaw];
+          if (!saved?.storagePath) continue;
+
+          const blob = await downloadBracketMotionScan(saved.storagePath);
+          if (hydrationTokenRef.current !== token) return;
+
+          const file = new File([blob], saved.fileName, {
+            type: blob.type || "application/octet-stream",
+          });
+          const asset = await parseScan(file, jaw);
+          asset.storagePath = saved.storagePath;
+          restoredAssets.push(asset);
+        }
+
+        if (hydrationTokenRef.current !== token) {
+          restoredAssets.forEach((asset) => asset.geometry.dispose());
+          return;
+        }
+
+        setAssets(restoredAssets);
+        setSegments(Array.isArray(initialState.segments) ? initialState.segments : []);
+        setJawTransforms(
+          initialState.jawTransforms || {
+            upper: identityTransform(),
+            lower: identityTransform(),
+          },
+        );
+        setTargetTransforms(initialState.targetTransforms || {});
+        setSetupApproved(initialState.setupApproved === true);
+        setApplianceLayers(
+          initialState.applianceLayers || {
+            brackets: true,
+            archwire: true,
+            powerChain: false,
+            coilSpring: false,
+            elastics: false,
+            closingLoop: false,
+          },
+        );
+        setMechanicEndpoints(
+          initialState.mechanicEndpoints || {
+            chainStart: "",
+            chainEnd: "",
+            coilStart: "",
+            coilEnd: "",
+            elasticUpper: "",
+            elasticLower: "",
+            loopStart: "",
+            loopEnd: "",
+          },
+        );
+        setWorkflowMode(initialState.setupApproved ? "target" : "segment");
+      } catch (cause) {
+        setError(
+          cause instanceof Error
+            ? `Saved scan could not be restored: ${cause.message}`
+            : "Saved scan could not be restored.",
+        );
+      } finally {
+        if (hydrationTokenRef.current === token) {
+          hydratingRef.current = false;
+        }
+      }
+    };
+
+    void restore();
+
+    return () => {
+      if (hydrationTokenRef.current === token) {
+        hydrationTokenRef.current += 1;
+      }
+    };
+  }, [caseId, initialState]);
 
   const activeAsset = assets.find((asset) => asset.jaw === activeJaw);
   const teethForJaw = activeJaw === "upper" ? upperTeeth : lowerTeeth;
@@ -1995,6 +2131,52 @@ export default function ScanWorkflow({
   }, [onSetupApprovalChange, setupApproved]);
 
   useEffect(() => {
+    if (hydratingRef.current) return;
+
+    const files: ScanPersistenceState["files"] = {};
+    assets.forEach((asset) => {
+      if (!asset.storagePath) return;
+      files[asset.jaw] = {
+        fileName: asset.fileName,
+        storagePath: asset.storagePath,
+      };
+    });
+
+    onPersistenceChange?.({
+      version: 1,
+      files,
+      segments,
+      jawTransforms,
+      targetTransforms,
+      setupApproved,
+      applianceLayers,
+      mechanicEndpoints,
+    });
+
+    const stages = deriveStages({
+      segments,
+      targetTransforms,
+      applianceLayers,
+      endpoints: mechanicEndpoints,
+    }).map(({ layers: _layers, ...stage }) => stage);
+
+    onStageStateChange?.({
+      version: 1,
+      stages,
+    });
+  }, [
+    applianceLayers,
+    assets,
+    jawTransforms,
+    mechanicEndpoints,
+    onPersistenceChange,
+    onStageStateChange,
+    segments,
+    setupApproved,
+    targetTransforms,
+  ]);
+
+  useEffect(() => {
     assetsRef.current = assets;
   }, [assets]);
 
@@ -2011,6 +2193,24 @@ export default function ScanWorkflow({
 
     try {
       const next = await parseScan(file, jaw);
+
+      if (userId && caseId) {
+        try {
+          next.storagePath = await uploadBracketMotionScan(
+            userId,
+            caseId,
+            jaw,
+            file,
+          );
+        } catch (uploadError) {
+          next.geometry.dispose();
+          throw new Error(
+            uploadError instanceof Error
+              ? `Cloud upload failed: ${uploadError.message}`
+              : "Cloud upload failed.",
+          );
+        }
+      }
 
       setAssets((current) => {
         current.find((asset) => asset.jaw === jaw)?.geometry.dispose();
@@ -2033,6 +2233,14 @@ export default function ScanWorkflow({
   };
 
   const removeAsset = (jaw: Jaw) => {
+    const currentAsset = assetsRef.current.find((asset) => asset.jaw === jaw);
+
+    if (currentAsset?.storagePath) {
+      void removeBracketMotionScan(currentAsset.storagePath).catch(() => {
+        setError("The scan was removed locally, but its cloud file could not be deleted.");
+      });
+    }
+
     setAssets((current) => {
       current.find((asset) => asset.jaw === jaw)?.geometry.dispose();
       return current.filter((asset) => asset.jaw !== jaw);
