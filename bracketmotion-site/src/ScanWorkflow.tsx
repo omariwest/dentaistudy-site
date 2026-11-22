@@ -3050,7 +3050,7 @@ export default function ScanWorkflow({
               <button
                 className={targetMode === "translate" ? "is-active" : ""}
                 type="button"
-                disabled={!displayTarget || !selectedTargetId}
+                disabled={!displayTarget || !selectedTargetId || selectedIsPlannedExtraction}
                 onClick={() => setTargetMode("translate")}
               >
                 Move
@@ -3058,7 +3058,7 @@ export default function ScanWorkflow({
               <button
                 className={targetMode === "rotate" ? "is-active" : ""}
                 type="button"
-                disabled={!displayTarget || !selectedTargetId}
+                disabled={!displayTarget || !selectedTargetId || selectedIsPlannedExtraction}
                 onClick={() => setTargetMode("rotate")}
               >
                 Rotate
@@ -3092,6 +3092,7 @@ export default function ScanWorkflow({
                   segments={segments}
                   jawTransforms={jawTransforms}
                   targetTransforms={targetTransforms}
+                  plannedExtractionIds={plannedExtractions}
                   selectedId={selectedTargetId}
                   transformMode={targetMode}
                   displayTarget={displayTarget}
@@ -3112,7 +3113,7 @@ export default function ScanWorkflow({
               </div>
 
               <div className="scan-canvas__hint">
-                Target setup starts from Initial · select a tooth and use Move/Rotate · right-drag pans · wheel zooms
+                Target setup starts from Initial · move/rotate teeth or mark a symmetric first-premolar extraction pair · right-drag pans · wheel zooms
               </div>
             </div>
 
@@ -3123,14 +3124,19 @@ export default function ScanWorkflow({
                 <small>
                   {setupApproved
                     ? "Any target or jaw change will revoke approval."
-                    : `${setupAnalysis.movedCount} tooth${setupAnalysis.movedCount === 1 ? "" : "es"} moved from Initial.`}
+                    : `${setupAnalysis.movedCount} target change${setupAnalysis.movedCount === 1 ? "" : "s"} from Initial.`}
                 </small>
               </div>
 
               <div className="target-tooth-strip" aria-label="Segmented teeth">
                 {segments.map((segment) => (
                   <button
-                    className={selectedTargetId === segment.id ? "is-active" : ""}
+                    className={[
+                      selectedTargetId === segment.id ? "is-active" : "",
+                      plannedExtractions.has(segment.id) ? "is-extraction" : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
                     type="button"
                     onClick={() => {
                       setSelectedTargetId(segment.id);
@@ -3151,48 +3157,83 @@ export default function ScanWorkflow({
 
                 {selectedSegment ? (
                   <>
-                    <div className="target-value-grid">
-                      {(["X", "Y", "Z"] as const).map((axis, index) => (
-                        <label key={axis}>
-                          <span>{axis} mm</span>
-                          <input
-                            type="number"
-                            step="0.1"
-                            value={selectedTransform.position[index].toFixed(2)}
-                            onChange={(event) =>
-                              updateSelectedTarget(
-                                "position",
-                                index as 0 | 1 | 2,
-                                Number(event.target.value),
-                              )
-                            }
-                          />
-                        </label>
-                      ))}
-                    </div>
+                    {firstPremolarPair[selectedSegment.label] && (
+                      <div className={`target-extraction-card${selectedIsPlannedExtraction ? " is-active" : ""}`}>
+                        <div>
+                          <span>Extraction plan</span>
+                          <strong>
+                            {selectedIsPlannedExtraction
+                              ? "Symmetric first-premolar pair planned"
+                              : "Keep tooth in final setup"}
+                          </strong>
+                          <small>
+                            {selectedExtractionPartner
+                              ? `FDI ${selectedSegment.label} + FDI ${selectedExtractionPartner.label}`
+                              : "Segment the contralateral first premolar to use this V1 extraction workflow."}
+                          </small>
+                        </div>
+                        <button
+                          type="button"
+                          disabled={!selectedExtractionPartner}
+                          onClick={toggleSelectedExtractionPair}
+                        >
+                          {selectedIsPlannedExtraction
+                            ? "Keep pair"
+                            : "Plan extraction pair"}
+                        </button>
+                      </div>
+                    )}
 
-                    <div className="target-value-grid">
-                      {(["Rx", "Ry", "Rz"] as const).map((axis, index) => (
-                        <label key={axis}>
-                          <span>{axis} °</span>
-                          <input
-                            type="number"
-                            step="1"
-                            value={(
-                              (selectedTransform.rotation[index] * 180) /
-                              Math.PI
-                            ).toFixed(1)}
-                            onChange={(event) =>
-                              updateSelectedTarget(
-                                "rotation",
-                                index as 0 | 1 | 2,
-                                Number(event.target.value),
-                              )
-                            }
-                          />
-                        </label>
-                      ))}
-                    </div>
+                    {selectedIsPlannedExtraction ? (
+                      <p className="target-panel__empty">
+                        This tooth stays visible in Initial and is omitted from the planned Target after the extraction stage.
+                      </p>
+                    ) : (
+                      <>
+                        <div className="target-value-grid">
+                          {(["X", "Y", "Z"] as const).map((axis, index) => (
+                            <label key={axis}>
+                              <span>{axis} mm</span>
+                              <input
+                                type="number"
+                                step="0.1"
+                                value={selectedTransform.position[index].toFixed(2)}
+                                onChange={(event) =>
+                                  updateSelectedTarget(
+                                    "position",
+                                    index as 0 | 1 | 2,
+                                    Number(event.target.value),
+                                  )
+                                }
+                              />
+                            </label>
+                          ))}
+                        </div>
+
+                        <div className="target-value-grid">
+                          {(["Rx", "Ry", "Rz"] as const).map((axis, index) => (
+                            <label key={axis}>
+                              <span>{axis} °</span>
+                              <input
+                                type="number"
+                                step="1"
+                                value={(
+                                  (selectedTransform.rotation[index] * 180) /
+                                  Math.PI
+                                ).toFixed(1)}
+                                onChange={(event) =>
+                                  updateSelectedTarget(
+                                    "rotation",
+                                    index as 0 | 1 | 2,
+                                    Number(event.target.value),
+                                  )
+                                }
+                              />
+                            </label>
+                          ))}
+                        </div>
+                      </>
+                    )}
                   </>
                 ) : (
                   <p className="target-panel__empty">Select a segmented tooth in the model or tooth strip.</p>
@@ -3332,6 +3373,7 @@ export default function ScanWorkflow({
                   segments={segments}
                   jawTransforms={jawTransforms}
                   targetTransforms={targetTransforms}
+                  plannedExtractionIds={plannedExtractions}
                   selectedId={null}
                   transformMode="translate"
                   displayTarget
@@ -3342,7 +3384,7 @@ export default function ScanWorkflow({
                 />
                 <ApplianceLayer
                   assets={assets}
-                  segments={segments}
+                  segments={treatmentSegments}
                   jawTransforms={jawTransforms}
                   targetTransforms={targetTransforms}
                   layers={applianceLayers}
