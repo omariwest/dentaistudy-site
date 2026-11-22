@@ -1345,7 +1345,7 @@ export default function ScanWorkflow({
   const [toothLabel, setToothLabel] = useState("11");
   const [alignJaw, setAlignJaw] = useState<Exclude<Jaw, "bite"> | null>(null);
   const [alignMode, setAlignMode] = useState<"translate" | "rotate">("translate");
-  const [workflowMode, setWorkflowMode] = useState<"segment" | "target">("segment");
+  const [workflowMode, setWorkflowMode] = useState<"segment" | "target" | "appliance">("segment");
   const [jawTransforms, setJawTransforms] = useState<
     Record<Exclude<Jaw, "bite">, RigidTransform>
   >({
@@ -1357,6 +1357,24 @@ export default function ScanWorkflow({
   const [targetMode, setTargetMode] = useState<SetupMode>("translate");
   const [displayTarget, setDisplayTarget] = useState(true);
   const [setupApproved, setSetupApproved] = useState(false);
+  const [applianceLayers, setApplianceLayers] = useState<ApplianceLayerState>({
+    brackets: true,
+    archwire: true,
+    powerChain: false,
+    coilSpring: false,
+    elastics: false,
+    closingLoop: false,
+  });
+  const [mechanicEndpoints, setMechanicEndpoints] = useState<MechanicEndpoints>({
+    chainStart: "",
+    chainEnd: "",
+    coilStart: "",
+    coilEnd: "",
+    elasticUpper: "",
+    elasticLower: "",
+    loopStart: "",
+    loopEnd: "",
+  });
   const assetsRef = useRef<ScanAsset[]>([]);
 
   const activeAsset = assets.find((asset) => asset.jaw === activeJaw);
@@ -1379,6 +1397,39 @@ export default function ScanWorkflow({
       setToothLabel(teethForJaw[0]);
     }
   }, [teethForJaw, toothLabel]);
+
+  const upperSegmentLabels = useMemo(
+    () => upperTeeth.filter((label) => segments.some((segment) => segment.label === label)),
+    [segments],
+  );
+  const lowerSegmentLabels = useMemo(
+    () => lowerTeeth.filter((label) => segments.some((segment) => segment.label === label)),
+    [segments],
+  );
+
+  useEffect(() => {
+    const upperFirst = upperSegmentLabels[0] || "";
+    const upperLast = upperSegmentLabels.at(-1) || "";
+    const lowerFirst = lowerSegmentLabels[0] || "";
+    const lowerLast = lowerSegmentLabels.at(-1) || "";
+
+    setMechanicEndpoints((current) => ({
+      chainStart: current.chainStart || upperFirst,
+      chainEnd: current.chainEnd || upperLast,
+      coilStart: current.coilStart || upperFirst,
+      coilEnd: current.coilEnd || upperLast,
+      elasticUpper: current.elasticUpper || upperFirst,
+      elasticLower: current.elasticLower || lowerFirst,
+      loopStart: current.loopStart || upperFirst,
+      loopEnd: current.loopEnd || upperLast,
+    }));
+  }, [lowerSegmentLabels, upperSegmentLabels]);
+
+  useEffect(() => {
+    if (!setupApproved && workflowMode === "appliance") {
+      setWorkflowMode("target");
+    }
+  }, [setupApproved, workflowMode]);
 
   useEffect(() => {
     setTargetTransforms((current) => {
