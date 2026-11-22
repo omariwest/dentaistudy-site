@@ -643,6 +643,8 @@ function TreatmentPlanView({
   onPlanChange: (field: keyof TreatmentPlanState, value: string) => void;
   onApprove: () => void;
 }) {
+  const planComplete = Object.values(plan).every((value) => value.trim().length > 0);
+
   if (!planningReady) {
     return (
       <div className="case-workflow-page">
@@ -752,16 +754,18 @@ function TreatmentPlanView({
           <p>
             {planApproved
               ? "The setup workspace is unlocked. Any later plan edit will revoke this approval."
-              : "BracketMotion does not generate or approve final tooth positions until the clinician approves this strategy."}
+              : planComplete
+                ? "BracketMotion does not generate or approve final tooth positions until the clinician approves this strategy."
+                : "Complete the problem list, goals, primary strategy and alternative before approval."}
           </p>
         </div>
         <button
           className="app-primary-action plan-approve-button"
           type="button"
           onClick={onApprove}
-          disabled={planApproved}
+          disabled={planApproved || !planComplete}
         >
-          {planApproved ? "Approved" : "Approve clinical plan"}
+          {planApproved ? "Approved" : planComplete ? "Approve clinical plan" : "Complete plan first"}
         </button>
       </section>
     </div>
@@ -875,6 +879,12 @@ function ClinicalAppPage() {
     setCaseLabel("Demo Case");
     setScopeIssue("");
     setPlanApproved(false);
+    setPlan({
+      problemList: "Mild maxillary crowding; moderate mandibular crowding; mild lower anterior rotations; 4 mm overjet; 45% overbite.",
+      goals: "Resolve crowding and rotations; coordinate the arches; maintain a Class I molar/canine relationship; normalize overjet and overbite while preserving facial balance.",
+      primaryStrategy: "Non-extraction fixed-appliance treatment. Align and level both arches with progressive NiTi wires, coordinate arch form, then finish on stainless steel with controlled settling as needed.",
+      alternativeStrategy: "Consider limited space creation if alignment cannot be achieved within the approved arch-form and incisor-position goals. Reassess space requirements before progressing beyond alignment.",
+    });
     setRecords({
       history: true,
       exam: true,
