@@ -116,7 +116,7 @@ Preview: Vercel.
 - [x] Add final install CTA.
 - [x] Add minimal footer.
 - [x] Responsive/accessibility pass.
-- [ ] Publish Task 3 preview.
+- [x] Publish Task 3 preview.
 - [ ] User approves Task 3.
 
 ### Task 4 — Legal shell + public-site finish
@@ -143,7 +143,7 @@ Preview: Vercel.
 
 **Task 3 — Complete landing page.**
 
-Implementation is complete. Publish preview and wait for user approval.
+Implementation and preview are complete. Wait for user approval before Task 4.
 
 ## Rule
 
@@ -151,3 +151,9 @@ Implementation is complete. Publish preview and wait for user approval.
 2. Update it in GitHub every approved step.
 3. Mark only work that truly exists.
 4. Detailed research stays outside this file.
+
+
+### Task 3 preview
+
+- Vercel: https://bracketmotion-preview-git-bracketmotion-amarsaaliomer-6121.vercel.app
+- Verified deployment: `dpl_DPfvUZFxtYAk1fij4uMaXokVHEUh`
