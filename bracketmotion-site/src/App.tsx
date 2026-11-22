@@ -778,88 +778,113 @@ function TreatmentPlanView({
 
 function SetupWorkspace({
   onSetupApprovalChange,
+  clinicalSection,
 }: {
   onSetupApprovalChange: (approved: boolean) => void;
+  clinicalSection: "Setup" | "Stages";
 }) {
   const viewerRef = useRef<ClinicalViewerHandle | null>(null);
   const [selectedTooth, setSelectedTooth] = useState<string | null>(null);
   const [workspaceMode, setWorkspaceMode] = useState<"patient" | "demo">("patient");
+  const isStages = clinicalSection === "Stages";
+  const showPatientSurface = isStages || workspaceMode === "patient";
 
   return (
     <div className="setup-workspace">
       <div className="app-viewer-toolbar">
-        <div className="app-viewer-toolbar__group" aria-label="Setup workspace">
-          <button
-            className={`app-tool-button${workspaceMode === "patient" ? " is-selected" : ""}`}
-            type="button"
-            onClick={() => setWorkspaceMode("patient")}
-          >
-            Patient scans
-          </button>
-          <button
-            className={`app-tool-button${workspaceMode === "demo" ? " is-selected" : ""}`}
-            type="button"
-            onClick={() => setWorkspaceMode("demo")}
-          >
-            Demo anatomy
-          </button>
-        </div>
-
-        {workspaceMode === "demo" && (
+        {isStages ? (
+          <div className="app-viewer-toolbar__group" aria-label="Stages workspace">
+            <button className="app-tool-button is-selected" type="button">
+              Stage + mechanics
+            </button>
+          </div>
+        ) : (
           <>
-            <div className="app-viewer-toolbar__group" aria-label="Viewer layers">
-              {viewerLayers.map((tool, index) => (
-                <button
-                  className={`app-tool-button${index < 2 ? " is-selected" : ""}`}
-                  type="button"
-                  key={tool}
-                  onClick={() => {
-                    if (tool === "Initial") viewerRef.current?.showInitial();
-                    if (tool === "Planned") viewerRef.current?.showTarget();
-                  }}
-                  disabled={index > 1}
-                  title={index > 1 ? "Layer controls arrive in later 3D/appliance tasks." : undefined}
-                >
-                  {tool}
-                </button>
-              ))}
+            <div className="app-viewer-toolbar__group" aria-label="Setup workspace">
+              <button
+                className={`app-tool-button${workspaceMode === "patient" ? " is-selected" : ""}`}
+                type="button"
+                onClick={() => setWorkspaceMode("patient")}
+              >
+                Patient scans
+              </button>
+              <button
+                className={`app-tool-button${workspaceMode === "demo" ? " is-selected" : ""}`}
+                type="button"
+                onClick={() => setWorkspaceMode("demo")}
+              >
+                Demo anatomy
+              </button>
             </div>
 
-            <div className="app-viewer-toolbar__group app-viewer-toolbar__views" aria-label="Canonical views">
-              {viewerViews.map((view) => (
-                <button
-                  className="app-view-button"
-                  type="button"
-                  key={view}
-                  onClick={() => viewerRef.current?.setView(view as "Front" | "Right" | "Left" | "Upper" | "Lower")}
-                >
-                  {view}
-                </button>
-              ))}
-            </div>
+            {workspaceMode === "demo" && (
+              <>
+                <div className="app-viewer-toolbar__group" aria-label="Viewer layers">
+                  {viewerLayers.map((tool, index) => (
+                    <button
+                      className={`app-tool-button${index < 2 ? " is-selected" : ""}`}
+                      type="button"
+                      key={tool}
+                      onClick={() => {
+                        if (tool === "Initial") viewerRef.current?.showInitial();
+                        if (tool === "Planned") viewerRef.current?.showTarget();
+                      }}
+                      disabled={index > 1}
+                      title={index > 1 ? "Layer controls arrive in later 3D/appliance tasks." : undefined}
+                    >
+                      {tool}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="app-viewer-toolbar__group app-viewer-toolbar__views" aria-label="Canonical views">
+                  {viewerViews.map((view) => (
+                    <button
+                      className="app-view-button"
+                      type="button"
+                      key={view}
+                      onClick={() => viewerRef.current?.setView(view as "Front" | "Right" | "Left" | "Upper" | "Lower")}
+                    >
+                      {view}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
           </>
         )}
       </div>
 
-      {workspaceMode === "patient" ? (
+      <div
+        className={`setup-workspace__surface${showPatientSurface ? " is-visible" : ""}`}
+        aria-hidden={!showPatientSurface}
+      >
         <Suspense
           fallback={
             <div className="clinical-viewer__message" role="status">
-              <strong>Preparing scan workflow…</strong>
-              <span>Loading local STL/PLY tools.</span>
+              <strong>Preparing patient workspace…</strong>
+              <span>Loading local scan and mechanics tools.</span>
             </div>
           }
         >
-          <ScanWorkflow onSetupApprovalChange={onSetupApprovalChange} />
+          <ScanWorkflow
+            onSetupApprovalChange={onSetupApprovalChange}
+            clinicalView={isStages ? "stages" : "setup"}
+          />
         </Suspense>
-      ) : (
+      </div>
+
+      <div
+        className={`setup-workspace__surface${!showPatientSurface ? " is-visible" : ""}`}
+        aria-hidden={showPatientSurface}
+      >
         <div className="setup-demo-workspace">
           <div className="app-viewport app-viewport--interactive">
             <Suspense
               fallback={
                 <div className="clinical-viewer__message" role="status">
                   <strong>Preparing 3D workspace…</strong>
-                  <span>Loading the viewer only when the clinical setup is opened.</span>
+                  <span>Loading the demo anatomy viewer.</span>
                 </div>
               }
             >
@@ -901,7 +926,7 @@ function SetupWorkspace({
             </div>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
@@ -1155,7 +1180,10 @@ function ClinicalAppPage() {
               }}
             />
           ) : (
-            <SetupWorkspace onSetupApprovalChange={setSetupApproved} />
+            <SetupWorkspace
+              onSetupApprovalChange={setSetupApproved}
+              clinicalSection={activeSection as "Setup" | "Stages"}
+            />
           )}
         </section>
 
