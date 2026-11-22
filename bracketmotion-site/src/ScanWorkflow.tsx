@@ -2000,7 +2000,7 @@ export default function ScanWorkflow({
         hydrationTokenRef.current += 1;
       }
     };
-  }, [caseId, initialState]);
+  }, [caseId]);
 
   const activeAsset = assets.find((asset) => asset.jaw === activeJaw);
   const teethForJaw = activeJaw === "upper" ? upperTeeth : lowerTeeth;
