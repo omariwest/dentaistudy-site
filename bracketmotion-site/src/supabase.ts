@@ -149,7 +149,9 @@ export async function removeBracketMotionScan(path: string) {
   if (error) throw error;
 }
 
-export async function invokeBracketMotionClinicalReview(payload: unknown) {
+export async function invokeBracketMotionClinicalReview(
+  payload: Record<string, unknown>,
+) {
   const { data, error } = await supabase.functions.invoke(
     "bracketmotion-clinical-reasoning",
     { body: payload },
