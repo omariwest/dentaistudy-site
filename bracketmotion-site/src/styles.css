@@ -529,6 +529,10 @@ a {
   font-weight: 650;
 }
 
+.app-save-state.is-error {
+  color: #a53b3b;
+}
+
 .app-quiet-button,
 .app-account-button,
 .app-tool-button,
@@ -1401,6 +1405,55 @@ a {
   box-shadow: 0 8px 22px rgba(24, 30, 42, 0.05);
 }
 
+.case-card + .case-card,
+.case-signin-card + .case-card,
+.case-card + .case-signin-card {
+  margin-top: 8px;
+}
+
+.case-card.is-current {
+  border-color: rgba(109, 76, 245, 0.3);
+  background: #fbfaff;
+}
+
+.case-signin-card {
+  display: grid;
+  width: min(980px, 100%);
+  gap: 4px;
+  margin: 8px auto 0;
+  padding: 14px 16px;
+  border: 1px dashed #d8dce4;
+  border-radius: 12px;
+  color: #525a66;
+  background: #fafbfc;
+  cursor: pointer;
+  text-align: left;
+}
+
+.case-signin-card strong {
+  font-size: 0.72rem;
+}
+
+.case-signin-card span,
+.case-hub__message {
+  color: #7d8590;
+  font-size: 0.64rem;
+  line-height: 1.45;
+}
+
+.case-hub__message {
+  width: min(980px, 100%);
+  margin: 8px auto 0;
+  padding: 10px 12px;
+  border-radius: 9px;
+  background: #f5f6f8;
+}
+
+.case-hub__message.is-error {
+  color: #8f4646;
+  background: #fff7f7;
+}
+
 .case-card > div:first-child {
   display: grid;
   gap: 5px;
@@ -1451,6 +1504,146 @@ a {
 }
 
 
+
+
+/* Account + saved-case authentication */
+.auth-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(30, 35, 45, 0.34);
+  backdrop-filter: blur(4px);
+}
+
+.auth-dialog {
+  width: min(420px, 100%);
+  max-height: min(680px, calc(100vh - 40px));
+  overflow-y: auto;
+  border: 1px solid #dfe2e8;
+  border-radius: 15px;
+  background: #ffffff;
+  box-shadow: 0 24px 70px rgba(25, 31, 42, 0.18);
+}
+
+.auth-dialog__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 17px 18px 14px;
+  border-bottom: 1px solid #eceef2;
+}
+
+.auth-dialog__header span,
+.auth-dialog__account span {
+  color: #858d98;
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.auth-dialog__header h2 {
+  margin: 4px 0 0;
+  font-size: 0.93rem;
+}
+
+.auth-dialog__header > button {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 7px;
+  color: #66707c;
+  background: #f2f3f5;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.auth-dialog__form,
+.auth-dialog__account {
+  display: grid;
+  gap: 12px;
+  padding: 16px 18px 18px;
+}
+
+.auth-dialog__form > p,
+.auth-dialog__account > p {
+  margin: 0;
+  color: #717985;
+  font-size: 0.63rem;
+  line-height: 1.5;
+}
+
+.auth-dialog__form label {
+  display: grid;
+  gap: 5px;
+}
+
+.auth-dialog__form label span {
+  color: #69717d;
+  font-size: 0.6rem;
+  font-weight: 700;
+}
+
+.auth-dialog__form input {
+  width: 100%;
+  min-height: 38px;
+  padding: 0 10px;
+  border: 1px solid #dfe2e8;
+  border-radius: 8px;
+  color: #343b45;
+  background: #ffffff;
+  font: inherit;
+  font-size: 0.66rem;
+}
+
+.auth-dialog__form input:focus {
+  border-color: rgba(109, 76, 245, 0.55);
+  outline: 0;
+  box-shadow: 0 0 0 3px rgba(109, 76, 245, 0.1);
+}
+
+.auth-dialog__form .app-primary-action,
+.auth-dialog__account .app-primary-action {
+  min-height: 38px;
+}
+
+.auth-dialog__switch {
+  border: 0;
+  color: var(--accent);
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.61rem;
+  font-weight: 720;
+}
+
+.auth-dialog__message {
+  padding: 8px 9px;
+  border-radius: 7px;
+  color: #646d78;
+  background: #f3f4f6;
+  font-size: 0.58rem;
+  line-height: 1.4;
+}
+
+.auth-dialog__message.is-error {
+  color: #8f4646;
+  background: #fff1f1;
+}
+
+.auth-dialog__account > div {
+  display: grid;
+  gap: 4px;
+}
+
+.auth-dialog__account strong {
+  overflow-wrap: anywhere;
+  font-size: 0.72rem;
+}
 
 /* Interactive 3D proof of concept */
 .app-viewport--interactive {
@@ -3099,6 +3292,16 @@ a {
   white-space: nowrap;
 }
 
+.ai-review-status.is-ready {
+  color: #19734a;
+  background: #eaf7f0;
+}
+
+.ai-review-status.is-error {
+  color: #a53b3b;
+  background: #fff0f0;
+}
+
 .ai-review-card__intro {
   margin: 9px 0 0;
   color: #6f7782;
@@ -3203,6 +3406,82 @@ a {
   margin: 0;
 }
 
+.ai-review-error {
+  margin-top: 9px;
+  padding: 9px 10px;
+  border: 1px solid #efcccc;
+  border-radius: 8px;
+  color: #8b4b4b;
+  background: #fff8f8;
+  font-size: 0.59rem;
+  line-height: 1.45;
+}
+
+.ai-review-output {
+  display: grid;
+  gap: 9px;
+  margin-top: 10px;
+  padding: 11px;
+  border: 1px solid #e2e5e9;
+  border-radius: 9px;
+  background: #fafbfc;
+}
+
+.ai-review-output__summary,
+.ai-review-output__section {
+  display: grid;
+  gap: 5px;
+}
+
+.ai-review-output__summary > span,
+.ai-review-output__section > span {
+  color: #858d98;
+  font-size: 0.53rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.ai-review-output__summary strong,
+.ai-review-output__item strong {
+  font-size: 0.66rem;
+}
+
+.ai-review-output__summary p,
+.ai-review-output__item p {
+  margin: 0;
+  color: #616975;
+  font-size: 0.59rem;
+  line-height: 1.48;
+}
+
+.ai-review-output__item {
+  display: grid;
+  gap: 3px;
+  padding: 8px 0;
+  border-top: 1px solid #e8eaee;
+}
+
+.ai-review-output__item small,
+.ai-review-output__section li {
+  color: #7d8590;
+  font-size: 0.55rem;
+  line-height: 1.4;
+}
+
+.ai-review-output__section ul {
+  margin: 0;
+  padding-left: 17px;
+}
+
+.ai-review-output__boundary {
+  padding-top: 8px;
+  border-top: 1px solid #e8eaee;
+  color: #777f8a;
+  font-size: 0.55rem;
+  line-height: 1.45;
+}
+
 .stage-panel__source-note button {
   width: 100%;
   min-height: 31px;
@@ -3218,6 +3497,47 @@ a {
 .stage-panel__source-note button:disabled {
   cursor: not-allowed;
   opacity: 0.62;
+}
+
+.stage-ai-review {
+  display: grid;
+  gap: 7px;
+  margin-top: 9px;
+  padding-top: 9px;
+  border-top: 1px solid #e4e7eb;
+}
+
+.stage-ai-review > p,
+.stage-ai-review__item span,
+.stage-ai-review > small {
+  margin: 0;
+  color: #69717d;
+  font-size: 0.56rem;
+  line-height: 1.45;
+}
+
+.stage-ai-review__item {
+  display: grid;
+  gap: 3px;
+  padding: 7px;
+  border-radius: 7px;
+  background: #ffffff;
+}
+
+.stage-ai-review__item strong {
+  font-size: 0.59rem;
+}
+
+.stage-ai-review__item small {
+  color: #8b929c;
+  font-size: 0.52rem;
+}
+
+.stage-ai-review__error {
+  margin-top: 8px;
+  color: #8f4646;
+  font-size: 0.56rem;
+  line-height: 1.4;
 }
 
 /* Treatment plan + approval */
