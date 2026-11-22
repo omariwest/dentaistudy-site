@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useThree, type ThreeEvent } from "@react-three/fiber";
 import {
   Box3,
@@ -1001,6 +1001,18 @@ export default function ScanWorkflow() {
   const [toothLabel, setToothLabel] = useState("11");
   const [alignJaw, setAlignJaw] = useState<Exclude<Jaw, "bite"> | null>(null);
   const [alignMode, setAlignMode] = useState<"translate" | "rotate">("translate");
+  const [workflowMode, setWorkflowMode] = useState<"segment" | "target">("segment");
+  const [jawTransforms, setJawTransforms] = useState<
+    Record<Exclude<Jaw, "bite">, RigidTransform>
+  >({
+    upper: identityTransform(),
+    lower: identityTransform(),
+  });
+  const [targetTransforms, setTargetTransforms] = useState<Record<string, RigidTransform>>({});
+  const [selectedTargetId, setSelectedTargetId] = useState<string | null>(null);
+  const [targetMode, setTargetMode] = useState<SetupMode>("translate");
+  const [displayTarget, setDisplayTarget] = useState(true);
+  const [setupApproved, setSetupApproved] = useState(false);
   const assetsRef = useRef<ScanAsset[]>([]);
 
   const activeAsset = assets.find((asset) => asset.jaw === activeJaw);
@@ -1023,6 +1035,38 @@ export default function ScanWorkflow() {
       setToothLabel(teethForJaw[0]);
     }
   }, [teethForJaw, toothLabel]);
+
+  useEffect(() => {
+    setTargetTransforms((current) => {
+      const next: Record<string, RigidTransform> = {};
+
+      segments.forEach((segment) => {
+        next[segment.id] = current[segment.id] || identityTransform();
+      });
+
+      return next;
+    });
+
+    if (selectedTargetId && !segments.some((segment) => segment.id === selectedTargetId)) {
+      setSelectedTargetId(null);
+    }
+  }, [segments, selectedTargetId]);
+
+  const updateJawTransform = useCallback(
+    (jaw: Exclude<Jaw, "bite">, transform: RigidTransform) => {
+      setJawTransforms((current) => ({ ...current, [jaw]: transform }));
+      setSetupApproved(false);
+    },
+    [],
+  );
+
+  const updateTargetTransform = useCallback(
+    (id: string, transform: RigidTransform) => {
+      setTargetTransforms((current) => ({ ...current, [id]: transform }));
+      setSetupApproved(false);
+    },
+    [],
+  );
 
   useEffect(() => {
     assetsRef.current = assets;
