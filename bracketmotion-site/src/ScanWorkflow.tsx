@@ -1000,6 +1000,26 @@ export type StagePersistenceState = {
   }>;
 };
 
+export type StageAiReviewResult = {
+  clinical_assessment?: string;
+  concerns?: Array<{
+    issue?: string;
+    why_it_matters?: string;
+    source_ids?: string[];
+  }>;
+  stage_guidance?: Array<{
+    stage?: string;
+    active_unit?: string;
+    anchorage_unit?: string;
+    movement_tendency?: string;
+    reciprocal_effects?: string;
+    control_strategy?: string;
+    source_ids?: string[];
+  }>;
+  missing_information?: string[];
+  boundary?: string;
+};
+
 type StageDefinition = {
   id: string;
   title: string;
@@ -1065,6 +1085,12 @@ function deriveStages({
   targetTransforms: Record<string, RigidTransform>;
   applianceLayers: ApplianceLayerState;
   endpoints: MechanicEndpoints;
+  sessionActive: boolean;
+  aiReview: StageAiReviewResult | null;
+  aiReviewLoading: boolean;
+  aiReviewError: string;
+  onRunAiReview: () => void;
+  onSignIn: () => void;
 }) {
   const stages: Omit<StageDefinition, "progress">[] = [];
   const movedLabels = segments
@@ -1557,6 +1583,12 @@ function StageWorkspace({
   targetTransforms,
   applianceLayers,
   endpoints,
+  sessionActive,
+  aiReview,
+  aiReviewLoading,
+  aiReviewError,
+  onRunAiReview,
+  onSignIn,
 }: {
   assets: ScanAsset[];
   segments: ToothSegment[];
@@ -1716,11 +1748,46 @@ function StageWorkspace({
           <div className="stage-panel__source-note">
             <strong>Gemini mechanics review</strong>
             <p>
-              The authenticated server-side review endpoint is deployed and source-grounded. Live patient-data calls unlock with BracketMotion sign-in in Task 10; Gemini cannot change geometry or approvals.
+              Source-grounded review of the approved stage sequence. Gemini cannot
+              change geometry, mechanics, or approvals.
             </p>
-            <button type="button" disabled>
-              Sign in required
+            <button
+              type="button"
+              disabled={aiReviewLoading}
+              onClick={sessionActive ? onRunAiReview : onSignIn}
+            >
+              {!sessionActive
+                ? "Sign in to review"
+                : aiReviewLoading
+                  ? "Reviewing…"
+                  : aiReview
+                    ? "Refresh review"
+                    : "Run mechanics review"}
             </button>
+            {aiReviewError && (
+              <div className="stage-ai-review__error" role="alert">
+                {aiReviewError}
+              </div>
+            )}
+            {aiReview && (
+              <div className="stage-ai-review">
+                <p>{aiReview.clinical_assessment}</p>
+                {aiReview.stage_guidance?.slice(0, 3).map((item, index) => (
+                  <div className="stage-ai-review__item" key={`${item.stage}-${index}`}>
+                    <strong>{item.stage || "Stage guidance"}</strong>
+                    <span>{item.control_strategy || item.movement_tendency}</span>
+                    {!!item.source_ids?.length && (
+                      <small>{item.source_ids.join(" · ")}</small>
+                    )}
+                  </div>
+                ))}
+                {!!aiReview.missing_information?.length && (
+                  <small>
+                    Missing: {aiReview.missing_information.slice(0, 3).join(" · ")}
+                  </small>
+                )}
+              </div>
+            )}
           </div>
         </aside>
       </div>
@@ -1823,6 +1890,12 @@ export default function ScanWorkflow({
   caseId = null,
   userId = null,
   initialState = null,
+  sessionActive = false,
+  stageAiReview = null,
+  stageAiReviewLoading = false,
+  stageAiReviewError = "",
+  onRunStageAiReview = () => undefined,
+  onSignIn = () => undefined,
 }: {
   onSetupApprovalChange?: (approved: boolean) => void;
   onPersistenceChange?: (state: ScanPersistenceState) => void;
@@ -1831,6 +1904,12 @@ export default function ScanWorkflow({
   caseId?: string | null;
   userId?: string | null;
   initialState?: ScanPersistenceState | null;
+  sessionActive?: boolean;
+  stageAiReview?: StageAiReviewResult | null;
+  stageAiReviewLoading?: boolean;
+  stageAiReviewError?: string;
+  onRunStageAiReview?: () => void;
+  onSignIn?: () => void;
 }) {
   const [assets, setAssets] = useState<ScanAsset[]>([]);
   const [loadingJaw, setLoadingJaw] = useState<Jaw | null>(null);
@@ -2511,6 +2590,12 @@ export default function ScanWorkflow({
         targetTransforms={targetTransforms}
         applianceLayers={applianceLayers}
         endpoints={mechanicEndpoints}
+        sessionActive={sessionActive}
+        aiReview={stageAiReview}
+        aiReviewLoading={stageAiReviewLoading}
+        aiReviewError={stageAiReviewError}
+        onRunAiReview={onRunStageAiReview}
+        onSignIn={onSignIn}
       />
     ) : (
       <div className="stage-blocked">
