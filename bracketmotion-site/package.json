@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "build": "npm run validate:v1 && tsc -b && vite build",
+    "preview": "vite preview",
+    "validate:v1": "node scripts/validate-v1.mjs"
   },
   "dependencies": {
     "@react-three/fiber": "^9.7.0",
