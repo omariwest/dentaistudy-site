@@ -43,6 +43,45 @@ function InstallButton({
   );
 }
 
+function Header() {
+  return (
+    <header className="site-header">
+      <div className="container header-inner">
+        <a className="wordmark" href="/" aria-label="BracketMotion home">
+          BracketMotion<span>.</span>
+        </a>
+
+        <div className="header-actions" aria-label="Install BracketMotion">
+          <InstallButton platform="Windows" compact />
+          <InstallButton platform="macOS" compact />
+        </div>
+      </div>
+    </header>
+  );
+}
+
+function Footer() {
+  return (
+    <footer className="site-footer">
+      <div className="container footer-inner">
+        <div className="footer-brand">
+          <a className="wordmark wordmark--footer" href="/" aria-label="BracketMotion home">
+            BracketMotion<span>.</span>
+          </a>
+          <p>Plan the mechanics. See the movement.</p>
+        </div>
+
+        <nav className="footer-links" aria-label="Legal">
+          <a href="/privacy">Privacy</a>
+          <a href="/terms">Terms</a>
+          <a href="/clinical-disclaimer">Clinical Disclaimer</a>
+          <a href="mailto:support@bracketmotion.com">support@bracketmotion.com</a>
+        </nav>
+      </div>
+    </footer>
+  );
+}
+
 const workflowSteps = [
   { number: "01", title: "Case", text: "Bring the patient's records and 3D dentition into one workspace." },
   { number: "02", title: "Plan", text: "Compare a primary treatment strategy with a clear alternative." },
@@ -50,22 +89,9 @@ const workflowSteps = [
   { number: "04", title: "Movement", text: "See the planned stages unfold on the patient's own dentition." },
 ];
 
-export default function App() {
+function HomePage() {
   return (
-    <div className="site-shell">
-      <header className="site-header">
-        <div className="container header-inner">
-          <a className="wordmark" href="/" aria-label="BracketMotion home">
-            BracketMotion<span>.</span>
-          </a>
-
-          <div className="header-actions" aria-label="Install BracketMotion">
-            <InstallButton platform="Windows" compact />
-            <InstallButton platform="macOS" compact />
-          </div>
-        </div>
-      </header>
-
+    <>
       <main>
         <section className="hero">
           <div className="container hero-inner">
@@ -134,24 +160,283 @@ export default function App() {
           </div>
         </section>
       </main>
+      <Footer />
+    </>
+  );
+}
 
-      <footer className="site-footer">
-        <div className="container footer-inner">
-          <div className="footer-brand">
-            <a className="wordmark wordmark--footer" href="/" aria-label="BracketMotion home">
-              BracketMotion<span>.</span>
-            </a>
-            <p>Plan the mechanics. See the movement.</p>
+function LegalLayout({
+  title,
+  intro,
+  children,
+}: {
+  title: string;
+  intro: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <>
+      <main className="legal-page">
+        <div className="container legal-content">
+          <div className="legal-header">
+            <p className="section-kicker">Legal</p>
+            <h1>{title}</h1>
+            <p className="legal-updated">Last updated: 22 November 2026</p>
           </div>
 
-          <nav className="footer-links" aria-label="Legal">
-            <a href="/privacy">Privacy</a>
-            <a href="/terms">Terms</a>
-            <a href="/clinical-disclaimer">Clinical Disclaimer</a>
-            <a href="mailto:support@bracketmotion.com">support@bracketmotion.com</a>
-          </nav>
+          <article className="legal-article">
+            <p className="legal-intro">{intro}</p>
+            {children}
+          </article>
         </div>
-      </footer>
+      </main>
+      <Footer />
+    </>
+  );
+}
+
+function PrivacyPage() {
+  return (
+    <LegalLayout
+      title="Privacy Policy"
+      intro="This Privacy Policy explains how BracketMotion collects, uses, stores and shares information when clinicians use our website and orthodontic planning software."
+    >
+      <h2>1. Information we collect</h2>
+      <p>Depending on how you use BracketMotion, we may process:</p>
+      <ul>
+        <li><strong>Account data:</strong> name, email address, login credentials and account preferences.</li>
+        <li><strong>Clinical case data:</strong> patient labels, age, orthodontic records, measurements, images, uploaded STL/PLY models, treatment notes and related case information you choose to provide.</li>
+        <li><strong>AI inputs and outputs:</strong> structured case information sent for treatment-planning assistance and the responses returned to the application.</li>
+        <li><strong>Technical data:</strong> browser, device, IP address, error logs and basic service-usage information needed to operate and secure the platform.</li>
+      </ul>
+
+      <h2>2. Patient data and your responsibility</h2>
+      <p>
+        Clinical records may contain personal or sensitive health information. You must have a lawful basis, authorization or other required permission before uploading patient information. Upload only information reasonably necessary for the case and use de-identified or pseudonymized records whenever practical.
+      </p>
+
+      <h2>3. How we use information</h2>
+      <ul>
+        <li>Provide authentication, case storage and saved treatment-planning work.</li>
+        <li>Display, process and visualize uploaded dental models and records.</li>
+        <li>Generate clinician-reviewed AI-assisted summaries, alternatives and draft treatment stages.</li>
+        <li>Maintain security, reliability, support and product performance.</li>
+        <li>Comply with applicable legal obligations and investigate misuse when necessary.</li>
+      </ul>
+
+      <h2>4. Service providers</h2>
+      <p>
+        BracketMotion is designed to use <strong>Vercel</strong> for web delivery, <strong>Supabase</strong> for authentication, database and file storage, and the <strong>OpenAI API</strong> for controlled AI features. These providers process information only as needed to provide their services and under their own contractual and privacy obligations.
+      </p>
+      <p>
+        OpenAI states that data submitted through its API is not used to train or improve its models unless the API customer explicitly opts in. API safety and service-retention rules may still apply according to the configured OpenAI account and endpoint.
+      </p>
+
+      <h2>5. Storage and security</h2>
+      <p>
+        We use reasonable technical and organizational safeguards appropriate to the service. Supabase states that customer data is encrypted in transit and at rest. No online system can guarantee absolute security, so users should avoid uploading unnecessary identifiers or unrelated sensitive information.
+      </p>
+
+      <h2>6. Sharing and sale of data</h2>
+      <p>
+        We do not sell patient or account data. Information may be disclosed to service providers that operate BracketMotion, when you direct us to do so, or when disclosure is required by law.
+      </p>
+
+      <h2>7. Retention and deletion</h2>
+      <p>
+        Case and account information is retained while needed to provide the service or meet legitimate security and legal requirements. Account and case deletion controls will remove data from active BracketMotion systems subject to backups, provider retention rules and legal obligations.
+      </p>
+
+      <h2>8. Cookies and local storage</h2>
+      <p>
+        BracketMotion may use essential browser storage or cookies for login sessions, security and PWA functionality. The V1 service is not designed around third-party advertising cookies or cross-site advertising profiles.
+      </p>
+
+      <h2>9. Your choices</h2>
+      <p>
+        You may request access, correction or deletion of your BracketMotion account information, subject to applicable law and any records we are required to retain.
+      </p>
+
+      <h2>10. Changes and contact</h2>
+      <p>
+        We may update this policy as the product and legal requirements evolve. Material changes will be reflected by a new “Last updated” date. Questions may be sent to <a href="mailto:support@bracketmotion.com">support@bracketmotion.com</a>.
+      </p>
+    </LegalLayout>
+  );
+}
+
+function TermsPage() {
+  return (
+    <LegalLayout
+      title="Terms of Use"
+      intro="These Terms govern access to and use of BracketMotion. By creating an account, installing the PWA or using the service, you agree to these Terms."
+    >
+      <h2>1. What BracketMotion is</h2>
+      <p>
+        BracketMotion is orthodontic decision-support and visualization software for conventional fixed-appliance treatment. It may organize clinical information, generate clinician-reviewed treatment options, stage planned tooth movement and visualize orthodontic mechanics.
+      </p>
+
+      <h2>2. Professional use</h2>
+      <p>
+        BracketMotion is intended for qualified orthodontic or dental professionals and appropriately supervised trainees. It does not replace professional education, examination of the patient, radiographic interpretation, diagnosis, informed consent or clinical judgment.
+      </p>
+
+      <h2>3. Accounts and security</h2>
+      <ul>
+        <li>Provide accurate account information and keep login credentials secure.</li>
+        <li>Do not share accounts in a way that defeats security or access controls.</li>
+        <li>Notify us if you believe your account or stored cases have been accessed without permission.</li>
+      </ul>
+
+      <h2>4. Patient records</h2>
+      <p>
+        You retain responsibility for the patient records and clinical files you upload. You confirm that you have the right and lawful authority to process and disclose that information through BracketMotion. You grant BracketMotion only the limited permission necessary to host, process, display, back up and transmit those files to provide the service.
+      </p>
+
+      <h2>5. AI-assisted features</h2>
+      <p>
+        AI-generated summaries, treatment alternatives, reasoning and draft stages are suggestions for clinician review. They may be incomplete, incorrect or inappropriate for a specific patient. You must verify AI output before relying on it, and the clinician—not BracketMotion or an AI model—makes the treatment decision.
+      </p>
+
+      <h2>6. 3D treatment visualization</h2>
+      <p>
+        Planned positions, animations and mechanics-aware effects are visual decision-support tools. They are not a guarantee that teeth, roots, periodontal tissues or bone will respond exactly as displayed, and they are not a promise of treatment time or clinical outcome.
+      </p>
+
+      <h2>7. Acceptable use</h2>
+      <p>You may not use BracketMotion to:</p>
+      <ul>
+        <li>Upload patient information without appropriate authority or permission.</li>
+        <li>Use the service for unlawful, fraudulent or harmful activity.</li>
+        <li>Upload malware, attack the service, bypass security or access another user's data.</li>
+        <li>Scrape, resell, copy or redistribute substantial portions of the software or proprietary content without permission.</li>
+        <li>Misrepresent BracketMotion output as autonomous medical advice or a guaranteed biological prediction.</li>
+      </ul>
+
+      <h2>8. Intellectual property</h2>
+      <p>
+        BracketMotion owns or licenses the software, interface, branding, internally authored rules and original content that make up the service. You retain ownership of your uploaded case content. Third-party software, publications, trademarks and open-source components remain the property of their respective owners and are governed by their applicable licenses.
+      </p>
+
+      <h2>9. Free service and changes</h2>
+      <p>
+        The initial BracketMotion version is provided free of charge. Features, storage limits, supported formats and availability may change as the product develops. We may modify, suspend or discontinue features when reasonably necessary for security, maintenance, clinical safety or product development.
+      </p>
+
+      <h2>10. Suspension or termination</h2>
+      <p>
+        We may suspend or terminate access for serious misuse, security threats, unlawful activity or material violation of these Terms. You may stop using BracketMotion and request deletion of your account subject to the Privacy Policy.
+      </p>
+
+      <h2>11. Availability and warranties</h2>
+      <p>
+        BracketMotion is provided on an “as is” and “as available” basis to the fullest extent permitted by law. We do not promise uninterrupted availability, error-free operation, complete clinical information or a particular treatment result.
+      </p>
+
+      <h2>12. Limitation of liability</h2>
+      <p>
+        To the fullest extent permitted by applicable law, BracketMotion and its operators are not liable for indirect, incidental, special or consequential losses arising from use of the service, treatment decisions, loss of data, interruption of service or reliance on unverified software or AI output. Nothing in these Terms excludes liability that cannot legally be excluded.
+      </p>
+
+      <h2>13. Privacy and updates</h2>
+      <p>
+        Use of BracketMotion is also governed by our <a href="/privacy">Privacy Policy</a> and <a href="/clinical-disclaimer">Clinical Disclaimer</a>. We may update these Terms as the service develops. Continued use after an updated version takes effect means you accept the revised Terms.
+      </p>
+
+      <h2>14. Contact</h2>
+      <p>
+        Questions about these Terms may be sent to <a href="mailto:support@bracketmotion.com">support@bracketmotion.com</a>.
+      </p>
+    </LegalLayout>
+  );
+}
+
+function ClinicalDisclaimerPage() {
+  return (
+    <LegalLayout
+      title="Clinical Disclaimer"
+      intro="BracketMotion is designed to support orthodontic professionals. It is not an autonomous clinician, and its outputs must always be reviewed in the context of the actual patient."
+    >
+      <h2>1. Clinical decision support, not replacement</h2>
+      <p>
+        BracketMotion may help organize diagnostic information, compare treatment strategies, suggest staging and visualize mechanics. The treating clinician remains responsible for diagnosis, treatment objectives, appliance selection, force systems, monitoring, modifications, patient communication and final clinical decisions.
+      </p>
+
+      <h2>2. Planned movement is not biological prediction</h2>
+      <p>
+        The 3D viewer represents planned tooth positions and mechanics-aware movement tendencies. It does not claim to reproduce the complete periodontal ligament, alveolar bone, root morphology, friction, patient compliance or individual biologic response. A displayed movement must not be interpreted as a guarantee that the patient will move by that amount, in that direction, or within a particular time.
+      </p>
+
+      <h2>3. AI limitations</h2>
+      <p>
+        AI-assisted outputs can contain errors, omissions or unsuitable suggestions. BracketMotion restricts AI to a clinician-reviewed decision-support role, but no control system eliminates every error. Do not approve a treatment strategy solely because the software generated it.
+      </p>
+
+      <h2>4. Clinical records remain essential</h2>
+      <p>
+        Treatment decisions should be based on an adequate clinical examination and appropriate records. BracketMotion cannot detect every pathology, periodontal limitation, root condition, growth issue, compliance factor or other circumstance that may change treatment.
+      </p>
+
+      <h2>5. Sources and references</h2>
+      <p>
+        BracketMotion's internally authored clinical and mechanics rules are informed by established orthodontic references, including <em>Contemporary Orthodontics</em>, selected peer-reviewed literature and other appropriately reviewed sources. Reference to a textbook, author, publisher, product or company does not imply sponsorship, affiliation or endorsement, and BracketMotion does not redistribute copyrighted textbooks as part of its public knowledge base.
+      </p>
+
+      <h2>6. Generic appliances and third-party brands</h2>
+      <p>
+        Brackets, wires, chains, coils, elastics and other components shown by BracketMotion are generic unless explicitly identified otherwise. Third-party names and trademarks belong to their owners. A visual resemblance to a commercial product does not mean that company sponsors or approves BracketMotion.
+      </p>
+
+      <h2>7. Regulatory status</h2>
+      <p>
+        Unless BracketMotion explicitly states otherwise for a particular released version and jurisdiction, do not assume the service has received regulatory clearance or approval as an autonomous diagnostic system, autonomous treatment planner or substitute for professional orthodontic judgment.
+      </p>
+
+      <h2>8. Emergency or urgent care</h2>
+      <p>
+        BracketMotion is not an emergency service and must not be used to delay urgent examination or treatment. Clinical emergencies and unexpected patient findings require direct professional assessment.
+      </p>
+
+      <h2>9. Contact</h2>
+      <p>
+        Questions about the intended clinical role of BracketMotion may be sent to <a href="mailto:support@bracketmotion.com">support@bracketmotion.com</a>.
+      </p>
+    </LegalLayout>
+  );
+}
+
+function NotFoundPage() {
+  return (
+    <>
+      <main className="legal-page">
+        <div className="container legal-content">
+          <div className="legal-header">
+            <p className="section-kicker">BracketMotion</p>
+            <h1>Page not found.</h1>
+            <p className="legal-updated"><a href="/">Return to BracketMotion</a></p>
+          </div>
+        </div>
+      </main>
+      <Footer />
+    </>
+  );
+}
+
+function RoutedPage() {
+  const path = window.location.pathname.replace(/\/+$/, "") || "/";
+
+  if (path === "/") return <HomePage />;
+  if (path === "/privacy") return <PrivacyPage />;
+  if (path === "/terms") return <TermsPage />;
+  if (path === "/clinical-disclaimer") return <ClinicalDisclaimerPage />;
+  return <NotFoundPage />;
+}
+
+export default function App() {
+  return (
+    <div className="site-shell">
+      <Header />
+      <RoutedPage />
     </div>
   );
 }
