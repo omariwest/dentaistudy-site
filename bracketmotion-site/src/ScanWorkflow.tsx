@@ -139,17 +139,34 @@ async function parseScan(file: File, jaw: Jaw): Promise<ScanAsset> {
   }
 
   const bytes = await file.arrayBuffer();
-  let geometry =
+  const parsed =
     extension === "stl"
       ? new STLLoader().parse(bytes)
       : new PLYLoader().parse(bytes);
 
-  geometry.deleteAttribute("color");
-  geometry.computeVertexNormals();
+  const triangleGeometry = parsed.index ? parsed.toNonIndexed() : parsed;
 
-  const indexed = mergeVertices(geometry, 0.0001);
+  if (
+    triangleGeometry.getAttribute("position").count < 3 ||
+    triangleGeometry.getAttribute("position").count % 3 !== 0
+  ) {
+    if (triangleGeometry !== parsed) triangleGeometry.dispose();
+    parsed.dispose();
+    throw new Error("The scan must contain a triangulated surface mesh.");
+  }
+
+  const positionOnly = new BufferGeometry();
+  positionOnly.setAttribute(
+    "position",
+    triangleGeometry.getAttribute("position").clone(),
+  );
+
+  if (triangleGeometry !== parsed) triangleGeometry.dispose();
+  parsed.dispose();
+
+  const indexed = mergeVertices(positionOnly, 0.0001);
+  positionOnly.dispose();
   indexed.computeVertexNormals();
-  geometry.dispose();
 
   const topology = buildTopology(indexed);
   const display = indexed.toNonIndexed();
