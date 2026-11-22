@@ -632,6 +632,90 @@ type TreatmentPlanState = {
   alternativeStrategy: string;
 };
 
+type AiReviewMode = "plan_review" | "stage_review";
+
+function ClinicalAiReviewCard({
+  mode,
+  planningReady,
+  planApproved,
+  setupApproved,
+}: {
+  mode: AiReviewMode;
+  planningReady: boolean;
+  planApproved: boolean;
+  setupApproved: boolean;
+}) {
+  const stageMode = mode === "stage_review";
+  const gateReady = stageMode
+    ? planningReady && planApproved && setupApproved
+    : planningReady;
+
+  return (
+    <section className="ai-review-card" aria-labelledby={`ai-review-${mode}`}>
+      <div className="ai-review-card__header">
+        <div>
+          <span>Gemini clinical reasoning</span>
+          <h2 id={`ai-review-${mode}`}>
+            {stageMode ? "Mechanics review" : "Clinical plan review"}
+          </h2>
+        </div>
+        <span className="ai-review-status">Authentication pending</span>
+      </div>
+
+      <p className="ai-review-card__intro">
+        BracketMotion can send a structured case to the authenticated server-side
+        reasoning endpoint and receive a source-grounded draft for clinician review.
+      </p>
+
+      <div className="ai-review-boundaries">
+        <div>
+          <span>Sources</span>
+          <strong>Proffit 2025 only</strong>
+          <small>Mechanics claims cite controlled internal source IDs.</small>
+        </div>
+        <div>
+          <span>Output</span>
+          <strong>Structured review</strong>
+          <small>Concerns, alternatives, stage guidance and missing information.</small>
+        </div>
+        <div>
+          <span>Geometry</span>
+          <strong>No write access</strong>
+          <small>Gemini cannot move teeth, alter transforms or approve setup.</small>
+        </div>
+      </div>
+
+      <div className="ai-review-gate">
+        <div>
+          <span>Clinical gate</span>
+          <strong>{gateReady ? "Clinical prerequisites met" : "Prerequisites not met"}</strong>
+          <p>
+            {stageMode
+              ? "Stage review requires planning readiness, Clinical Plan Approval and 3D Setup Approval."
+              : "Plan review requires a planning-ready case. The clinician remains responsible for accepting, editing or rejecting the draft."}
+          </p>
+        </div>
+        <button
+          className="ai-review-button"
+          type="button"
+          disabled
+          title="Task 10 connects authenticated BracketMotion sessions to this deployed endpoint."
+        >
+          Sign in required
+        </button>
+      </div>
+
+      <div className="ai-review-source-note">
+        <strong>Live endpoint deployed</strong>
+        <p>
+          The clinical reasoning service is already server-side and approval-gated.
+          Task 10 only supplies the authenticated BracketMotion session needed to call it safely.
+        </p>
+      </div>
+    </section>
+  );
+}
+
 function TreatmentPlanView({
   planningReady,
   scopeIssue,
@@ -678,7 +762,7 @@ function TreatmentPlanView({
         <div>
           <span className="case-page-kicker">Treatment plan</span>
           <h1>Review the strategy before any tooth moves.</h1>
-          <p>The plan remains clinician-controlled. Task 9 will generate this structure from controlled Gemini reasoning.</p>
+          <p>The plan remains clinician-controlled. Gemini can review the structured strategy, but it cannot approve or alter the treatment geometry.</p>
         </div>
         <span className={`plan-approval-badge${planApproved ? " is-approved" : ""}`}>
           {planApproved ? "Clinical plan approved" : "Approval required"}
@@ -750,6 +834,13 @@ function TreatmentPlanView({
           />
         </section>
       </div>
+
+      <ClinicalAiReviewCard
+        mode="plan_review"
+        planningReady={planningReady}
+        planApproved={planApproved}
+        setupApproved={false}
+      />
 
       <section className={`plan-approval-panel${planApproved ? " is-approved" : ""}`}>
         <div>
@@ -1180,10 +1271,20 @@ function ClinicalAppPage() {
               }}
             />
           ) : (
-            <SetupWorkspace
-              onSetupApprovalChange={setSetupApproved}
-              clinicalSection={activeSection as "Setup" | "Stages"}
-            />
+            <>
+              {activeSection === "Stages" && (
+                <ClinicalAiReviewCard
+                  mode="stage_review"
+                  planningReady={planningReady}
+                  planApproved={planApproved}
+                  setupApproved={setupApproved}
+                />
+              )}
+              <SetupWorkspace
+                onSetupApprovalChange={setSetupApproved}
+                clinicalSection={activeSection as "Setup" | "Stages"}
+              />
+            </>
           )}
         </section>
 
