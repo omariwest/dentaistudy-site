@@ -1516,6 +1516,224 @@ function ApplianceLayer({
   );
 }
 
+function StageWorkspace({
+  assets,
+  segments,
+  jawTransforms,
+  targetTransforms,
+  applianceLayers,
+  endpoints,
+}: {
+  assets: ScanAsset[];
+  segments: ToothSegment[];
+  jawTransforms: Record<Exclude<Jaw, "bite">, RigidTransform>;
+  targetTransforms: Record<string, RigidTransform>;
+  applianceLayers: ApplianceLayerState;
+  endpoints: MechanicEndpoints;
+}) {
+  const stages = useMemo(
+    () =>
+      deriveStages({
+        segments,
+        targetTransforms,
+        applianceLayers,
+        endpoints,
+      }),
+    [applianceLayers, endpoints, segments, targetTransforms],
+  );
+  const [stageStep, setStageStep] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  useEffect(() => {
+    setStageStep((current) => Math.min(current, stages.length));
+  }, [stages.length]);
+
+  useEffect(() => {
+    if (!isPlaying) return;
+
+    const timer = window.setInterval(() => {
+      setStageStep((current) => {
+        if (current >= stages.length) {
+          setIsPlaying(false);
+          return current;
+        }
+
+        return current + 1;
+      });
+    }, 1800);
+
+    return () => window.clearInterval(timer);
+  }, [isPlaying, stages.length]);
+
+  const currentStage = stageStep === 0 ? null : stages[stageStep - 1];
+  const progress = currentStage?.progress || 0;
+  const playbackTransforms = useMemo(
+    () => scaleTargetTransforms(targetTransforms, progress),
+    [progress, targetTransforms],
+  );
+  const playbackLayers: ApplianceLayerState =
+    currentStage?.layers || {
+      brackets: true,
+      archwire: true,
+      powerChain: false,
+      coilSpring: false,
+      elastics: false,
+      closingLoop: false,
+    };
+
+  return (
+    <div className="stage-workspace">
+      <div className="stage-workspace__header">
+        <div>
+          <span className="case-page-kicker">Stage + mechanics engine</span>
+          <h2>{currentStage ? currentStage.title : "Initial approved setup"}</h2>
+          <p>
+            Stages are derived from the approved target and enabled mechanics.
+            Playback is geometric and does not predict biologic timing.
+          </p>
+        </div>
+        <div className="stage-workspace__status">
+          <span>{stageStep}</span>
+          <small>of {stages.length} stages</small>
+        </div>
+      </div>
+
+      <div className="stage-workspace__body">
+        <div className="stage-viewer">
+          <Canvas camera={{ fov: 36, near: 0.01, far: 100000 }} dpr={[1, 1.5]}>
+            <color attach="background" args={["#bfc1c9"]} />
+            <TargetSetupScene
+              assets={assets}
+              segments={segments}
+              jawTransforms={jawTransforms}
+              targetTransforms={playbackTransforms}
+              selectedId={null}
+              transformMode="translate"
+              displayTarget
+              collisionIds={new Set()}
+              contactIds={new Set()}
+              onSelect={() => undefined}
+              onTransform={() => undefined}
+            />
+            <ApplianceLayer
+              assets={assets}
+              segments={segments}
+              jawTransforms={jawTransforms}
+              targetTransforms={playbackTransforms}
+              layers={playbackLayers}
+              endpoints={endpoints}
+            />
+          </Canvas>
+
+          <div className="stage-viewer__badge">
+            <span>{currentStage ? `Stage ${stageStep}` : "Initial"}</span>
+            <strong>{Math.round(progress * 100)}% geometric target</strong>
+          </div>
+
+          <div className="scan-canvas__hint">
+            Playback interpolates Initial → approved Target · mechanics notes describe expected tendencies, not exact force or biologic response
+          </div>
+        </div>
+
+        <aside className="stage-panel">
+          <div className="stage-panel__summary">
+            <span>Current stage</span>
+            <strong>{currentStage?.title || "Initial"}</strong>
+            <small>
+              {currentStage
+                ? `${Math.round(currentStage.progress * 100)}% of the approved geometric target`
+                : "Baseline before staged movement"}
+            </small>
+          </div>
+
+          {currentStage ? (
+            <div className="stage-mechanics-card">
+              <div>
+                <span>Active unit</span>
+                <p>{currentStage.activeUnits}</p>
+              </div>
+              <div>
+                <span>Anchorage unit</span>
+                <p>{currentStage.anchorageUnits}</p>
+              </div>
+              <div>
+                <span>Intended movement tendency</span>
+                <p>{currentStage.intendedMovement}</p>
+              </div>
+              <div>
+                <span>Reciprocal / side-effect tendency</span>
+                <p>{currentStage.reciprocalEffects}</p>
+              </div>
+              <div className="stage-mechanics-card__warning">
+                <span>Watch for</span>
+                <p>{currentStage.warning}</p>
+              </div>
+              <div className="stage-mechanics-card__control">
+                <span>Control strategy</span>
+                <p>{currentStage.controlStrategy}</p>
+              </div>
+            </div>
+          ) : (
+            <div className="stage-panel__empty">
+              Choose Stage 1 or press Play to review the proposed treatment sequence.
+            </div>
+          )}
+
+          <div className="stage-panel__source-note">
+            <strong>V1 mechanics boundary</strong>
+            <p>
+              Deterministic stage guidance uses the current case geometry and enabled appliance mechanics. Gemini-generated case reasoning arrives in Task 9 and still requires clinician review.
+            </p>
+          </div>
+        </aside>
+      </div>
+
+      <div className="stage-timeline">
+        <button
+          className="stage-play-button"
+          type="button"
+          onClick={() => {
+            if (stageStep >= stages.length) setStageStep(0);
+            setIsPlaying((current) => !current);
+          }}
+          aria-label={isPlaying ? "Pause stage playback" : "Play stage playback"}
+        >
+          {isPlaying ? "Ⅱ" : "▶"}
+        </button>
+
+        <div className="stage-timeline__track">
+          <button
+            className={`stage-timeline__item${stageStep === 0 ? " is-current" : ""}`}
+            type="button"
+            onClick={() => {
+              setIsPlaying(false);
+              setStageStep(0);
+            }}
+          >
+            <span>00</span>
+            Initial
+          </button>
+
+          {stages.map((stage, index) => (
+            <button
+              className={`stage-timeline__item${stageStep === index + 1 ? " is-current" : ""}`}
+              type="button"
+              onClick={() => {
+                setIsPlaying(false);
+                setStageStep(index + 1);
+              }}
+              key={stage.id}
+            >
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              {stage.title}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ScanUploadCard({
   jaw,
   asset,
