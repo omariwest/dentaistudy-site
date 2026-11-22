@@ -1,7 +1,9 @@
 import {
+  createContext,
   lazy,
   Suspense,
   useCallback,
+  useContext,
   useEffect,
   useMemo,
   useRef,
@@ -29,6 +31,216 @@ const ScanWorkflow = lazy(() => import("./ScanWorkflow"));
 
 type Platform = "Windows" | "macOS";
 
+type BeforeInstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{
+    outcome: "accepted" | "dismissed";
+    platform: string;
+  }>;
+};
+
+type InstallContextValue = {
+  installed: boolean;
+  requestInstall: (platform: Platform) => Promise<void>;
+};
+
+const InstallContext = createContext<InstallContextValue | null>(null);
+
+function isStandaloneMode() {
+  return (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    ("standalone" in window.navigator &&
+      Boolean((window.navigator as Navigator & { standalone?: boolean }).standalone))
+  );
+}
+
+function PwaInstallProvider({ children }: { children: React.ReactNode }) {
+  const [installPrompt, setInstallPrompt] =
+    useState<BeforeInstallPromptEvent | null>(null);
+  const [installed, setInstalled] = useState(isStandaloneMode);
+  const [guidePlatform, setGuidePlatform] = useState<Platform | null>(null);
+
+  useEffect(() => {
+    const displayMode = window.matchMedia("(display-mode: standalone)");
+
+    const handlePrompt = (event: Event) => {
+      event.preventDefault();
+      setInstallPrompt(event as BeforeInstallPromptEvent);
+    };
+
+    const handleInstalled = () => {
+      setInstalled(true);
+      setInstallPrompt(null);
+      setGuidePlatform(null);
+    };
+
+    const handleDisplayMode = () => {
+      setInstalled(isStandaloneMode());
+    };
+
+    window.addEventListener("beforeinstallprompt", handlePrompt);
+    window.addEventListener("appinstalled", handleInstalled);
+    displayMode.addEventListener("change", handleDisplayMode);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handlePrompt);
+      window.removeEventListener("appinstalled", handleInstalled);
+      displayMode.removeEventListener("change", handleDisplayMode);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!guidePlatform) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setGuidePlatform(null);
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [guidePlatform]);
+
+  const requestInstall = useCallback(
+    async (platform: Platform) => {
+      if (installed) {
+        window.location.href = "/app";
+        return;
+      }
+
+      if (installPrompt) {
+        try {
+          await installPrompt.prompt();
+          const choice = await installPrompt.userChoice;
+          setInstallPrompt(null);
+
+          if (choice.outcome === "accepted") {
+            return;
+          }
+        } catch {
+          setInstallPrompt(null);
+        }
+      }
+
+      setGuidePlatform(platform);
+    },
+    [installPrompt, installed],
+  );
+
+  const value = useMemo(
+    () => ({ installed, requestInstall }),
+    [installed, requestInstall],
+  );
+
+  return (
+    <InstallContext.Provider value={value}>
+      {children}
+
+      {guidePlatform && (
+        <div
+          className="install-dialog-backdrop"
+          role="presentation"
+          onMouseDown={() => setGuidePlatform(null)}
+        >
+          <section
+            className="install-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="install-dialog-title"
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <div className="install-dialog__header">
+              <div>
+                <span>Install BracketMotion</span>
+                <h2 id="install-dialog-title">{guidePlatform}</h2>
+              </div>
+              <button
+                type="button"
+                aria-label="Close install instructions"
+                onClick={() => setGuidePlatform(null)}
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="install-dialog__body">
+              {guidePlatform === "Windows" ? (
+                <>
+                  <p>
+                    In Chrome or Edge, use the install icon in the address bar when it
+                    appears. You can also open the browser menu and choose its app/site
+                    install option.
+                  </p>
+                  <small>
+                    BracketMotion then opens in its own app window and remains available
+                    from your normal Windows app launcher.
+                  </small>
+                </>
+              ) : (
+                <>
+                  <p>
+                    In Safari on macOS Sonoma 14 or later, choose
+                    <strong> File → Add to Dock</strong>. In Chrome or Edge, use the
+                    install icon in the address bar or the browser's install-app option.
+                  </p>
+                  <small>
+                    The installed web app opens separately from the browser and keeps
+                    using the same BracketMotion account.
+                  </small>
+                </>
+              )}
+
+              <div className="install-dialog__actions">
+                <button
+                  className="app-primary-action"
+                  type="button"
+                  onClick={() => {
+                    setGuidePlatform(null);
+                    window.location.href = "/app";
+                  }}
+                >
+                  Open web app
+                </button>
+                <button
+                  className="app-quiet-button"
+                  type="button"
+                  onClick={() => setGuidePlatform(null)}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </section>
+        </div>
+      )}
+    </InstallContext.Provider>
+  );
+}
+
+function usePwaInstall() {
+  const context = useContext(InstallContext);
+  if (!context) {
+    throw new Error("usePwaInstall must be used inside PwaInstallProvider.");
+  }
+  return context;
+}
+
+function useOnlineStatus() {
+  const [online, setOnline] = useState(() => navigator.onLine);
+
+  useEffect(() => {
+    const update = () => setOnline(navigator.onLine);
+    window.addEventListener("online", update);
+    window.addEventListener("offline", update);
+
+    return () => {
+      window.removeEventListener("online", update);
+      window.removeEventListener("offline", update);
+    };
+  }, []);
+
+  return online;
+}
+
 function PlatformIcon({ platform }: { platform: Platform }) {
   if (platform === "Windows") {
     return (
@@ -54,6 +266,8 @@ function InstallButton({
   compact?: boolean;
   primary?: boolean;
 }) {
+  const { installed, requestInstall } = usePwaInstall();
+
   return (
     <button
       className={[
@@ -64,10 +278,23 @@ function InstallButton({
         .filter(Boolean)
         .join(" ")}
       type="button"
-      aria-label={`Install BracketMotion for ${platform}`}
+      aria-label={
+        installed
+          ? "Open BracketMotion"
+          : `Install BracketMotion for ${platform}`
+      }
+      onClick={() => void requestInstall(platform)}
     >
       <PlatformIcon platform={platform} />
-      <span>{compact ? platform : `Install for ${platform}`}</span>
+      <span>
+        {installed
+          ? compact
+            ? "Open"
+            : "Open BracketMotion"
+          : compact
+            ? platform
+            : `Install for ${platform}`}
+      </span>
     </button>
   );
 }
@@ -2658,7 +2885,7 @@ function RoutedPage() {
   return <NotFoundPage />;
 }
 
-export default function App() {
+function AppRoutes() {
   const path = window.location.pathname.replace(/\/+$/, "") || "/";
 
   if (path === "/app") {
@@ -2670,5 +2897,13 @@ export default function App() {
       <Header />
       <RoutedPage />
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <PwaInstallProvider>
+      <AppRoutes />
+    </PwaInstallProvider>
   );
 }
