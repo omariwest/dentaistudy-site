@@ -1093,8 +1093,11 @@ export default function ScanWorkflow() {
 
       if (jaw !== "bite") {
         setSegments((current) => current.filter((segment) => segment.jaw !== jaw));
+        setJawTransforms((current) => ({ ...current, [jaw]: identityTransform() }));
         setActiveFaces(new Set());
         setActiveSegmentId(null);
+        setWorkflowMode("segment");
+        setSetupApproved(false);
       }
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "The scan could not be read.");
@@ -1111,8 +1114,11 @@ export default function ScanWorkflow() {
 
     if (jaw !== "bite") {
       setSegments((current) => current.filter((segment) => segment.jaw !== jaw));
+      setJawTransforms((current) => ({ ...current, [jaw]: identityTransform() }));
       setActiveFaces(new Set());
       setActiveSegmentId(null);
+      setWorkflowMode("segment");
+      setSetupApproved(false);
     }
   };
 
@@ -1133,6 +1139,8 @@ export default function ScanWorkflow() {
     if (!activeAsset || activeFaces.size === 0) return;
 
     const faces = [...activeFaces];
+
+    setSetupApproved(false);
 
     setSegments((current) => {
       const sameLabel = current.find(
@@ -1191,7 +1199,9 @@ export default function ScanWorkflow() {
 
   const deleteSegment = (segmentId: string) => {
     setSegments((current) => current.filter((segment) => segment.id !== segmentId));
+    setSetupApproved(false);
     if (activeSegmentId === segmentId) newSegment();
+    if (selectedTargetId === segmentId) setSelectedTargetId(null);
   };
 
   const upperReady = assets.some((asset) => asset.jaw === "upper");
