@@ -3,6 +3,7 @@ import { Canvas, useThree, type ThreeEvent } from "@react-three/fiber";
 import {
   Box3,
   BufferAttribute,
+  CatmullRomCurve3,
   BufferGeometry,
   Color,
   DoubleSide,
@@ -941,6 +942,345 @@ function TargetSetupScene({
         }}
       />
     </>
+  );
+}
+
+
+type ApplianceLayerState = {
+  brackets: boolean;
+  archwire: boolean;
+  powerChain: boolean;
+  coilSpring: boolean;
+  elastics: boolean;
+  closingLoop: boolean;
+};
+
+type MechanicEndpoints = {
+  chainStart: string;
+  chainEnd: string;
+  coilStart: string;
+  coilEnd: string;
+  elasticUpper: string;
+  elasticLower: string;
+  loopStart: string;
+  loopEnd: string;
+};
+
+function SegmentBar({
+  start,
+  end,
+  radius,
+  color,
+}: {
+  start: Vector3;
+  end: Vector3;
+  radius: number;
+  color: string;
+}) {
+  const vector = useMemo(() => end.clone().sub(start), [end, start]);
+  const length = vector.length();
+  const midpoint = useMemo(
+    () => start.clone().add(end).multiplyScalar(0.5),
+    [end, start],
+  );
+  const quaternion = useMemo(
+    () =>
+      new Quaternion().setFromUnitVectors(
+        new Vector3(0, 1, 0),
+        vector.clone().normalize(),
+      ),
+    [vector],
+  );
+
+  if (length < 0.001) return null;
+
+  return (
+    <mesh position={midpoint} quaternion={quaternion}>
+      <cylinderGeometry args={[radius, radius, length, 10]} />
+      <meshStandardMaterial color={color} roughness={0.35} metalness={0.16} />
+    </mesh>
+  );
+}
+
+function TubePath({
+  points,
+  radius,
+  color,
+}: {
+  points: Vector3[];
+  radius: number;
+  color: string;
+}) {
+  const curve = useMemo(
+    () => new CatmullRomCurve3(points.map((point) => point.clone())),
+    [points],
+  );
+
+  return (
+    <mesh>
+      <tubeGeometry args={[curve, 56, radius, 8, false]} />
+      <meshStandardMaterial color={color} roughness={0.34} metalness={0.12} />
+    </mesh>
+  );
+}
+
+function GenericBracket({
+  anchor,
+  scale,
+}: {
+  anchor: Vector3;
+  scale: number;
+}) {
+  const width = scale * 1.35;
+  const height = scale;
+  const depth = scale * 0.42;
+
+  return (
+    <group position={anchor}>
+      <mesh>
+        <boxGeometry args={[width, height, depth]} />
+        <meshStandardMaterial color="#d8dde3" metalness={0.68} roughness={0.26} />
+      </mesh>
+      <mesh position={[0, height * 0.38, depth * 0.18]}>
+        <boxGeometry args={[width * 1.14, height * 0.22, depth * 0.48]} />
+        <meshStandardMaterial color="#edf0f3" metalness={0.72} roughness={0.22} />
+      </mesh>
+      <mesh position={[0, -height * 0.38, depth * 0.18]}>
+        <boxGeometry args={[width * 1.14, height * 0.22, depth * 0.48]} />
+        <meshStandardMaterial color="#edf0f3" metalness={0.72} roughness={0.22} />
+      </mesh>
+    </group>
+  );
+}
+
+function CoilSpring({
+  start,
+  end,
+  scale,
+}: {
+  start: Vector3;
+  end: Vector3;
+  scale: number;
+}) {
+  const points = useMemo(() => {
+    const direction = end.clone().sub(start);
+    const length = direction.length();
+    const axis = direction.clone().normalize();
+    const helper =
+      Math.abs(axis.y) < 0.9 ? new Vector3(0, 1, 0) : new Vector3(1, 0, 0);
+    const side = new Vector3().crossVectors(axis, helper).normalize();
+    const up = new Vector3().crossVectors(side, axis).normalize();
+    const turns = Math.max(5, Math.round(length / Math.max(scale * 0.9, 0.5)));
+    const count = turns * 10;
+    const radius = scale * 0.36;
+
+    return Array.from({ length: count + 1 }, (_, index) => {
+      const t = index / count;
+      const angle = t * Math.PI * 2 * turns;
+
+      return start
+        .clone()
+        .lerp(end, t)
+        .add(side.clone().multiplyScalar(Math.cos(angle) * radius))
+        .add(up.clone().multiplyScalar(Math.sin(angle) * radius));
+    });
+  }, [end, scale, start]);
+
+  return <TubePath points={points} radius={scale * 0.09} color="#7f8790" />;
+}
+
+function ClosingLoop({
+  start,
+  end,
+  scale,
+}: {
+  start: Vector3;
+  end: Vector3;
+  scale: number;
+}) {
+  const points = useMemo(() => {
+    const middle = start.clone().lerp(end, 0.5);
+    const height = scale * 4.2;
+
+    return [
+      start,
+      start.clone().lerp(middle, 0.55),
+      middle.clone().add(new Vector3(0, height, 0)),
+      middle.clone().add(new Vector3(scale * 0.8, height * 1.05, 0)),
+      middle.clone().add(new Vector3(scale * 1.05, 0, 0)),
+      end,
+    ];
+  }, [end, scale, start]);
+
+  return <TubePath points={points} radius={scale * 0.1} color="#a9b0b8" />;
+}
+
+function ApplianceLayer({
+  assets,
+  segments,
+  jawTransforms,
+  targetTransforms,
+  layers,
+  endpoints,
+}: {
+  assets: ScanAsset[];
+  segments: ToothSegment[];
+  jawTransforms: Record<Exclude<Jaw, "bite">, RigidTransform>;
+  targetTransforms: Record<string, RigidTransform>;
+  layers: ApplianceLayerState;
+  endpoints: MechanicEndpoints;
+}) {
+  const anchors = useMemo(() => {
+    const map = new Map<string, { point: Vector3; jaw: Exclude<Jaw, "bite"> }>();
+    const combined = new Box3();
+
+    segments.forEach((segment) => {
+      const asset = assets.find((item) => item.jaw === segment.jaw);
+      if (!asset) return;
+
+      const box = targetWorldBox(
+        asset,
+        segment,
+        jawTransforms[segment.jaw],
+        targetTransforms[segment.id] || identityTransform(),
+      );
+
+      combined.union(box);
+      const center = box.getCenter(new Vector3());
+      const depth = Math.max(0.6, box.max.z - box.min.z);
+
+      map.set(segment.label, {
+        point: new Vector3(center.x, center.y, box.max.z + depth * 0.08),
+        jaw: segment.jaw,
+      });
+    });
+
+    const diagonal = combined.isEmpty()
+      ? 60
+      : combined.getSize(new Vector3()).length();
+
+    return {
+      map,
+      scale: Math.max(0.75, Math.min(2.2, diagonal * 0.018)),
+    };
+  }, [assets, jawTransforms, segments, targetTransforms]);
+
+  const sequenceFor = (jaw: Exclude<Jaw, "bite">) =>
+    (jaw === "upper" ? upperTeeth : lowerTeeth)
+      .map((label) => anchors.map.get(label))
+      .filter(
+        (item): item is { point: Vector3; jaw: Exclude<Jaw, "bite"> } =>
+          Boolean(item),
+      )
+      .map((item) => item.point);
+
+  const upperWire = sequenceFor("upper");
+  const lowerWire = sequenceFor("lower");
+
+  const pointFor = (label: string) => anchors.map.get(label)?.point || null;
+
+  const rangePoints = (startLabel: string, endLabel: string) => {
+    const start = anchors.map.get(startLabel);
+    const end = anchors.map.get(endLabel);
+    if (!start || !end || start.jaw !== end.jaw) return [];
+
+    const sequence = start.jaw === "upper" ? upperTeeth : lowerTeeth;
+    const startIndex = sequence.indexOf(startLabel);
+    const endIndex = sequence.indexOf(endLabel);
+    if (startIndex < 0 || endIndex < 0) return [];
+
+    const low = Math.min(startIndex, endIndex);
+    const high = Math.max(startIndex, endIndex);
+
+    return sequence
+      .slice(low, high + 1)
+      .map((label) => pointFor(label))
+      .filter((point): point is Vector3 => Boolean(point));
+  };
+
+  const chainPoints = rangePoints(endpoints.chainStart, endpoints.chainEnd);
+  const coilStart = pointFor(endpoints.coilStart);
+  const coilEnd = pointFor(endpoints.coilEnd);
+  const elasticUpper = pointFor(endpoints.elasticUpper);
+  const elasticLower = pointFor(endpoints.elasticLower);
+  const loopStart = pointFor(endpoints.loopStart);
+  const loopEnd = pointFor(endpoints.loopEnd);
+
+  return (
+    <group>
+      {layers.brackets &&
+        [...anchors.map.entries()].map(([label, anchor]) => (
+          <GenericBracket
+            anchor={anchor.point}
+            scale={anchors.scale}
+            key={`bracket-${label}`}
+          />
+        ))}
+
+      {layers.archwire &&
+        [upperWire, lowerWire].map((points, index) =>
+          points.length > 1 ? (
+            <TubePath
+              points={points}
+              radius={anchors.scale * 0.09}
+              color="#aeb5bd"
+              key={index}
+            />
+          ) : null,
+        )}
+
+      {layers.powerChain && chainPoints.length > 1 && (
+        <group>
+          {chainPoints.map((point, index) => (
+            <mesh position={point} key={index}>
+              <torusGeometry
+                args={[
+                  anchors.scale * 0.35,
+                  anchors.scale * 0.09,
+                  8,
+                  18,
+                ]}
+              />
+              <meshStandardMaterial color="#6d4cf5" roughness={0.52} />
+            </mesh>
+          ))}
+          {chainPoints.slice(0, -1).map((point, index) => (
+            <SegmentBar
+              start={point}
+              end={chainPoints[index + 1]}
+              radius={anchors.scale * 0.07}
+              color="#6d4cf5"
+              key={index}
+            />
+          ))}
+        </group>
+      )}
+
+      {layers.coilSpring && coilStart && coilEnd && (
+        <CoilSpring
+          start={coilStart}
+          end={coilEnd}
+          scale={anchors.scale}
+        />
+      )}
+
+      {layers.elastics && elasticUpper && elasticLower && (
+        <SegmentBar
+          start={elasticUpper}
+          end={elasticLower}
+          radius={anchors.scale * 0.13}
+          color="#3aa17e"
+        />
+      )}
+
+      {layers.closingLoop && loopStart && loopEnd && (
+        <ClosingLoop
+          start={loopStart}
+          end={loopEnd}
+          scale={anchors.scale}
+        />
+      )}
+    </group>
   );
 }
 
