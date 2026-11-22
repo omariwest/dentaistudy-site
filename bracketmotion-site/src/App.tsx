@@ -259,6 +259,8 @@ function ReadinessCard({
 }
 
 function CaseRecordsView({
+  caseLabel,
+  onCaseLabel,
   records,
   onCompleteRecord,
   planningReady,
@@ -266,6 +268,8 @@ function CaseRecordsView({
   scopeIssue,
   onOpenFindings,
 }: {
+  caseLabel: string;
+  onCaseLabel: (value: string) => void;
   records: Record<RecordKey, boolean>;
   onCompleteRecord: (key: RecordKey) => void;
   planningReady: boolean;
@@ -304,16 +308,17 @@ function CaseRecordsView({
         <div className="case-form-grid">
           <label>
             <span>Case label</span>
-            <input defaultValue="Demo Case" type="text" />
+            <input value={caseLabel} onChange={(event) => onCaseLabel(event.target.value)} type="text" />
           </label>
           <label>
             <span>Age at records</span>
             <input defaultValue="24" min="12" type="number" />
           </label>
           <label>
-            <span>Dentition</span>
-            <select defaultValue="Permanent">
-              <option>Permanent</option>
+            <span>Patient stage</span>
+            <select defaultValue="Adult">
+              <option>Adult</option>
+              <option>Adolescent</option>
             </select>
           </label>
           <label>
@@ -329,6 +334,18 @@ function CaseRecordsView({
           <label className="case-form-grid__wide">
             <span>Chief complaint / treatment goal</span>
             <input defaultValue="Improve alignment and bite." type="text" />
+          </label>
+          <label className="case-form-grid__wide">
+            <span>Relevant medical history</span>
+            <input defaultValue="No relevant medical-history flags reported." type="text" />
+          </label>
+          <label className="case-form-grid__wide">
+            <span>Relevant dental / previous orthodontic history</span>
+            <input defaultValue="No previous orthodontic treatment." type="text" />
+          </label>
+          <label className="case-form-grid__wide">
+            <span>Allergies / material considerations / clinician notes</span>
+            <input defaultValue="None reported." type="text" />
           </label>
         </div>
       </section>
@@ -393,47 +410,105 @@ function FindingsView({
         scopeIssue={scopeIssue}
       />
 
-      <section className="case-section" aria-labelledby="occlusion-title">
+      <section className="case-section" aria-labelledby="oral-title">
         <div className="case-section__heading">
           <div>
             <span>01</span>
+            <h2 id="oral-title">Oral + periodontal</h2>
+          </div>
+          <p>Treatment-readiness findings stay above malocclusion findings.</p>
+        </div>
+
+        <div className="finding-grid">
+          <label>
+            <span>Oral hygiene</span>
+            <select defaultValue="Acceptable"><option>Acceptable</option><option>Concern</option></select>
+          </label>
+          <label>
+            <span>Gingival / periodontal status</span>
+            <select defaultValue="Healthy"><option>Healthy</option><option>Concern</option></select>
+          </label>
+          <label>
+            <span>Active caries / untreated pathology</span>
+            <select defaultValue="No"><option>No</option><option>Yes</option></select>
+          </label>
+          <label>
+            <span>Restorative / prosthetic considerations</span>
+            <select defaultValue="None"><option>None</option><option>Present</option></select>
+          </label>
+          <label>
+            <span>Missing permanent teeth</span>
+            <input defaultValue="None" type="text" />
+          </label>
+          <label>
+            <span>Impacted / unerupted teeth</span>
+            <input defaultValue="None" type="text" />
+          </label>
+          <label className="finding-grid__wide">
+            <span>Teeth unsuitable for routine orthodontic movement</span>
+            <input defaultValue="None" type="text" />
+          </label>
+        </div>
+      </section>
+
+      <section className="case-section" aria-labelledby="facial-title">
+        <div className="case-section__heading">
+          <div>
+            <span>02</span>
+            <h2 id="facial-title">Facial + soft tissue</h2>
+          </div>
+          <p>Clinician-entered findings only.</p>
+        </div>
+
+        <div className="finding-grid">
+          <label>
+            <span>Profile</span>
+            <select defaultValue="Straight"><option>Convex</option><option>Straight</option><option>Concave</option></select>
+          </label>
+          <label>
+            <span>Lip competence</span>
+            <select defaultValue="Competent"><option>Competent</option><option>Incompetent</option></select>
+          </label>
+          <label>
+            <span>Facial vertical pattern</span>
+            <select defaultValue="Average"><option>Low</option><option>Average</option><option>High</option></select>
+          </label>
+          <label>
+            <span>Facial asymmetry</span>
+            <select defaultValue="None"><option>None</option><option>Present</option></select>
+          </label>
+          <label className="finding-grid__wide">
+            <span>Smile / incisor display concern</span>
+            <input defaultValue="None" type="text" />
+          </label>
+        </div>
+      </section>
+
+      <section className="case-section" aria-labelledby="occlusion-title">
+        <div className="case-section__heading">
+          <div>
+            <span>03</span>
             <h2 id="occlusion-title">Occlusion</h2>
           </div>
-          <p>Compact structured findings for treatment reasoning.</p>
+          <p>Structured findings for treatment reasoning.</p>
         </div>
 
         <div className="finding-grid">
           <label>
             <span>Molar relationship — right</span>
-            <select defaultValue="Class I">
-              <option>Class I</option>
-              <option>Class II</option>
-              <option>Class III</option>
-            </select>
+            <select defaultValue="Class I"><option>Class I</option><option>Class II</option><option>Class III</option></select>
           </label>
           <label>
             <span>Molar relationship — left</span>
-            <select defaultValue="Class I">
-              <option>Class I</option>
-              <option>Class II</option>
-              <option>Class III</option>
-            </select>
+            <select defaultValue="Class I"><option>Class I</option><option>Class II</option><option>Class III</option></select>
           </label>
           <label>
             <span>Canine relationship — right</span>
-            <select defaultValue="Class I">
-              <option>Class I</option>
-              <option>Class II</option>
-              <option>Class III</option>
-            </select>
+            <select defaultValue="Class I"><option>Class I</option><option>Class II</option><option>Class III</option></select>
           </label>
           <label>
             <span>Canine relationship — left</span>
-            <select defaultValue="Class I">
-              <option>Class I</option>
-              <option>Class II</option>
-              <option>Class III</option>
-            </select>
+            <select defaultValue="Class I"><option>Class I</option><option>Class II</option><option>Class III</option></select>
           </label>
           <label>
             <span>Overjet</span>
@@ -451,13 +526,41 @@ function FindingsView({
             <span>Mandibular crowding / spacing</span>
             <div className="field-with-unit"><input defaultValue="-4" type="number" /><small>mm</small></div>
           </label>
+          <label>
+            <span>Upper dental midline to face</span>
+            <input defaultValue="Coincident" type="text" />
+          </label>
+          <label>
+            <span>Lower dental midline to face</span>
+            <input defaultValue="1 mm left" type="text" />
+          </label>
+          <label>
+            <span>Upper-to-lower midline discrepancy</span>
+            <div className="field-with-unit"><input defaultValue="1" type="number" /><small>mm</small></div>
+          </label>
+          <label>
+            <span>Curve of Spee</span>
+            <select defaultValue="Mild"><option>Flat</option><option>Mild</option><option>Moderate</option><option>Deep</option></select>
+          </label>
+          <label>
+            <span>Anterior / posterior crossbite</span>
+            <input defaultValue="None" type="text" />
+          </label>
+          <label>
+            <span>Scissor bite</span>
+            <input defaultValue="None" type="text" />
+          </label>
+          <label className="finding-grid__wide">
+            <span>Important rotations / displacements</span>
+            <input defaultValue="Mild lower anterior rotations." type="text" />
+          </label>
         </div>
       </section>
 
       <section className="case-section" aria-labelledby="ceph-title">
         <div className="case-section__heading">
           <div>
-            <span>02</span>
+            <span>04</span>
             <h2 id="ceph-title">Cephalometric summary</h2>
           </div>
           <p>No proprietary analysis is required.</p>
@@ -466,35 +569,23 @@ function FindingsView({
         <div className="finding-grid">
           <label>
             <span>Skeletal AP pattern</span>
-            <select defaultValue="Class I">
-              <option>Class I</option>
-              <option>Class II</option>
-              <option>Class III</option>
-            </select>
+            <select defaultValue="Class I"><option>Class I</option><option>Class II</option><option>Class III</option></select>
           </label>
           <label>
             <span>Vertical skeletal pattern</span>
-            <select defaultValue="Average">
-              <option>Low</option>
-              <option>Average</option>
-              <option>High</option>
-            </select>
+            <select defaultValue="Average"><option>Low</option><option>Average</option><option>High</option></select>
           </label>
           <label>
             <span>Maxillary incisors</span>
-            <select defaultValue="Normal">
-              <option>Retroclined</option>
-              <option>Normal</option>
-              <option>Proclined</option>
-            </select>
+            <select defaultValue="Normal"><option>Retroclined</option><option>Normal</option><option>Proclined</option></select>
           </label>
           <label>
             <span>Mandibular incisors</span>
-            <select defaultValue="Normal">
-              <option>Retroclined</option>
-              <option>Normal</option>
-              <option>Proclined</option>
-            </select>
+            <select defaultValue="Normal"><option>Retroclined</option><option>Normal</option><option>Proclined</option></select>
+          </label>
+          <label className="finding-grid__wide">
+            <span>Important cephalometric concern</span>
+            <input defaultValue="None" type="text" />
           </label>
         </div>
       </section>
@@ -502,7 +593,7 @@ function FindingsView({
       <section className="case-section" aria-labelledby="scope-screen-title">
         <div className="case-section__heading">
           <div>
-            <span>03</span>
+            <span>05</span>
             <h2 id="scope-screen-title">V1 scope screen</h2>
           </div>
           <p>If the primary treatment need is unsupported, planning stops here.</p>
