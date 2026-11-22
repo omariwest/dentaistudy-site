@@ -118,14 +118,16 @@ function buildTopology(indexed: BufferGeometry): Topology {
     });
   }
 
+  indexed.computeBoundingBox();
+  const diagonal = indexed.boundingBox
+    ? indexed.boundingBox.getSize(new Vector3()).length()
+    : 1;
+
   return {
     neighbors,
     centroids,
     normals,
-    diagonal: Math.max(
-      0.001,
-      new Box3().setFromBufferAttribute(position).getSize(new Vector3()).length(),
-    ),
+    diagonal: Math.max(0.001, diagonal),
   };
 }
 
@@ -429,7 +431,7 @@ function ScanScene({
   }, [activeAsset, activeFaces, savedFaces]);
 
   const handleBrush = (event: ThreeEvent<PointerEvent>, asset: ScanAsset) => {
-    if (alignJaw || asset.jaw !== activeJaw || event.faceIndex === undefined) return;
+    if (alignJaw || asset.jaw !== activeJaw || event.faceIndex == null) return;
 
     event.stopPropagation();
 
