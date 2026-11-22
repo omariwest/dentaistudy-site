@@ -1373,12 +1373,26 @@ export default function ScanWorkflow() {
       <div className="scan-workflow__top">
         <div>
           <span className="case-page-kicker">Patient scans</span>
-          <h2>Import, align and segment the arches.</h2>
-          <p>STL/PLY files are processed locally in the browser during this workflow.</p>
+          <h2>
+            {workflowMode === "segment"
+              ? "Import, align and segment the arches."
+              : "Review and approve the final 3D target."}
+          </h2>
+          <p>
+            {workflowMode === "segment"
+              ? "STL/PLY files are processed locally in the browser during this workflow."
+              : "Target transforms stay clinician-controlled and are checked against the current aligned scan geometry."}
+          </p>
         </div>
         <div className="scan-workflow__status">
-          <span>{movableCount}</span>
-          <small>movable tooth segments</small>
+          <span>{workflowMode === "segment" ? movableCount : setupAnalysis.movedCount}</span>
+          <small>
+            {workflowMode === "segment"
+              ? "movable tooth segments"
+              : setupApproved
+                ? "setup approved"
+                : "teeth moved in target"}
+          </small>
         </div>
       </div>
 
@@ -1395,6 +1409,33 @@ export default function ScanWorkflow() {
         ))}
       </div>
 
+      {scanReady && (
+        <div className="scan-phase-tabs" aria-label="Scan and setup workflow">
+          <button
+            className={workflowMode === "segment" ? "is-active" : ""}
+            type="button"
+            onClick={() => setWorkflowMode("segment")}
+          >
+            <span>01</span>
+            Segmentation
+          </button>
+          <button
+            className={workflowMode === "target" ? "is-active" : ""}
+            type="button"
+            disabled={segments.length === 0}
+            onClick={() => {
+              setWorkflowMode("target");
+              setDisplayTarget(true);
+              setAlignJaw(null);
+              if (!selectedTargetId && segments[0]) setSelectedTargetId(segments[0].id);
+            }}
+          >
+            <span>02</span>
+            Target setup
+          </button>
+        </div>
+      )}
+
       {error && (
         <div className="scan-error" role="alert">
           <strong>Scan import failed</strong>
@@ -1409,7 +1450,7 @@ export default function ScanWorkflow() {
             <p>Add ordinary STL or PLY arch scans to start the patient-specific segmentation workflow. A bite reference is optional.</p>
           </div>
         </div>
-      ) : (
+      ) : workflowMode === "segment" ? (
         <div className="scan-editor">
           <div className="scan-editor__toolbar">
             <div className="scan-editor__toolbar-group">
@@ -1513,6 +1554,8 @@ export default function ScanWorkflow() {
                   editMode={editMode}
                   alignJaw={alignJaw}
                   alignMode={alignMode}
+                  jawTransforms={jawTransforms}
+                  onJawTransform={updateJawTransform}
                   onBrush={applyBrush}
                 />
               </Canvas>
@@ -1595,6 +1638,272 @@ export default function ScanWorkflow() {
                   <p className="scan-segment-list__empty">No teeth segmented in this arch yet.</p>
                 )}
               </div>
+            </aside>
+          </div>
+        </div>
+      ) : (
+        <div className="target-setup">
+          <div className="target-setup__toolbar">
+            <div className="target-toolbar-group">
+              <button
+                className={!displayTarget ? "is-active" : ""}
+                type="button"
+                onClick={() => setDisplayTarget(false)}
+              >
+                Initial
+              </button>
+              <button
+                className={displayTarget ? "is-active" : ""}
+                type="button"
+                onClick={() => setDisplayTarget(true)}
+              >
+                Target
+              </button>
+            </div>
+
+            <div className="target-toolbar-group">
+              <button
+                className={targetMode === "translate" ? "is-active" : ""}
+                type="button"
+                disabled={!displayTarget || !selectedTargetId}
+                onClick={() => setTargetMode("translate")}
+              >
+                Move
+              </button>
+              <button
+                className={targetMode === "rotate" ? "is-active" : ""}
+                type="button"
+                disabled={!displayTarget || !selectedTargetId}
+                onClick={() => setTargetMode("rotate")}
+              >
+                Rotate
+              </button>
+            </div>
+
+            <div className="target-toolbar-group target-toolbar-group--right">
+              <button
+                type="button"
+                disabled={!selectedTargetId}
+                onClick={resetSelectedTarget}
+              >
+                Reset tooth
+              </button>
+              <button type="button" onClick={resetAllTargets}>
+                Reset all
+              </button>
+            </div>
+          </div>
+
+          <div className="target-setup__body">
+            <div className="target-canvas">
+              <Canvas
+                camera={{ fov: 36, near: 0.01, far: 100000 }}
+                dpr={[1, 1.5]}
+                onPointerMissed={() => setSelectedTargetId(null)}
+              >
+                <color attach="background" args={["#bfc1c9"]} />
+                <TargetSetupScene
+                  assets={assets}
+                  segments={segments}
+                  jawTransforms={jawTransforms}
+                  targetTransforms={targetTransforms}
+                  selectedId={selectedTargetId}
+                  transformMode={targetMode}
+                  displayTarget={displayTarget}
+                  collisionIds={setupAnalysis.collisionIds}
+                  contactIds={setupAnalysis.contactIds}
+                  onSelect={(id) => {
+                    setSelectedTargetId(id);
+                    setDisplayTarget(true);
+                  }}
+                  onTransform={updateTargetTransform}
+                />
+              </Canvas>
+
+              <div className="target-canvas__legend">
+                <span><i className="is-selected" /> Selected</span>
+                <span><i className="is-contact" /> Near contact</span>
+                <span><i className="is-collision" /> Potential collision</span>
+              </div>
+
+              <div className="scan-canvas__hint">
+                Target setup starts from Initial · select a tooth and use Move/Rotate · right-drag pans · wheel zooms
+              </div>
+            </div>
+
+            <aside className="target-panel">
+              <div className="target-panel__status">
+                <span>3D setup</span>
+                <strong>{setupApproved ? "Approved" : "Draft target"}</strong>
+                <small>
+                  {setupApproved
+                    ? "Any target or jaw change will revoke approval."
+                    : `${setupAnalysis.movedCount} tooth${setupAnalysis.movedCount === 1 ? "" : "es"} moved from Initial.`}
+                </small>
+              </div>
+
+              <div className="target-tooth-strip" aria-label="Segmented teeth">
+                {segments.map((segment) => (
+                  <button
+                    className={selectedTargetId === segment.id ? "is-active" : ""}
+                    type="button"
+                    onClick={() => {
+                      setSelectedTargetId(segment.id);
+                      setDisplayTarget(true);
+                    }}
+                    key={segment.id}
+                  >
+                    {segment.label}
+                  </button>
+                ))}
+              </div>
+
+              <section className="target-panel__section">
+                <div className="target-panel__heading">
+                  <span>Selected tooth</span>
+                  <strong>{selectedSegment ? `FDI ${selectedSegment.label}` : "None"}</strong>
+                </div>
+
+                {selectedSegment ? (
+                  <>
+                    <div className="target-value-grid">
+                      {(["X", "Y", "Z"] as const).map((axis, index) => (
+                        <label key={axis}>
+                          <span>{axis} mm</span>
+                          <input
+                            type="number"
+                            step="0.1"
+                            value={selectedTransform.position[index].toFixed(2)}
+                            onChange={(event) =>
+                              updateSelectedTarget(
+                                "position",
+                                index as 0 | 1 | 2,
+                                Number(event.target.value),
+                              )
+                            }
+                          />
+                        </label>
+                      ))}
+                    </div>
+
+                    <div className="target-value-grid">
+                      {(["Rx", "Ry", "Rz"] as const).map((axis, index) => (
+                        <label key={axis}>
+                          <span>{axis} °</span>
+                          <input
+                            type="number"
+                            step="1"
+                            value={(
+                              (selectedTransform.rotation[index] * 180) /
+                              Math.PI
+                            ).toFixed(1)}
+                            onChange={(event) =>
+                              updateSelectedTarget(
+                                "rotation",
+                                index as 0 | 1 | 2,
+                                Number(event.target.value),
+                              )
+                            }
+                          />
+                        </label>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <p className="target-panel__empty">Select a segmented tooth in the model or tooth strip.</p>
+                )}
+              </section>
+
+              <section className="target-panel__section">
+                <div className="target-panel__heading">
+                  <span>Geometry checks</span>
+                  <strong>Current target</strong>
+                </div>
+
+                <div className="target-check-grid">
+                  <div>
+                    <span>Overjet</span>
+                    <strong>
+                      {setupAnalysis.overjet === null
+                        ? "—"
+                        : `${setupAnalysis.overjet.toFixed(1)} mm`}
+                    </strong>
+                  </div>
+                  <div>
+                    <span>Overbite</span>
+                    <strong>
+                      {setupAnalysis.overbite === null
+                        ? "—"
+                        : `${setupAnalysis.overbite.toFixed(1)} mm`}
+                    </strong>
+                  </div>
+                  <div>
+                    <span>Midline</span>
+                    <strong>
+                      {setupAnalysis.midline === null
+                        ? "—"
+                        : `${setupAnalysis.midline.toFixed(1)} mm`}
+                    </strong>
+                  </div>
+                </div>
+
+                <p className="target-check-note">
+                  Geometric estimates use FDI 11/21/31/41 and the current aligned scan axes. Imported scan units are expected to be millimetres.
+                </p>
+
+                {!setupAnalysis.metricsReady && (
+                  <div className="target-warning is-info">
+                    Segment FDI 11, 21, 31 and 41 to enable overjet, overbite and dental-midline checks.
+                  </div>
+                )}
+
+                {setupAnalysis.unitWarning && (
+                  <div className="target-warning">
+                    Scan scale looks inconsistent with ordinary millimetre dental models. Setup approval is blocked until the source units are corrected.
+                  </div>
+                )}
+
+                {setupAnalysis.collisionIds.size > 0 && (
+                  <div className="target-warning">
+                    Potential gross collision detected in {setupAnalysis.collisionIds.size} tooth segments. Resolve the red teeth before approval.
+                  </div>
+                )}
+              </section>
+
+              <section className="target-approval">
+                <div>
+                  <span>3D Setup Approval</span>
+                  <strong>
+                    {setupApproved
+                      ? "Setup approved"
+                      : setupReady
+                        ? "Ready for clinician approval"
+                        : "Approval requirements not met"}
+                  </strong>
+                  <p>
+                    {setupApproved
+                      ? "This target is now the approved geometric setup for the next staging step."
+                      : setupAnalysis.unitWarning
+                        ? "Correct the scan scale first."
+                        : !setupAnalysis.metricsReady
+                          ? "Complete the four incisor segments needed for geometry checks."
+                          : setupAnalysis.movedCount === 0
+                            ? "Move at least one tooth from Initial to create a target setup."
+                            : setupAnalysis.collisionIds.size > 0
+                              ? "Resolve gross collision warnings before approval."
+                              : "Review the target and approve it before staging."}
+                  </p>
+                </div>
+
+                <button
+                  className="target-approve-button"
+                  type="button"
+                  disabled={!setupReady || setupApproved}
+                  onClick={() => setSetupApproved(true)}
+                >
+                  {setupApproved ? "Approved" : "Approve 3D setup"}
+                </button>
+              </section>
             </aside>
           </div>
         </div>
