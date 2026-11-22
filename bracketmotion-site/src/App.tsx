@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import ClinicalViewer, { type ClinicalViewerHandle } from "./ClinicalViewer";
 
 type Platform = "Windows" | "macOS";
 
@@ -773,6 +774,9 @@ function TreatmentPlanView({
 }
 
 function SetupWorkspace() {
+  const viewerRef = useRef<ClinicalViewerHandle | null>(null);
+  const [selectedTooth, setSelectedTooth] = useState<string | null>(null);
+
   return (
     <>
       <div className="app-viewer-toolbar">
@@ -782,6 +786,12 @@ function SetupWorkspace() {
               className={`app-tool-button${index < 2 ? " is-selected" : ""}`}
               type="button"
               key={tool}
+              onClick={() => {
+                if (tool === "Initial") viewerRef.current?.showInitial();
+                if (tool === "Planned") viewerRef.current?.showTarget();
+              }}
+              disabled={index > 1}
+              title={index > 1 ? "Layer controls arrive in later 3D/appliance tasks." : undefined}
             >
               {tool}
             </button>
@@ -790,32 +800,48 @@ function SetupWorkspace() {
 
         <div className="app-viewer-toolbar__group app-viewer-toolbar__views" aria-label="Canonical views">
           {viewerViews.map((view) => (
-            <button className="app-view-button" type="button" key={view}>{view}</button>
+            <button
+              className="app-view-button"
+              type="button"
+              key={view}
+              onClick={() => viewerRef.current?.setView(view as "Front" | "Right" | "Left" | "Upper" | "Lower")}
+            >
+              {view}
+            </button>
           ))}
         </div>
       </div>
 
-      <div className="app-viewport">
-        <div className="app-viewport__empty">
-          <span className="app-viewport__mark" aria-hidden="true" />
-          <strong>3D treatment workspace</strong>
-          <p>The patient model will occupy this canvas. The 3D engine arrives in Task 4.</p>
-        </div>
+      <div className="app-viewport app-viewport--interactive">
+        <ClinicalViewer ref={viewerRef} onSelectionChange={setSelectedTooth} />
 
         <div className="app-viewport__corner">
-          <span>Setup</span>
-          <strong>Initial → Planned</strong>
+          <span>3D proof of concept</span>
+          <strong>{selectedTooth || "Select a tooth"}</strong>
         </div>
       </div>
 
       <div className="app-timeline">
-        <button className="app-play-button" type="button" aria-label="Play treatment stages">▶</button>
+        <button
+          className="app-play-button"
+          type="button"
+          aria-label="Preview selected tooth movement"
+          onClick={() => viewerRef.current?.previewMovement()}
+          disabled={!selectedTooth}
+        >
+          ▶
+        </button>
         <div className="app-timeline__track">
           {demoStages.map((stage, index) => (
             <button
               className={`app-stage-chip${index === 0 ? " is-current" : ""}`}
               type="button"
               key={stage}
+              disabled={index > 1}
+              onClick={() => {
+                if (index === 0) viewerRef.current?.showInitial();
+                if (index === 1) viewerRef.current?.showTarget();
+              }}
             >
               <span>{String(index + 1).padStart(2, "0")}</span>
               {stage}
