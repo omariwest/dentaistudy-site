@@ -1667,10 +1667,10 @@ a {
 }
 
 .scan-workflow {
-  display: grid;
-  grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+  display: flex;
   min-width: 0;
   min-height: 0;
+  flex-direction: column;
   gap: 10px;
   overflow: hidden;
   padding: 12px;
@@ -1811,6 +1811,7 @@ a {
   display: grid;
   min-width: 0;
   min-height: 0;
+  flex: 1 1 auto;
   place-items: center;
   border: 1px dashed #cfd3da;
   border-radius: 12px;
@@ -1839,6 +1840,7 @@ a {
   grid-template-rows: auto minmax(0, 1fr);
   min-width: 0;
   min-height: 0;
+  flex: 1 1 auto;
   overflow: hidden;
   border: 1px solid #dfe2e7;
   border-radius: 12px;
@@ -2139,6 +2141,397 @@ a {
   outline-offset: 2px;
 }
 
+
+.scan-phase-tabs {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 5px;
+  padding: 4px;
+  border: 1px solid #e0e3e8;
+  border-radius: 9px;
+  background: #ffffff;
+}
+
+.scan-phase-tabs button {
+  display: inline-flex;
+  min-height: 30px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 6px;
+  color: #68717d;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.62rem;
+  font-weight: 730;
+}
+
+.scan-phase-tabs button span {
+  color: #9aa1ad;
+  font-size: 0.54rem;
+  font-weight: 800;
+}
+
+.scan-phase-tabs button.is-active {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.scan-phase-tabs button.is-active span {
+  color: var(--accent);
+}
+
+.scan-phase-tabs button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.target-setup {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  border: 1px solid #dfe2e7;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.target-setup__toolbar {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 7px 8px;
+  border-bottom: 1px solid #e2e5e9;
+  background: #fbfcfd;
+}
+
+.target-toolbar-group {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 4px;
+}
+
+.target-toolbar-group--right {
+  margin-left: auto;
+}
+
+.target-setup__toolbar button {
+  min-height: 30px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 7px;
+  color: #5e6672;
+  background: #eef0f3;
+  cursor: pointer;
+  font-size: 0.61rem;
+  font-weight: 730;
+}
+
+.target-setup__toolbar button.is-active {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.target-setup__toolbar button:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
+.target-setup__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 286px;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.target-canvas {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: #bfc1c9;
+}
+
+.target-canvas canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+.target-canvas__legend {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 3;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 7px 9px;
+  border-radius: 8px;
+  color: #5d6570;
+  background: rgba(249, 250, 252, 0.84);
+  backdrop-filter: blur(8px);
+  font-size: 0.56rem;
+  font-weight: 680;
+}
+
+.target-canvas__legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.target-canvas__legend i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #4e9b7b;
+}
+
+.target-canvas__legend i.is-selected {
+  background: #6d4cf5;
+}
+
+.target-canvas__legend i.is-contact {
+  background: #d29a3a;
+}
+
+.target-canvas__legend i.is-collision {
+  background: #c95656;
+}
+
+.target-panel {
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  border-left: 1px solid #e2e5e9;
+  background: #ffffff;
+}
+
+.target-panel__status {
+  display: grid;
+  gap: 3px;
+  padding: 12px;
+  border-bottom: 1px solid #e8eaee;
+}
+
+.target-panel__status span,
+.target-panel__heading span,
+.target-approval > div > span {
+  color: #858d99;
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.target-panel__status strong,
+.target-panel__heading strong {
+  font-size: 0.74rem;
+}
+
+.target-panel__status small {
+  color: #7b838f;
+  font-size: 0.6rem;
+  line-height: 1.4;
+}
+
+.target-tooth-strip {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  padding: 8px 10px;
+  border-bottom: 1px solid #e8eaee;
+}
+
+.target-tooth-strip button {
+  min-width: 32px;
+  min-height: 29px;
+  flex: 0 0 auto;
+  border: 1px solid #dfe2e8;
+  border-radius: 7px;
+  color: #616975;
+  background: #ffffff;
+  cursor: pointer;
+  font-size: 0.59rem;
+  font-weight: 740;
+}
+
+.target-tooth-strip button.is-active {
+  border-color: rgba(109, 76, 245, 0.28);
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.target-panel__section {
+  padding: 11px;
+  border-bottom: 1px solid #e8eaee;
+}
+
+.target-panel__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 9px;
+}
+
+.target-value-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.target-value-grid + .target-value-grid {
+  margin-top: 6px;
+}
+
+.target-value-grid label {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.target-value-grid label span {
+  color: #7b838f;
+  font-size: 0.54rem;
+  font-weight: 690;
+}
+
+.target-value-grid input {
+  width: 100%;
+  min-width: 0;
+  min-height: 31px;
+  padding: 0 6px;
+  border: 1px solid #dfe2e8;
+  border-radius: 6px;
+  color: #343b45;
+  background: #ffffff;
+  font-size: 0.61rem;
+}
+
+.target-value-grid input:focus {
+  border-color: rgba(109, 76, 245, 0.55);
+  outline: 0;
+  box-shadow: 0 0 0 3px rgba(109, 76, 245, 0.1);
+}
+
+.target-panel__empty {
+  margin: 0;
+  color: #828a95;
+  font-size: 0.61rem;
+  line-height: 1.45;
+}
+
+.target-check-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.target-check-grid > div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  padding: 8px 6px;
+  border: 1px solid #e4e7eb;
+  border-radius: 7px;
+  background: #f8f9fb;
+}
+
+.target-check-grid span {
+  color: #858d98;
+  font-size: 0.52rem;
+  font-weight: 720;
+}
+
+.target-check-grid strong {
+  overflow: hidden;
+  font-size: 0.65rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.target-check-note {
+  margin: 8px 0 0;
+  color: #89909a;
+  font-size: 0.55rem;
+  line-height: 1.45;
+}
+
+.target-warning {
+  margin-top: 7px;
+  padding: 8px;
+  border: 1px solid #efcccc;
+  border-radius: 7px;
+  color: #7b5757;
+  background: #fff8f8;
+  font-size: 0.57rem;
+  line-height: 1.4;
+}
+
+.target-warning.is-info {
+  border-color: #d9def0;
+  color: #626a82;
+  background: #f8f9fd;
+}
+
+.target-approval {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  background: #fafbfc;
+}
+
+.target-approval > div {
+  display: grid;
+  gap: 3px;
+}
+
+.target-approval strong {
+  font-size: 0.72rem;
+}
+
+.target-approval p {
+  margin: 2px 0 0;
+  color: #7a828e;
+  font-size: 0.59rem;
+  line-height: 1.45;
+}
+
+.target-approve-button {
+  min-height: 36px;
+  border: 0;
+  border-radius: 8px;
+  color: #ffffff;
+  background: var(--accent);
+  cursor: pointer;
+  font-size: 0.64rem;
+  font-weight: 760;
+}
+
+.target-approve-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.44;
+}
+
+.scan-phase-tabs button:focus-visible,
+.target-setup__toolbar button:focus-visible,
+.target-tooth-strip button:focus-visible,
+.target-value-grid input:focus-visible,
+.target-approve-button:focus-visible {
+  outline: 3px solid rgba(109, 76, 245, 0.2);
+  outline-offset: 2px;
+}
+
 /* Treatment plan + approval */
 .plan-blocked-card {
   width: min(980px, 100%);
@@ -2393,6 +2786,10 @@ a {
 
 
 @media (max-width: 1024px) {
+  .target-setup__body {
+    grid-template-columns: minmax(0, 1fr) 250px;
+  }
+
   .scan-upload-grid {
     grid-template-columns: 1fr;
   }
@@ -2463,6 +2860,44 @@ a {
 }
 
 @media (max-width: 640px) {
+  .target-setup {
+    overflow-y: auto;
+  }
+
+  .target-setup__body {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(320px, 52vh) auto;
+    overflow: visible;
+  }
+
+  .target-canvas {
+    min-height: 320px;
+  }
+
+  .target-panel {
+    overflow: visible;
+    border-top: 1px solid #e2e5e9;
+    border-left: 0;
+  }
+
+  .target-toolbar-group--right {
+    margin-left: 0;
+  }
+
+  .target-canvas__legend {
+    right: 8px;
+    left: 8px;
+    justify-content: center;
+  }
+
+  .scan-phase-tabs {
+    overflow-x: auto;
+  }
+
+  .scan-phase-tabs button {
+    flex: 0 0 auto;
+  }
+
   .scan-workflow {
     gap: 8px;
     padding: 8px;
