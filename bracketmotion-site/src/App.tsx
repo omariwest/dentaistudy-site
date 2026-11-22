@@ -324,6 +324,74 @@ const emptyFindings: FindingsState = {
   cephConcern: "",
 };
 
+const demoRecords: Record<RecordKey, boolean> = {
+  history: true,
+  exam: true,
+  scans: true,
+  photos: true,
+  pano: false,
+  ceph: false,
+  cephSummary: true,
+};
+
+const emptyRecords: Record<RecordKey, boolean> = {
+  history: false,
+  exam: false,
+  scans: false,
+  photos: false,
+  pano: false,
+  ceph: false,
+  cephSummary: false,
+};
+
+const demoPlan: TreatmentPlanState = {
+  problemList:
+    "Mild maxillary crowding; moderate mandibular crowding; mild lower anterior rotations; 4 mm overjet; 45% overbite.",
+  goals:
+    "Resolve crowding and rotations; coordinate the arches; maintain a Class I molar/canine relationship; normalize overjet and overbite while preserving facial balance.",
+  primaryStrategy:
+    "Non-extraction fixed-appliance treatment. Align and level both arches with progressive NiTi wires, coordinate arch form, then finish on stainless steel with controlled settling as needed.",
+  alternativeStrategy:
+    "Consider limited space creation if alignment cannot be achieved within the approved arch-form and incisor-position goals. Reassess space requirements before progressing beyond alignment.",
+};
+
+const emptyPlan: TreatmentPlanState = {
+  problemList: "",
+  goals: "",
+  primaryStrategy: "",
+  alternativeStrategy: "",
+};
+
+type StoredRecordsState = {
+  checklist?: Partial<Record<RecordKey, boolean>>;
+  details?: Partial<CaseDetailsState>;
+  findings?: Partial<FindingsState>;
+};
+
+type ClinicalAiReviewResult = {
+  case_summary?: string;
+  clinical_assessment?: string;
+  supported_points?: string[];
+  concerns?: Array<{
+    issue?: string;
+    why_it_matters?: string;
+    source_ids?: string[];
+  }>;
+  alternative_consideration?: string;
+  stage_guidance?: Array<{
+    stage?: string;
+    active_unit?: string;
+    anchorage_unit?: string;
+    movement_tendency?: string;
+    reciprocal_effects?: string;
+    control_strategy?: string;
+    source_ids?: string[];
+  }>;
+  missing_information?: string[];
+  clinician_checks?: string[];
+  boundary?: string;
+};
+
 const viewerLayers = ["Initial", "Planned", "Upper", "Lower", "Gingiva", "Brackets", "Wire"];
 const viewerViews = ["Front", "Right", "Left", "Upper", "Lower"];
 const demoStages = ["Initial", "Alignment", "Leveling", "Space", "Finishing", "Final"];
