@@ -678,6 +678,7 @@ function SetupWorkspace() {
 function ClinicalAppPage() {
   const [activeSection, setActiveSection] = useState<ClinicalSection>("Case");
   const [showCaseHub, setShowCaseHub] = useState(false);
+  const [caseLabel, setCaseLabel] = useState("Demo Case");
   const [scopeIssue, setScopeIssue] = useState("");
   const [records, setRecords] = useState<Record<RecordKey, boolean>>({
     history: true,
@@ -704,6 +705,38 @@ function ClinicalAppPage() {
     setActiveSection(section);
   };
 
+  const openDemoCase = () => {
+    setCaseLabel("Demo Case");
+    setScopeIssue("");
+    setRecords({
+      history: true,
+      exam: true,
+      scans: true,
+      photos: true,
+      pano: false,
+      ceph: false,
+      cephSummary: true,
+    });
+    setShowCaseHub(false);
+    setActiveSection("Case");
+  };
+
+  const startNewCase = () => {
+    setCaseLabel("Untitled Case");
+    setScopeIssue("");
+    setRecords({
+      history: false,
+      exam: false,
+      scans: false,
+      photos: false,
+      pano: false,
+      ceph: false,
+      cephSummary: false,
+    });
+    setShowCaseHub(false);
+    setActiveSection("Case");
+  };
+
   return (
     <main className="clinical-app">
       <header className="app-topbar">
@@ -713,7 +746,7 @@ function ClinicalAppPage() {
           </a>
           <span className="app-topbar__divider" aria-hidden="true" />
           <div className="app-case-title">
-            <strong>Demo Case</strong>
+            <strong>{caseLabel}</strong>
             <span>Permanent dentition · {planningReady ? "Planning ready" : "Draft"}</span>
           </div>
         </div>
@@ -735,7 +768,7 @@ function ClinicalAppPage() {
         <aside className="app-sidebar" aria-label="Case workflow">
           <div className="app-sidebar__heading">
             <span>Clinical flow</span>
-            <strong>Demo Case</strong>
+            <strong>{caseLabel}</strong>
           </div>
 
           <nav className="app-flow-nav">
@@ -793,10 +826,7 @@ function ClinicalAppPage() {
                 <button
                   className="app-primary-action case-page-primary"
                   type="button"
-                  onClick={() => {
-                    setShowCaseHub(false);
-                    setActiveSection("Case");
-                  }}
+                  onClick={startNewCase}
                 >
                   New case
                 </button>
@@ -805,10 +835,7 @@ function ClinicalAppPage() {
               <button
                 className="case-card"
                 type="button"
-                onClick={() => {
-                  setShowCaseHub(false);
-                  setActiveSection("Case");
-                }}
+                onClick={openDemoCase}
               >
                 <div>
                   <span>Demo Case</span>
@@ -822,6 +849,8 @@ function ClinicalAppPage() {
             </div>
           ) : activeSection === "Case" ? (
             <CaseRecordsView
+              caseLabel={caseLabel}
+              onCaseLabel={setCaseLabel}
               records={records}
               onCompleteRecord={completeRecord}
               planningReady={planningReady}
