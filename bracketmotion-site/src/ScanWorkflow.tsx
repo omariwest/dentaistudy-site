@@ -21,6 +21,11 @@ import { PLYLoader } from "three/addons/loaders/PLYLoader.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { TransformControls } from "three/addons/controls/TransformControls.js";
 import { mergeVertices } from "three/addons/utils/BufferGeometryUtils.js";
+import {
+  downloadBracketMotionScan,
+  removeBracketMotionScan,
+  uploadBracketMotionScan,
+} from "./supabase";
 
 type Jaw = "upper" | "lower" | "bite";
 type EditMode = "add" | "erase";
@@ -42,6 +47,7 @@ type Topology = {
 type ScanAsset = {
   jaw: Jaw;
   fileName: string;
+  storagePath?: string;
   geometry: BufferGeometry;
   topology: Topology;
 };
@@ -964,6 +970,34 @@ type MechanicEndpoints = {
   elasticLower: string;
   loopStart: string;
   loopEnd: string;
+};
+
+export type ScanPersistenceState = {
+  version: 1;
+  files: Partial<
+    Record<Jaw, { fileName: string; storagePath: string }>
+  >;
+  segments: ToothSegment[];
+  jawTransforms: Record<Exclude<Jaw, "bite">, RigidTransform>;
+  targetTransforms: Record<string, RigidTransform>;
+  setupApproved: boolean;
+  applianceLayers: ApplianceLayerState;
+  mechanicEndpoints: MechanicEndpoints;
+};
+
+export type StagePersistenceState = {
+  version: 1;
+  stages: Array<{
+    id: string;
+    title: string;
+    progress: number;
+    activeUnits: string;
+    anchorageUnits: string;
+    intendedMovement: string;
+    reciprocalEffects: string;
+    warning: string;
+    controlStrategy: string;
+  }>;
 };
 
 type StageDefinition = {
