@@ -2,6 +2,7 @@ import { lazy, Suspense, useMemo, useRef, useState } from "react";
 import type { ClinicalViewerHandle } from "./ClinicalViewer";
 
 const ClinicalViewer = lazy(() => import("./ClinicalViewer"));
+const ScanWorkflow = lazy(() => import("./ScanWorkflow"));
 
 type Platform = "Windows" | "macOS";
 
@@ -778,89 +779,126 @@ function TreatmentPlanView({
 function SetupWorkspace() {
   const viewerRef = useRef<ClinicalViewerHandle | null>(null);
   const [selectedTooth, setSelectedTooth] = useState<string | null>(null);
+  const [workspaceMode, setWorkspaceMode] = useState<"patient" | "demo">("patient");
 
   return (
-    <>
+    <div className="setup-workspace">
       <div className="app-viewer-toolbar">
-        <div className="app-viewer-toolbar__group" aria-label="Viewer layers">
-          {viewerLayers.map((tool, index) => (
-            <button
-              className={`app-tool-button${index < 2 ? " is-selected" : ""}`}
-              type="button"
-              key={tool}
-              onClick={() => {
-                if (tool === "Initial") viewerRef.current?.showInitial();
-                if (tool === "Planned") viewerRef.current?.showTarget();
-              }}
-              disabled={index > 1}
-              title={index > 1 ? "Layer controls arrive in later 3D/appliance tasks." : undefined}
-            >
-              {tool}
-            </button>
-          ))}
+        <div className="app-viewer-toolbar__group" aria-label="Setup workspace">
+          <button
+            className={`app-tool-button${workspaceMode === "patient" ? " is-selected" : ""}`}
+            type="button"
+            onClick={() => setWorkspaceMode("patient")}
+          >
+            Patient scans
+          </button>
+          <button
+            className={`app-tool-button${workspaceMode === "demo" ? " is-selected" : ""}`}
+            type="button"
+            onClick={() => setWorkspaceMode("demo")}
+          >
+            Demo anatomy
+          </button>
         </div>
 
-        <div className="app-viewer-toolbar__group app-viewer-toolbar__views" aria-label="Canonical views">
-          {viewerViews.map((view) => (
-            <button
-              className="app-view-button"
-              type="button"
-              key={view}
-              onClick={() => viewerRef.current?.setView(view as "Front" | "Right" | "Left" | "Upper" | "Lower")}
-            >
-              {view}
-            </button>
-          ))}
-        </div>
+        {workspaceMode === "demo" && (
+          <>
+            <div className="app-viewer-toolbar__group" aria-label="Viewer layers">
+              {viewerLayers.map((tool, index) => (
+                <button
+                  className={`app-tool-button${index < 2 ? " is-selected" : ""}`}
+                  type="button"
+                  key={tool}
+                  onClick={() => {
+                    if (tool === "Initial") viewerRef.current?.showInitial();
+                    if (tool === "Planned") viewerRef.current?.showTarget();
+                  }}
+                  disabled={index > 1}
+                  title={index > 1 ? "Layer controls arrive in later 3D/appliance tasks." : undefined}
+                >
+                  {tool}
+                </button>
+              ))}
+            </div>
+
+            <div className="app-viewer-toolbar__group app-viewer-toolbar__views" aria-label="Canonical views">
+              {viewerViews.map((view) => (
+                <button
+                  className="app-view-button"
+                  type="button"
+                  key={view}
+                  onClick={() => viewerRef.current?.setView(view as "Front" | "Right" | "Left" | "Upper" | "Lower")}
+                >
+                  {view}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
       </div>
 
-      <div className="app-viewport app-viewport--interactive">
+      {workspaceMode === "patient" ? (
         <Suspense
           fallback={
             <div className="clinical-viewer__message" role="status">
-              <strong>Preparing 3D workspace…</strong>
-              <span>Loading the viewer only when the clinical setup is opened.</span>
+              <strong>Preparing scan workflow…</strong>
+              <span>Loading local STL/PLY tools.</span>
             </div>
           }
         >
-          <ClinicalViewer ref={viewerRef} onSelectionChange={setSelectedTooth} />
+          <ScanWorkflow />
         </Suspense>
-
-        <div className="app-viewport__corner">
-          <span>3D proof of concept</span>
-          <strong>{selectedTooth || "Select a tooth"}</strong>
-        </div>
-      </div>
-
-      <div className="app-timeline">
-        <button
-          className="app-play-button"
-          type="button"
-          aria-label="Preview selected tooth movement"
-          onClick={() => viewerRef.current?.previewMovement()}
-          disabled={!selectedTooth}
-        >
-          ▶
-        </button>
-        <div className="app-timeline__track">
-          {demoStages.map((stage, index) => (
-            <button
-              className={`app-stage-chip${index === 0 ? " is-current" : ""}`}
-              type="button"
-              key={stage}
-              disabled={index > 1}
-              onClick={() => {
-                if (index === 0) viewerRef.current?.showInitial();
-                if (index === 1) viewerRef.current?.showTarget();
-              }}
+      ) : (
+        <div className="setup-demo-workspace">
+          <div className="app-viewport app-viewport--interactive">
+            <Suspense
+              fallback={
+                <div className="clinical-viewer__message" role="status">
+                  <strong>Preparing 3D workspace…</strong>
+                  <span>Loading the viewer only when the clinical setup is opened.</span>
+                </div>
+              }
             >
-              <span>{String(index + 1).padStart(2, "0")}</span>
-              {stage}
+              <ClinicalViewer ref={viewerRef} onSelectionChange={setSelectedTooth} />
+            </Suspense>
+
+            <div className="app-viewport__corner">
+              <span>3D proof of concept</span>
+              <strong>{selectedTooth || "Select a tooth"}</strong>
+            </div>
+          </div>
+
+          <div className="app-timeline">
+            <button
+              className="app-play-button"
+              type="button"
+              aria-label="Preview selected tooth movement"
+              onClick={() => viewerRef.current?.previewMovement()}
+              disabled={!selectedTooth}
+            >
+              ▶
             </button>
-          ))}
+            <div className="app-timeline__track">
+              {demoStages.map((stage, index) => (
+                <button
+                  className={`app-stage-chip${index === 0 ? " is-current" : ""}`}
+                  type="button"
+                  key={stage}
+                  disabled={index > 1}
+                  onClick={() => {
+                    if (index === 0) viewerRef.current?.showInitial();
+                    if (index === 1) viewerRef.current?.showTarget();
+                  }}
+                >
+                  <span>{String(index + 1).padStart(2, "0")}</span>
+                  {stage}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
-      </div>
-    </>
+      )}
+    </div>
   );
 }
 
