@@ -697,12 +697,39 @@ export default function ScanWorkflow() {
     if (!activeAsset || activeFaces.size === 0) return;
 
     const faces = [...activeFaces];
-    const id = activeSegmentId || `${activeJaw}-${toothLabel}-${Date.now()}`;
 
     setSegments((current) => {
-      const others = current.filter((segment) => segment.id !== id);
+      const sameLabel = current.find(
+        (segment) =>
+          segment.jaw === activeJaw &&
+          segment.label === toothLabel &&
+          segment.id !== activeSegmentId,
+      );
+      const id =
+        activeSegmentId ||
+        sameLabel?.id ||
+        `${activeJaw}-${toothLabel}-${Date.now()}`;
+
+      const reassigned = current
+        .filter(
+          (segment) =>
+            segment.id !== id &&
+            !(segment.jaw === activeJaw && segment.label === toothLabel),
+        )
+        .map((segment) =>
+          segment.jaw === activeJaw
+            ? {
+                ...segment,
+                faces: segment.faces.filter((face) => !activeFaces.has(face)),
+              }
+            : segment,
+        )
+        .filter((segment) => segment.faces.length > 0);
+
+      setActiveSegmentId(id);
+
       return [
-        ...others,
+        ...reassigned,
         {
           id,
           jaw: activeJaw,
@@ -711,8 +738,6 @@ export default function ScanWorkflow() {
         },
       ];
     });
-
-    setActiveSegmentId(id);
   };
 
   const editSegment = (segment: ToothSegment) => {
