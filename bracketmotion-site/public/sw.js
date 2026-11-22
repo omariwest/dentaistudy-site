@@ -1,7 +1,6 @@
-const CACHE_NAME = "bracketmotion-shell-v1";
-const APP_SHELL = [
+const CACHE_NAME = "bracketmotion-shell-v2";
+const STATIC_SHELL = [
   "/",
-  "/app",
   "/manifest.webmanifest",
   "/icons/bracketmotion-icon.svg",
   "/icons/icon-180.png",
@@ -9,10 +8,42 @@ const APP_SHELL = [
   "/icons/icon-512.png",
 ];
 
-self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)),
+async function precacheApplicationShell() {
+  const cache = await caches.open(CACHE_NAME);
+  await cache.addAll(STATIC_SHELL);
+
+  const appResponse = await fetch("/app", { cache: "no-store" });
+  if (!appResponse.ok) {
+    throw new Error("BracketMotion app shell could not be cached.");
+  }
+
+  const html = await appResponse.clone().text();
+  await cache.put("/app", appResponse);
+
+  const assetUrls = [
+    ...new Set(
+      [...html.matchAll(/(?:src|href)=["'](\/assets\/[^"']+)["']/g)].map(
+        (match) => match[1],
+      ),
+    ),
+  ];
+
+  await Promise.all(
+    assetUrls.map(async (assetUrl) => {
+      try {
+        const response = await fetch(assetUrl);
+        if (response.ok) {
+          await cache.put(assetUrl, response);
+        }
+      } catch {
+        // The app shell remains installable even if one optional asset misses cache.
+      }
+    }),
   );
+}
+
+self.addEventListener("install", (event) => {
+  event.waitUntil(precacheApplicationShell());
   self.skipWaiting();
 });
 
@@ -42,8 +73,10 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put("/app", copy));
+          if (response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put("/app", copy));
+          }
           return response;
         })
         .catch(async () => {
