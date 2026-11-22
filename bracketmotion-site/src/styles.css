@@ -2532,6 +2532,226 @@ a {
   outline-offset: 2px;
 }
 
+
+/* Fixed-appliance visualization */
+.appliance-workspace {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  border: 1px solid #dfe2e7;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.appliance-workspace__toolbar {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  overflow-x: auto;
+  padding: 7px 8px;
+  border-bottom: 1px solid #e2e5e9;
+  background: #fbfcfd;
+}
+
+.appliance-layer-buttons {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 4px;
+}
+
+.appliance-layer-buttons button {
+  min-height: 30px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 7px;
+  color: #5e6672;
+  background: #eef0f3;
+  cursor: pointer;
+  font-size: 0.61rem;
+  font-weight: 730;
+  white-space: nowrap;
+}
+
+.appliance-layer-buttons button.is-active {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.appliance-workspace__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 286px;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.appliance-canvas {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: #bfc1c9;
+}
+
+.appliance-canvas canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+.appliance-panel {
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  border-left: 1px solid #e2e5e9;
+  background: #ffffff;
+}
+
+.appliance-panel__status {
+  display: grid;
+  gap: 3px;
+  padding: 12px;
+  border-bottom: 1px solid #e8eaee;
+}
+
+.appliance-panel__status span,
+.appliance-panel__heading span,
+.appliance-boundary-note > strong {
+  color: #858d99;
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.appliance-panel__status strong,
+.appliance-panel__heading strong {
+  font-size: 0.74rem;
+}
+
+.appliance-panel__status small {
+  color: #7b838f;
+  font-size: 0.6rem;
+  line-height: 1.45;
+}
+
+.appliance-panel__section {
+  padding: 11px;
+  border-bottom: 1px solid #e8eaee;
+}
+
+.appliance-panel__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 9px;
+}
+
+.appliance-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.appliance-summary-grid > div {
+  display: grid;
+  gap: 3px;
+  padding: 8px;
+  border: 1px solid #e4e7eb;
+  border-radius: 7px;
+  background: #f8f9fb;
+}
+
+.appliance-summary-grid span {
+  color: #858d98;
+  font-size: 0.54rem;
+}
+
+.appliance-summary-grid strong {
+  font-size: 0.64rem;
+}
+
+.mechanic-editor {
+  display: grid;
+  gap: 7px;
+  padding: 9px;
+  border: 1px solid #e4e7eb;
+  border-radius: 8px;
+  background: #fafbfc;
+}
+
+.mechanic-editor + .mechanic-editor {
+  margin-top: 7px;
+}
+
+.mechanic-editor > strong {
+  font-size: 0.65rem;
+}
+
+.mechanic-endpoints {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.mechanic-endpoints label {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.mechanic-endpoints label span {
+  color: #7e8691;
+  font-size: 0.54rem;
+  font-weight: 690;
+}
+
+.mechanic-endpoints select {
+  width: 100%;
+  min-width: 0;
+  min-height: 31px;
+  padding: 0 6px;
+  border: 1px solid #dfe2e8;
+  border-radius: 6px;
+  color: #343b45;
+  background: #ffffff;
+  font-size: 0.61rem;
+}
+
+.appliance-panel__empty {
+  margin: 0;
+  color: #858d98;
+  font-size: 0.6rem;
+  line-height: 1.45;
+}
+
+.appliance-boundary-note {
+  margin: 10px;
+  padding: 10px;
+  border: 1px solid #e4e7eb;
+  border-radius: 8px;
+  background: #f8f9fb;
+}
+
+.appliance-boundary-note p {
+  margin: 5px 0 0;
+  color: #7b838f;
+  font-size: 0.58rem;
+  line-height: 1.45;
+}
+
+.appliance-layer-buttons button:focus-visible,
+.mechanic-endpoints select:focus-visible {
+  outline: 3px solid rgba(109, 76, 245, 0.2);
+  outline-offset: 2px;
+}
+
 /* Treatment plan + approval */
 .plan-blocked-card {
   width: min(980px, 100%);
@@ -2786,6 +3006,10 @@ a {
 
 
 @media (max-width: 1024px) {
+  .appliance-workspace__body {
+    grid-template-columns: minmax(0, 1fr) 250px;
+  }
+
   .target-setup__body {
     grid-template-columns: minmax(0, 1fr) 250px;
   }
@@ -2860,6 +3084,30 @@ a {
 }
 
 @media (max-width: 640px) {
+  .appliance-workspace {
+    overflow-y: auto;
+  }
+
+  .appliance-workspace__body {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(320px, 52vh) auto;
+    overflow: visible;
+  }
+
+  .appliance-canvas {
+    min-height: 320px;
+  }
+
+  .appliance-panel {
+    overflow: visible;
+    border-top: 1px solid #e2e5e9;
+    border-left: 0;
+  }
+
+  .appliance-layer-buttons {
+    width: max-content;
+  }
+
   .target-setup {
     overflow-y: auto;
   }
