@@ -1614,6 +1614,7 @@ function StageWorkspace({
   segments,
   jawTransforms,
   targetTransforms,
+  plannedExtractions,
   applianceLayers,
   endpoints,
   sessionActive,
@@ -1627,6 +1628,7 @@ function StageWorkspace({
   segments: ToothSegment[];
   jawTransforms: Record<Exclude<Jaw, "bite">, RigidTransform>;
   targetTransforms: Record<string, RigidTransform>;
+  plannedExtractions: Set<string>;
   applianceLayers: ApplianceLayerState;
   endpoints: MechanicEndpoints;
   sessionActive: boolean;
@@ -1641,10 +1643,11 @@ function StageWorkspace({
       deriveStages({
         segments,
         targetTransforms,
+        plannedExtractions,
         applianceLayers,
         endpoints,
       }),
-    [applianceLayers, endpoints, segments, targetTransforms],
+    [applianceLayers, endpoints, plannedExtractions, segments, targetTransforms],
   );
   const [stageStep, setStageStep] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -1685,6 +1688,17 @@ function StageWorkspace({
       elastics: false,
       closingLoop: false,
     };
+  const extractionStageReached =
+    stageStep > 0 &&
+    stages
+      .slice(0, stageStep)
+      .some((stage) => stage.id === "extractions");
+  const playbackExtractions = extractionStageReached
+    ? plannedExtractions
+    : new Set<string>();
+  const playbackSegments = segments.filter(
+    (segment) => !playbackExtractions.has(segment.id),
+  );
 
   return (
     <div className="stage-workspace">
@@ -1712,6 +1726,7 @@ function StageWorkspace({
               segments={segments}
               jawTransforms={jawTransforms}
               targetTransforms={playbackTransforms}
+              plannedExtractionIds={playbackExtractions}
               selectedId={null}
               transformMode="translate"
               displayTarget
@@ -1722,7 +1737,7 @@ function StageWorkspace({
             />
             <ApplianceLayer
               assets={assets}
-              segments={segments}
+              segments={playbackSegments}
               jawTransforms={jawTransforms}
               targetTransforms={playbackTransforms}
               layers={playbackLayers}
