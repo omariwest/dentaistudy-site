@@ -966,6 +966,215 @@ type MechanicEndpoints = {
   loopEnd: string;
 };
 
+type StageDefinition = {
+  id: string;
+  title: string;
+  progress: number;
+  activeUnits: string;
+  anchorageUnits: string;
+  intendedMovement: string;
+  reciprocalEffects: string;
+  warning: string;
+  controlStrategy: string;
+  layers: ApplianceLayerState;
+};
+
+function toothTransformChanged(transform: RigidTransform) {
+  const translation = new Vector3(...transform.position).length();
+  const rotation =
+    Math.abs(transform.rotation[0]) +
+    Math.abs(transform.rotation[1]) +
+    Math.abs(transform.rotation[2]);
+
+  return translation > 0.01 || rotation > 0.005;
+}
+
+function labelsBetween(start: string, end: string) {
+  const sequence = upperTeeth.includes(start)
+    ? upperTeeth
+    : lowerTeeth.includes(start)
+      ? lowerTeeth
+      : [];
+
+  if (!sequence.length || !sequence.includes(end)) return [start, end].filter(Boolean);
+
+  const startIndex = sequence.indexOf(start);
+  const endIndex = sequence.indexOf(end);
+  const low = Math.min(startIndex, endIndex);
+  const high = Math.max(startIndex, endIndex);
+
+  return sequence.slice(low, high + 1);
+}
+
+function scaleTargetTransforms(
+  targetTransforms: Record<string, RigidTransform>,
+  progress: number,
+) {
+  return Object.fromEntries(
+    Object.entries(targetTransforms).map(([id, transform]) => [
+      id,
+      {
+        position: transform.position.map((value) => value * progress) as VectorTuple,
+        rotation: transform.rotation.map((value) => value * progress) as VectorTuple,
+      },
+    ]),
+  );
+}
+
+function deriveStages({
+  segments,
+  targetTransforms,
+  applianceLayers,
+  endpoints,
+}: {
+  segments: ToothSegment[];
+  targetTransforms: Record<string, RigidTransform>;
+  applianceLayers: ApplianceLayerState;
+  endpoints: MechanicEndpoints;
+}) {
+  const stages: Omit<StageDefinition, "progress">[] = [];
+  const movedLabels = segments
+    .filter((segment) =>
+      toothTransformChanged(targetTransforms[segment.id] || identityTransform()),
+    )
+    .map((segment) => segment.label);
+
+  const baseLayers: ApplianceLayerState = {
+    brackets: true,
+    archwire: true,
+    powerChain: false,
+    coilSpring: false,
+    elastics: false,
+    closingLoop: false,
+  };
+
+  if (movedLabels.length) {
+    stages.push({
+      id: "alignment",
+      title: "Alignment + leveling",
+      activeUnits: movedLabels.join(", "),
+      anchorageUnits:
+        "Remaining bonded teeth in each arch; reinforce locally when differential movement is required.",
+      intendedMovement:
+        "Progress the segmented teeth toward the approved setup while establishing alignment, leveling and arch coordination.",
+      reciprocalEffects:
+        "Continuous-wire engagement can redistribute force through neighboring teeth and can produce unwanted tipping while irregularity remains.",
+      warning:
+        "The 3D path is geometric. It does not predict delivered force, rate of movement or biologic response.",
+      controlStrategy:
+        "Progress wire stiffness only as engagement permits and monitor arch form, bracket engagement and unwanted tipping.",
+      layers: baseLayers,
+    });
+  }
+
+  const hasSpaceClosure =
+    applianceLayers.powerChain ||
+    applianceLayers.coilSpring ||
+    applianceLayers.closingLoop;
+
+  if (hasSpaceClosure) {
+    const activeRanges = [
+      applianceLayers.powerChain
+        ? labelsBetween(endpoints.chainStart, endpoints.chainEnd)
+        : [],
+      applianceLayers.coilSpring
+        ? labelsBetween(endpoints.coilStart, endpoints.coilEnd)
+        : [],
+      applianceLayers.closingLoop
+        ? labelsBetween(endpoints.loopStart, endpoints.loopEnd)
+        : [],
+    ].flat();
+
+    const activeLabels = [...new Set(activeRanges.filter(Boolean))];
+
+    stages.push({
+      id: "space-closure",
+      title: "Space closure",
+      activeUnits:
+        activeLabels.length > 0
+          ? activeLabels.join(", ")
+          : "Selected space-closing units",
+      anchorageUnits:
+        "Remaining bonded teeth in the involved arch; enlarge or reinforce the anchorage unit when differential movement is desired.",
+      intendedMovement:
+        applianceLayers.closingLoop
+          ? "Approximate the selected units while maintaining root-position control through the rectangular wire/loop system."
+          : "Approximate the selected units by sliding along the archwire while preserving the approved arch form.",
+      reciprocalEffects:
+        "The opposing unit receives reciprocal force. Sliding also adds binding/resistance, increasing anchorage demand; incisor torque can add a forward reaction on posterior anchorage.",
+      warning:
+        "Space closure can lose anchorage or allow unwanted tipping if force, wire stiffness and root-control moments are not matched to the intended movement.",
+      controlStrategy:
+        "Use a rectangular base wire, define the anchorage requirement explicitly and monitor posterior protraction, incisor torque and root parallelism.",
+      layers: {
+        brackets: true,
+        archwire: true,
+        powerChain: applianceLayers.powerChain,
+        coilSpring: applianceLayers.coilSpring,
+        elastics: false,
+        closingLoop: applianceLayers.closingLoop,
+      },
+    });
+  }
+
+  if (applianceLayers.elastics) {
+    stages.push({
+      id: "interarch",
+      title: "Interarch correction",
+      activeUnits:
+        endpoints.elasticUpper && endpoints.elasticLower
+          ? `FDI ${endpoints.elasticUpper} ↔ FDI ${endpoints.elasticLower}`
+          : "Selected upper and lower attachment teeth",
+      anchorageUnits:
+        "Both arches through the complete fixed appliance and stabilizing archwires.",
+      intendedMovement:
+        "Apply a relative interarch correction along the selected elastic vector while maintaining the approved dental setup.",
+      reciprocalEffects:
+        "Equal and opposite forces act on both arches. The elastic vector can add vertical components, tooth extrusion and occlusal-plane change in addition to the intended sagittal correction.",
+      warning:
+        "Interarch elastics can alter incisor inclination, molar vertical position and transverse relationships if the arches are not adequately stabilized.",
+      controlStrategy:
+        "Use adequate stabilizing wires/full fixed appliances and monitor incisor inclination, molar extrusion, arch width and occlusal plane.",
+      layers: {
+        brackets: true,
+        archwire: true,
+        powerChain: false,
+        coilSpring: false,
+        elastics: true,
+        closingLoop: false,
+      },
+    });
+  }
+
+  stages.push({
+    id: "finishing",
+    title: "Finishing + settling",
+    activeUnits: movedLabels.length ? movedLabels.join(", ") : "Residual correction units",
+    anchorageUnits: "Full-arch fixed appliance with the stabilized teeth acting as the reference unit.",
+    intendedMovement:
+      "Complete residual alignment, torque/root-position control, arch coordination and settling to the approved target.",
+    reciprocalEffects:
+      "Local torque and settling corrections can redistribute reaction forces through the arch or across both arches.",
+    warning:
+      "Final contact and root-position decisions require clinical and radiographic verification; geometric playback is not a biologic prediction.",
+    controlStrategy:
+      "Use appropriate final rectangular wires for root control, limit auxiliaries to the remaining objective and remove anchorage auxiliaries once their task is complete.",
+    layers: {
+      brackets: true,
+      archwire: true,
+      powerChain: false,
+      coilSpring: false,
+      elastics: applianceLayers.elastics,
+      closingLoop: false,
+    },
+  });
+
+  return stages.map((stage, index) => ({
+    ...stage,
+    progress: (index + 1) / stages.length,
+  }));
+}
+
 function SegmentBar({
   start,
   end,
