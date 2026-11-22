@@ -406,6 +406,8 @@ function ReadinessCard({
 function CaseRecordsView({
   caseLabel,
   onCaseLabel,
+  caseDetails,
+  onCaseDetail,
   records,
   onCompleteRecord,
   planningReady,
@@ -415,6 +417,8 @@ function CaseRecordsView({
 }: {
   caseLabel: string;
   onCaseLabel: (value: string) => void;
+  caseDetails: CaseDetailsState;
+  onCaseDetail: (field: keyof CaseDetailsState, value: string) => void;
   records: Record<RecordKey, boolean>;
   onCompleteRecord: (key: RecordKey) => void;
   planningReady: boolean;
@@ -457,18 +461,29 @@ function CaseRecordsView({
           </label>
           <label>
             <span>Age at records</span>
-            <input defaultValue="24" min="12" type="number" />
+            <input
+              value={caseDetails.age}
+              min="12"
+              type="number"
+              onChange={(event) => onCaseDetail("age", event.target.value)}
+            />
           </label>
           <label>
             <span>Patient stage</span>
-            <select defaultValue="Adult">
+            <select
+              value={caseDetails.patientStage}
+              onChange={(event) => onCaseDetail("patientStage", event.target.value)}
+            >
               <option>Adult</option>
               <option>Adolescent</option>
             </select>
           </label>
           <label>
             <span>Growth status</span>
-            <select defaultValue="Adult">
+            <select
+              value={caseDetails.growthStatus}
+              onChange={(event) => onCaseDetail("growthStatus", event.target.value)}
+            >
               <option>Adult</option>
               <option>Prepubertal</option>
               <option>Pubertal</option>
@@ -478,19 +493,35 @@ function CaseRecordsView({
           </label>
           <label className="case-form-grid__wide">
             <span>Chief complaint / treatment goal</span>
-            <input defaultValue="Improve alignment and bite." type="text" />
+            <input
+              value={caseDetails.chiefComplaint}
+              type="text"
+              onChange={(event) => onCaseDetail("chiefComplaint", event.target.value)}
+            />
           </label>
           <label className="case-form-grid__wide">
             <span>Relevant medical history</span>
-            <input defaultValue="No relevant medical-history flags reported." type="text" />
+            <input
+              value={caseDetails.medicalHistory}
+              type="text"
+              onChange={(event) => onCaseDetail("medicalHistory", event.target.value)}
+            />
           </label>
           <label className="case-form-grid__wide">
             <span>Relevant dental / previous orthodontic history</span>
-            <input defaultValue="No previous orthodontic treatment." type="text" />
+            <input
+              value={caseDetails.dentalHistory}
+              type="text"
+              onChange={(event) => onCaseDetail("dentalHistory", event.target.value)}
+            />
           </label>
           <label className="case-form-grid__wide">
             <span>Allergies / material considerations / clinician notes</span>
-            <input defaultValue="None reported." type="text" />
+            <input
+              value={caseDetails.notes}
+              type="text"
+              onChange={(event) => onCaseDetail("notes", event.target.value)}
+            />
           </label>
         </div>
       </section>
