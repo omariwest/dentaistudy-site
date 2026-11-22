@@ -1209,6 +1209,165 @@ export default function ScanWorkflow() {
   const scanReady = upperReady && lowerReady;
   const movableCount = segments.length;
 
+  const setupAnalysis = useMemo(() => {
+    const boxes = new Map<string, Box3>();
+    const collisionIds = new Set<string>();
+    const contactIds = new Set<string>();
+
+    segments.forEach((segment) => {
+      const asset = assets.find((item) => item.jaw === segment.jaw);
+      if (!asset) return;
+
+      boxes.set(
+        segment.id,
+        targetWorldBox(
+          asset,
+          segment,
+          jawTransforms[segment.jaw],
+          targetTransforms[segment.id] || identityTransform(),
+        ),
+      );
+    });
+
+    const combined = new Box3();
+    boxes.forEach((box) => combined.union(box));
+    const caseDiagonal = combined.isEmpty()
+      ? 0
+      : combined.getSize(new Vector3()).length();
+    const contactTolerance = Math.max(
+      0.05,
+      Math.min(0.5, caseDiagonal * 0.004),
+    );
+
+    const segmentList = segments.filter((segment) => boxes.has(segment.id));
+
+    for (let i = 0; i < segmentList.length; i += 1) {
+      for (let j = i + 1; j < segmentList.length; j += 1) {
+        const first = segmentList[i];
+        const second = segmentList[j];
+        const firstBox = boxes.get(first.id)!;
+        const secondBox = boxes.get(second.id)!;
+
+        const firstCore = shrinkBox(firstBox, 0.58);
+        const secondCore = shrinkBox(secondBox, 0.58);
+
+        if (firstCore.intersectsBox(secondCore)) {
+          collisionIds.add(first.id);
+          collisionIds.add(second.id);
+          continue;
+        }
+
+        if (boxDistance(firstBox, secondBox) <= contactTolerance) {
+          contactIds.add(first.id);
+          contactIds.add(second.id);
+        }
+      }
+    }
+
+    const byLabel = new Map(
+      segments.map((segment) => [segment.label, segment] as const),
+    );
+    const incisorLabels = ["11", "21", "31", "41"];
+    const metricsReady = incisorLabels.every((label) => byLabel.has(label));
+
+    let overjet: number | null = null;
+    let overbite: number | null = null;
+    let midline: number | null = null;
+
+    if (metricsReady) {
+      const upperBoxes = ["11", "21"].map(
+        (label) => boxes.get(byLabel.get(label)!.id)!,
+      );
+      const lowerBoxes = ["31", "41"].map(
+        (label) => boxes.get(byLabel.get(label)!.id)!,
+      );
+
+      const upper = upperBoxes[0].clone().union(upperBoxes[1]);
+      const lower = lowerBoxes[0].clone().union(lowerBoxes[1]);
+      const upperCenter = upper.getCenter(new Vector3());
+      const lowerCenter = lower.getCenter(new Vector3());
+
+      overjet = Math.abs(upperCenter.z - lowerCenter.z);
+      overbite = Math.max(
+        0,
+        Math.min(upper.max.y, lower.max.y) -
+          Math.max(upper.min.y, lower.min.y),
+      );
+      midline = Math.abs(upperCenter.x - lowerCenter.x);
+    }
+
+    const movedCount = segments.filter((segment) => {
+      const transform = targetTransforms[segment.id] || identityTransform();
+      const translation = new Vector3(...transform.position).length();
+      const rotation =
+        Math.abs(transform.rotation[0]) +
+        Math.abs(transform.rotation[1]) +
+        Math.abs(transform.rotation[2]);
+
+      return translation > 0.01 || rotation > 0.005;
+    }).length;
+
+    const unitWarning =
+      caseDiagonal > 0 && (caseDiagonal < 20 || caseDiagonal > 300);
+
+    return {
+      boxes,
+      collisionIds,
+      contactIds,
+      metricsReady,
+      overjet,
+      overbite,
+      midline,
+      movedCount,
+      unitWarning,
+    };
+  }, [assets, jawTransforms, segments, targetTransforms]);
+
+  const selectedSegment =
+    segments.find((segment) => segment.id === selectedTargetId) || null;
+  const selectedTransform = selectedTargetId
+    ? targetTransforms[selectedTargetId] || identityTransform()
+    : identityTransform();
+
+  const setupReady =
+    setupAnalysis.metricsReady &&
+    setupAnalysis.movedCount > 0 &&
+    setupAnalysis.collisionIds.size === 0 &&
+    !setupAnalysis.unitWarning;
+
+  const updateSelectedTarget = (
+    channel: "position" | "rotation",
+    axis: 0 | 1 | 2,
+    value: number,
+  ) => {
+    if (!selectedTargetId || !Number.isFinite(value)) return;
+
+    const current = targetTransforms[selectedTargetId] || identityTransform();
+    const next: RigidTransform = {
+      position: [...current.position] as VectorTuple,
+      rotation: [...current.rotation] as VectorTuple,
+    };
+
+    next[channel][axis] =
+      channel === "rotation" ? (value * Math.PI) / 180 : value;
+
+    updateTargetTransform(selectedTargetId, next);
+  };
+
+  const resetSelectedTarget = () => {
+    if (!selectedTargetId) return;
+    updateTargetTransform(selectedTargetId, identityTransform());
+  };
+
+  const resetAllTargets = () => {
+    const next: Record<string, RigidTransform> = {};
+    segments.forEach((segment) => {
+      next[segment.id] = identityTransform();
+    });
+    setTargetTransforms(next);
+    setSetupApproved(false);
+  };
+
   return (
     <div className="scan-workflow">
       <div className="scan-workflow__top">
