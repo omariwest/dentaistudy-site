@@ -591,6 +591,359 @@ function ScanScene({
   );
 }
 
+
+function segmentLocalBox(asset: ScanAsset, segment: ToothSegment) {
+  const source = asset.geometry.getAttribute("position");
+  const box = new Box3();
+  const point = new Vector3();
+
+  segment.faces.forEach((face) => {
+    for (let corner = 0; corner < 3; corner += 1) {
+      const vertex = face * 3 + corner;
+      point.set(source.getX(vertex), source.getY(vertex), source.getZ(vertex));
+      box.expandByPoint(point);
+    }
+  });
+
+  return box;
+}
+
+function transformMatrix(transform: RigidTransform) {
+  return new Matrix4().compose(
+    new Vector3(...transform.position),
+    new Quaternion().setFromEuler(new Euler(...transform.rotation)),
+    new Vector3(1, 1, 1),
+  );
+}
+
+function targetWorldBox(
+  asset: ScanAsset,
+  segment: ToothSegment,
+  jawTransform: RigidTransform,
+  toothTransform: RigidTransform,
+) {
+  const localBox = segmentLocalBox(asset, segment);
+  const center = localBox.getCenter(new Vector3());
+
+  const aroundCenter = new Matrix4()
+    .makeTranslation(
+      center.x + toothTransform.position[0],
+      center.y + toothTransform.position[1],
+      center.z + toothTransform.position[2],
+    )
+    .multiply(
+      new Matrix4().makeRotationFromEuler(new Euler(...toothTransform.rotation)),
+    )
+    .multiply(new Matrix4().makeTranslation(-center.x, -center.y, -center.z));
+
+  return localBox
+    .clone()
+    .applyMatrix4(transformMatrix(jawTransform).multiply(aroundCenter));
+}
+
+function shrinkBox(box: Box3, factor: number) {
+  const center = box.getCenter(new Vector3());
+  const size = box.getSize(new Vector3()).multiplyScalar(factor);
+  return new Box3().setFromCenterAndSize(center, size);
+}
+
+function boxDistance(a: Box3, b: Box3) {
+  const dx = Math.max(0, a.min.x - b.max.x, b.min.x - a.max.x);
+  const dy = Math.max(0, a.min.y - b.max.y, b.min.y - a.max.y);
+  const dz = Math.max(0, a.min.z - b.max.z, b.min.z - a.max.z);
+  return Math.sqrt(dx * dx + dy * dy + dz * dz);
+}
+
+function TargetTooth({
+  asset,
+  segment,
+  transform,
+  displayTarget,
+  selected,
+  collision,
+  contact,
+  onSelect,
+  onReady,
+}: {
+  asset: ScanAsset;
+  segment: ToothSegment;
+  transform: RigidTransform;
+  displayTarget: boolean;
+  selected: boolean;
+  collision: boolean;
+  contact: boolean;
+  onSelect: () => void;
+  onReady: (id: string, object: Group | null) => void;
+}) {
+  const prepared = useMemo(() => {
+    const geometry = segmentGeometry(asset, segment.faces);
+    geometry.computeBoundingBox();
+    const center = geometry.boundingBox?.getCenter(new Vector3()) || new Vector3();
+    geometry.translate(-center.x, -center.y, -center.z);
+    geometry.computeBoundingBox();
+    return { geometry, center };
+  }, [asset, segment.faces]);
+
+  useEffect(() => () => prepared.geometry.dispose(), [prepared.geometry]);
+
+  const position: VectorTuple = displayTarget
+    ? [
+        prepared.center.x + transform.position[0],
+        prepared.center.y + transform.position[1],
+        prepared.center.z + transform.position[2],
+      ]
+    : [prepared.center.x, prepared.center.y, prepared.center.z];
+
+  const rotation: VectorTuple = displayTarget
+    ? transform.rotation
+    : [0, 0, 0];
+
+  const color = collision
+    ? "#c95656"
+    : selected
+      ? "#6d4cf5"
+      : contact
+        ? "#d29a3a"
+        : "#4e9b7b";
+
+  return (
+    <group
+      ref={(object) => onReady(segment.id, object)}
+      position={position}
+      rotation={rotation}
+      userData={{ pivot: prepared.center.toArray() }}
+    >
+      <mesh
+        geometry={prepared.geometry}
+        onClick={(event) => {
+          event.stopPropagation();
+          onSelect();
+        }}
+      >
+        <meshStandardMaterial color={color} roughness={0.5} />
+      </mesh>
+    </group>
+  );
+}
+
+function TargetSetupCamera({
+  assets,
+  selectedObject,
+  transformMode,
+  editingEnabled,
+  onTransform,
+}: {
+  assets: ScanAsset[];
+  selectedObject: Group | null;
+  transformMode: SetupMode;
+  editingEnabled: boolean;
+  onTransform: (transform: RigidTransform) => void;
+}) {
+  const { camera, gl, scene } = useThree();
+  const orbitRef = useRef<OrbitControls | null>(null);
+
+  const bounds = useMemo(() => {
+    const box = new Box3();
+
+    assets.forEach((asset) => {
+      asset.geometry.computeBoundingBox();
+      if (asset.geometry.boundingBox) box.union(asset.geometry.boundingBox);
+    });
+
+    if (box.isEmpty()) {
+      box.setFromCenterAndSize(new Vector3(), new Vector3(10, 10, 10));
+    }
+
+    return {
+      center: box.getCenter(new Vector3()),
+      radius: Math.max(1, box.getSize(new Vector3()).length() / 2),
+    };
+  }, [assets]);
+
+  useEffect(() => {
+    const orbit = new OrbitControls(camera, gl.domElement);
+    orbit.enableDamping = true;
+    orbit.enablePan = true;
+    orbit.mouseButtons.RIGHT = MOUSE.PAN;
+    orbit.target.copy(bounds.center);
+    orbit.minDistance = bounds.radius * 0.8;
+    orbit.maxDistance = bounds.radius * 8;
+
+    camera.position
+      .copy(bounds.center)
+      .add(new Vector3(0, 0, bounds.radius * 2.8));
+    camera.lookAt(bounds.center);
+    orbit.update();
+    orbitRef.current = orbit;
+
+    return () => {
+      orbit.dispose();
+      orbitRef.current = null;
+    };
+  }, [bounds.center, bounds.radius, camera, gl.domElement]);
+
+  useEffect(() => {
+    if (!selectedObject || !editingEnabled) return;
+
+    const transform = new TransformControls(camera, gl.domElement);
+    transform.setMode(transformMode);
+    transform.setSize(0.75);
+    transform.attach(selectedObject);
+    scene.add(transform.getHelper());
+
+    const onDown = () => {
+      if (orbitRef.current) orbitRef.current.enabled = false;
+    };
+    const onUp = () => {
+      if (orbitRef.current) orbitRef.current.enabled = true;
+    };
+    const onObjectChange = () => {
+      const pivot = selectedObject.userData.pivot as number[] | undefined;
+      if (!pivot) return;
+
+      onTransform({
+        position: [
+          selectedObject.position.x - pivot[0],
+          selectedObject.position.y - pivot[1],
+          selectedObject.position.z - pivot[2],
+        ],
+        rotation: [
+          selectedObject.rotation.x,
+          selectedObject.rotation.y,
+          selectedObject.rotation.z,
+        ],
+      });
+    };
+
+    transform.addEventListener("mouseDown", onDown);
+    transform.addEventListener("mouseUp", onUp);
+    transform.addEventListener("objectChange", onObjectChange);
+
+    return () => {
+      transform.detach();
+      transform.removeEventListener("mouseDown", onDown);
+      transform.removeEventListener("mouseUp", onUp);
+      transform.removeEventListener("objectChange", onObjectChange);
+      scene.remove(transform.getHelper());
+      transform.dispose();
+    };
+  }, [camera, editingEnabled, gl.domElement, onTransform, scene, selectedObject, transformMode]);
+
+  return null;
+}
+
+function TargetSetupScene({
+  assets,
+  segments,
+  jawTransforms,
+  targetTransforms,
+  selectedId,
+  transformMode,
+  displayTarget,
+  collisionIds,
+  contactIds,
+  onSelect,
+  onTransform,
+}: {
+  assets: ScanAsset[];
+  segments: ToothSegment[];
+  jawTransforms: Record<Exclude<Jaw, "bite">, RigidTransform>;
+  targetTransforms: Record<string, RigidTransform>;
+  selectedId: string | null;
+  transformMode: SetupMode;
+  displayTarget: boolean;
+  collisionIds: Set<string>;
+  contactIds: Set<string>;
+  onSelect: (id: string) => void;
+  onTransform: (id: string, transform: RigidTransform) => void;
+}) {
+  const objectRefs = useRef(new Map<string, Group>());
+  const [registryVersion, setRegistryVersion] = useState(0);
+
+  const registerObject = (id: string, object: Group | null) => {
+    const current = objectRefs.current.get(id);
+
+    if (object) {
+      if (current !== object) {
+        objectRefs.current.set(id, object);
+        setRegistryVersion((value) => value + 1);
+      }
+      return;
+    }
+
+    if (current) {
+      objectRefs.current.delete(id);
+      setRegistryVersion((value) => value + 1);
+    }
+  };
+
+  const selectedObject = selectedId
+    ? objectRefs.current.get(selectedId) || null
+    : null;
+
+  void registryVersion;
+
+  return (
+    <>
+      <ambientLight intensity={1.05} />
+      <hemisphereLight args={["#fffdf8", "#8b91a0", 1.5]} />
+      <directionalLight position={[-5, 7, 8]} intensity={2.3} />
+      <directionalLight position={[5, 1, -5]} intensity={1.1} />
+
+      {(["upper", "lower"] as const).map((jaw) => {
+        const asset = assets.find((item) => item.jaw === jaw);
+        if (!asset) return null;
+
+        return (
+          <group
+            position={jawTransforms[jaw].position}
+            rotation={jawTransforms[jaw].rotation}
+            key={jaw}
+          >
+            <mesh geometry={asset.geometry} raycast={() => null}>
+              <meshStandardMaterial
+                color="#d8d8d5"
+                transparent
+                opacity={0.13}
+                roughness={0.72}
+                side={DoubleSide}
+                depthWrite={false}
+              />
+            </mesh>
+
+            {segments
+              .filter((segment) => segment.jaw === jaw)
+              .map((segment) => (
+                <TargetTooth
+                  asset={asset}
+                  segment={segment}
+                  transform={targetTransforms[segment.id] || identityTransform()}
+                  displayTarget={displayTarget}
+                  selected={segment.id === selectedId}
+                  collision={collisionIds.has(segment.id)}
+                  contact={contactIds.has(segment.id)}
+                  onSelect={() => onSelect(segment.id)}
+                  onReady={registerObject}
+                  key={segment.id}
+                />
+              ))}
+          </group>
+        );
+      })}
+
+      <TargetSetupCamera
+        assets={assets}
+        selectedObject={selectedObject}
+        transformMode={transformMode}
+        editingEnabled={displayTarget}
+        onTransform={(transform) => {
+          if (selectedId) onTransform(selectedId, transform);
+        }}
+      />
+    </>
+  );
+}
+
 function ScanUploadCard({
   jaw,
   asset,
