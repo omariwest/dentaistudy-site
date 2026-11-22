@@ -1857,6 +1857,7 @@ function ClinicalAppPage() {
   const [stageAiReviewError, setStageAiReviewError] = useState("");
   const skipNextAutosaveRef = useRef(false);
   const previousUserIdRef = useRef<string | null>(null);
+  const online = useOnlineStatus();
 
   const missingCount = useMemo(
     () => requiredRecords.filter((record) => !records[record.key]).length,
@@ -1876,6 +1877,11 @@ function ClinicalAppPage() {
       return;
     }
 
+    if (!online) {
+      setCaseError("You are offline. Reconnect to load saved cases.");
+      return;
+    }
+
     setCasesLoading(true);
     setCaseError("");
 
@@ -1886,7 +1892,7 @@ function ClinicalAppPage() {
     } finally {
       setCasesLoading(false);
     }
-  }, [userId]);
+  }, [online, userId]);
 
   useEffect(() => {
     let active = true;
@@ -2050,6 +2056,12 @@ function ClinicalAppPage() {
   }, []);
 
   const openSavedCase = async (savedCaseId: string) => {
+    if (!online) {
+      setCaseError("You are offline. Reconnect to open a saved case.");
+      setShowCaseHub(true);
+      return;
+    }
+
     setCasesLoading(true);
     setCaseError("");
 
@@ -2065,6 +2077,12 @@ function ClinicalAppPage() {
   const startNewCase = async () => {
     if (!session) {
       setAccountOpen(true);
+      return;
+    }
+
+    if (!online) {
+      setCaseError("You are offline. Reconnect to create a saved case.");
+      setShowCaseHub(true);
       return;
     }
 
@@ -2084,7 +2102,7 @@ function ClinicalAppPage() {
   };
 
   useEffect(() => {
-    if (!session || !caseId) return;
+    if (!session || !caseId || !online) return;
 
     if (skipNextAutosaveRef.current) {
       skipNextAutosaveRef.current = false;
@@ -2146,6 +2164,7 @@ function ClinicalAppPage() {
     records,
     scanState,
     scopeIssue,
+    online,
     session,
     setupApproved,
     stageState,
@@ -2252,6 +2271,11 @@ function ClinicalAppPage() {
       return;
     }
 
+    if (!online) {
+      setAiReviewError("Reconnect to run the clinical review.");
+      return;
+    }
+
     setAiReviewLoading(true);
     setAiReviewError("");
 
@@ -2275,6 +2299,11 @@ function ClinicalAppPage() {
       return;
     }
 
+    if (!online) {
+      setStageAiReviewError("Reconnect to run the mechanics review.");
+      return;
+    }
+
     setStageAiReviewLoading(true);
     setStageAiReviewError("");
 
@@ -2295,11 +2324,13 @@ function ClinicalAppPage() {
   const saveLabel =
     !session || !caseId
       ? "Local preview"
-      : saveState === "saving"
-        ? "Saving…"
-        : saveState === "error"
-          ? "Save failed"
-          : "Saved";
+      : !online
+        ? "Offline"
+        : saveState === "saving"
+          ? "Saving…"
+          : saveState === "error"
+            ? "Save failed"
+            : "Saved";
 
   return (
     <main className="clinical-app">
@@ -2317,7 +2348,9 @@ function ClinicalAppPage() {
 
         <div className="app-topbar__actions">
           <span
-            className={`app-save-state${saveState === "error" ? " is-error" : ""}`}
+            className={`app-save-state${saveState === "error" || !online ? " is-error" : ""}`}
+            role="status"
+            aria-live="polite"
           >
             {saveLabel}
           </span>
@@ -2341,6 +2374,13 @@ function ClinicalAppPage() {
           </button>
         </div>
       </header>
+
+      {!online && (
+        <div className="app-offline-banner" role="status">
+          Offline — local work stays in this tab, but saved cases, uploads and AI
+          review need a connection.
+        </div>
+      )}
 
       <div className="clinical-app__body">
         <aside className="app-sidebar" aria-label="Case workflow">
@@ -2409,9 +2449,9 @@ function ClinicalAppPage() {
                   className="app-primary-action case-page-primary"
                   type="button"
                   onClick={startNewCase}
-                  disabled={casesLoading}
+                  disabled={casesLoading || (Boolean(session) && !online)}
                 >
-                  {session ? "New case" : "Sign in to save"}
+                  {session ? (online ? "New case" : "Offline") : "Sign in to save"}
                 </button>
               </div>
 
