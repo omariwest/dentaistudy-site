@@ -1985,6 +1985,7 @@ export default function ScanWorkflow({
     lower: identityTransform(),
   });
   const [targetTransforms, setTargetTransforms] = useState<Record<string, RigidTransform>>({});
+  const [plannedExtractions, setPlannedExtractions] = useState<Set<string>>(new Set());
   const [selectedTargetId, setSelectedTargetId] = useState<string | null>(null);
   const [targetMode, setTargetMode] = useState<SetupMode>("translate");
   const [displayTarget, setDisplayTarget] = useState(true);
@@ -2033,6 +2034,7 @@ export default function ScanWorkflow({
         lower: identityTransform(),
       });
       setTargetTransforms({});
+      setPlannedExtractions(new Set());
       setSetupApproved(false);
       setApplianceLayers({
         brackets: true,
@@ -2089,6 +2091,13 @@ export default function ScanWorkflow({
           },
         );
         setTargetTransforms(initialState.targetTransforms || {});
+        setPlannedExtractions(
+          new Set(
+            Array.isArray(initialState.plannedExtractions)
+              ? initialState.plannedExtractions
+              : [],
+          ),
+        );
         setSetupApproved(initialState.setupApproved === true);
         setApplianceLayers(
           initialState.applianceLayers || {
@@ -2238,6 +2247,11 @@ export default function ScanWorkflow({
       return next;
     });
 
+    setPlannedExtractions((current) => {
+      const validIds = new Set(segments.map((segment) => segment.id));
+      return new Set([...current].filter((id) => validIds.has(id)));
+    });
+
     if (selectedTargetId && !segments.some((segment) => segment.id === selectedTargetId)) {
       setSelectedTargetId(null);
     }
@@ -2281,6 +2295,7 @@ export default function ScanWorkflow({
       segments,
       jawTransforms,
       targetTransforms,
+      plannedExtractions: [...plannedExtractions],
       setupApproved,
       applianceLayers,
       mechanicEndpoints,
@@ -2289,6 +2304,7 @@ export default function ScanWorkflow({
     const stages = deriveStages({
       segments,
       targetTransforms,
+      plannedExtractions,
       applianceLayers,
       endpoints: mechanicEndpoints,
     }).map(({ layers: _layers, ...stage }) => stage);
@@ -2304,6 +2320,7 @@ export default function ScanWorkflow({
     mechanicEndpoints,
     onPersistenceChange,
     onStageStateChange,
+    plannedExtractions,
     segments,
     setupApproved,
     targetTransforms,
