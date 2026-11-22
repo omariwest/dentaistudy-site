@@ -165,6 +165,171 @@ function HomePage() {
   );
 }
 
+
+const clinicalFlow = [
+  { label: "Case", detail: "Records" },
+  { label: "Findings", detail: "Review" },
+  { label: "Plan", detail: "Strategies" },
+  { label: "Setup", detail: "3D target", active: true },
+  { label: "Stages", detail: "Mechanics" },
+];
+
+const viewerLayers = ["Initial", "Planned", "Upper", "Lower", "Gingiva", "Brackets", "Wire"];
+const viewerViews = ["Front", "Right", "Left", "Upper", "Lower"];
+const demoStages = ["Initial", "Alignment", "Leveling", "Space", "Finishing", "Final"];
+
+function ClinicalAppPage() {
+  return (
+    <main className="clinical-app">
+      <header className="app-topbar">
+        <div className="app-topbar__brand">
+          <a className="wordmark app-wordmark" href="/" aria-label="BracketMotion home">
+            BracketMotion<span>.</span>
+          </a>
+          <span className="app-topbar__divider" aria-hidden="true" />
+          <div className="app-case-title">
+            <strong>Demo Case</strong>
+            <span>Permanent dentition · Draft</span>
+          </div>
+        </div>
+
+        <div className="app-topbar__actions">
+          <span className="app-save-state">Saved</span>
+          <button className="app-quiet-button" type="button">Cases</button>
+          <button className="app-account-button" type="button" aria-label="Account">A</button>
+        </div>
+      </header>
+
+      <div className="clinical-app__body">
+        <aside className="app-sidebar" aria-label="Case workflow">
+          <div className="app-sidebar__heading">
+            <span>Clinical flow</span>
+            <strong>Demo Case</strong>
+          </div>
+
+          <nav className="app-flow-nav">
+            {clinicalFlow.map((item, index) => (
+              <button
+                className={`app-flow-item${item.active ? " is-active" : ""}`}
+                type="button"
+                key={item.label}
+              >
+                <span className="app-flow-item__index">{String(index + 1).padStart(2, "0")}</span>
+                <span className="app-flow-item__copy">
+                  <strong>{item.label}</strong>
+                  <small>{item.detail}</small>
+                </span>
+              </button>
+            ))}
+          </nav>
+
+          <div className="app-sidebar__status">
+            <span>Planning status</span>
+            <strong>Draft case</strong>
+            <p>Clinical planning remains locked until required records are complete.</p>
+          </div>
+        </aside>
+
+        <section className="app-workspace" aria-label="3D treatment workspace">
+          <div className="app-viewer-toolbar">
+            <div className="app-viewer-toolbar__group" aria-label="Viewer layers">
+              {viewerLayers.map((tool, index) => (
+                <button
+                  className={`app-tool-button${index < 2 ? " is-selected" : ""}`}
+                  type="button"
+                  key={tool}
+                >
+                  {tool}
+                </button>
+              ))}
+            </div>
+
+            <div className="app-viewer-toolbar__group app-viewer-toolbar__views" aria-label="Canonical views">
+              {viewerViews.map((view) => (
+                <button className="app-view-button" type="button" key={view}>{view}</button>
+              ))}
+            </div>
+          </div>
+
+          <div className="app-mobile-flow" aria-label="Case workflow">
+            {clinicalFlow.map((item) => (
+              <button
+                className={`app-mobile-flow__item${item.active ? " is-active" : ""}`}
+                type="button"
+                key={item.label}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="app-viewport">
+            <div className="app-viewport__empty">
+              <span className="app-viewport__mark" aria-hidden="true" />
+              <strong>3D treatment workspace</strong>
+              <p>The patient model will occupy this canvas. Task 1 builds the workspace only.</p>
+            </div>
+
+            <div className="app-viewport__corner">
+              <span>Setup</span>
+              <strong>Initial → Planned</strong>
+            </div>
+          </div>
+
+          <div className="app-timeline">
+            <button className="app-play-button" type="button" aria-label="Play treatment stages">▶</button>
+            <div className="app-timeline__track">
+              {demoStages.map((stage, index) => (
+                <button
+                  className={`app-stage-chip${index === 0 ? " is-current" : ""}`}
+                  type="button"
+                  key={stage}
+                >
+                  <span>{String(index + 1).padStart(2, "0")}</span>
+                  {stage}
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <aside className="app-inspector" aria-label="Selection inspector">
+          <div className="app-inspector__header">
+            <div>
+              <span>Inspector</span>
+              <strong>Setup</strong>
+            </div>
+            <button className="app-icon-button" type="button" aria-label="Inspector settings">•••</button>
+          </div>
+
+          <div className="app-inspector__section">
+            <span className="app-inspector__label">Selection</span>
+            <div className="app-empty-selection">
+              <strong>Nothing selected</strong>
+              <p>Select a tooth, bracket or mechanic in the 3D workspace to inspect it here.</p>
+            </div>
+          </div>
+
+          <div className="app-inspector__section app-inspector__section--compact">
+            <div className="app-inspector__row">
+              <span>Clinical plan</span>
+              <strong>Not approved</strong>
+            </div>
+            <div className="app-inspector__row">
+              <span>3D setup</span>
+              <strong>Not approved</strong>
+            </div>
+          </div>
+
+          <div className="app-inspector__footer">
+            <button className="app-primary-action" type="button">Review setup</button>
+          </div>
+        </aside>
+      </div>
+    </main>
+  );
+}
+
 function LegalLayout({
   title,
   intro,
@@ -433,6 +598,12 @@ function RoutedPage() {
 }
 
 export default function App() {
+  const path = window.location.pathname.replace(/\/+$/, "") || "/";
+
+  if (path === "/app") {
+    return <ClinicalAppPage />;
+  }
+
   return (
     <div className="site-shell">
       <Header />
