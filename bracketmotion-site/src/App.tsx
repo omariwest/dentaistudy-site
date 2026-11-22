@@ -776,7 +776,11 @@ function TreatmentPlanView({
   );
 }
 
-function SetupWorkspace() {
+function SetupWorkspace({
+  onSetupApprovalChange,
+}: {
+  onSetupApprovalChange: (approved: boolean) => void;
+}) {
   const viewerRef = useRef<ClinicalViewerHandle | null>(null);
   const [selectedTooth, setSelectedTooth] = useState<string | null>(null);
   const [workspaceMode, setWorkspaceMode] = useState<"patient" | "demo">("patient");
@@ -846,7 +850,7 @@ function SetupWorkspace() {
             </div>
           }
         >
-          <ScanWorkflow />
+          <ScanWorkflow onSetupApprovalChange={onSetupApprovalChange} />
         </Suspense>
       ) : (
         <div className="setup-demo-workspace">
@@ -908,6 +912,7 @@ function ClinicalAppPage() {
   const [caseLabel, setCaseLabel] = useState("Demo Case");
   const [scopeIssue, setScopeIssue] = useState("");
   const [planApproved, setPlanApproved] = useState(false);
+  const [setupApproved, setSetupApproved] = useState(false);
   const [plan, setPlan] = useState<TreatmentPlanState>({
     problemList: "Mild maxillary crowding; moderate mandibular crowding; mild lower anterior rotations; 4 mm overjet; 45% overbite.",
     goals: "Resolve crowding and rotations; coordinate the arches; maintain a Class I molar/canine relationship; normalize overjet and overbite while preserving facial balance.",
@@ -937,6 +942,7 @@ function ClinicalAppPage() {
   const updatePlan = (field: keyof TreatmentPlanState, value: string) => {
     setPlan((current) => ({ ...current, [field]: value }));
     setPlanApproved(false);
+    setSetupApproved(false);
   };
 
   const openSection = (section: ClinicalSection) => {
@@ -947,6 +953,11 @@ function ClinicalAppPage() {
       return;
     }
 
+    if (section === "Stages" && !setupApproved) {
+      setActiveSection("Setup");
+      return;
+    }
+
     setActiveSection(section);
   };
 
@@ -954,6 +965,7 @@ function ClinicalAppPage() {
     setCaseLabel("Demo Case");
     setScopeIssue("");
     setPlanApproved(false);
+    setSetupApproved(false);
     setPlan({
       problemList: "Mild maxillary crowding; moderate mandibular crowding; mild lower anterior rotations; 4 mm overjet; 45% overbite.",
       goals: "Resolve crowding and rotations; coordinate the arches; maintain a Class I molar/canine relationship; normalize overjet and overbite while preserving facial balance.",
@@ -977,6 +989,7 @@ function ClinicalAppPage() {
     setCaseLabel("Untitled Case");
     setScopeIssue("");
     setPlanApproved(false);
+    setSetupApproved(false);
     setPlan({
       problemList: "",
       goals: "",
@@ -1123,6 +1136,7 @@ function ClinicalAppPage() {
               onScopeIssue={(value) => {
                 setScopeIssue(value);
                 setPlanApproved(false);
+                setSetupApproved(false);
               }}
               planningReady={planningReady}
               missingCount={missingCount}
@@ -1135,10 +1149,13 @@ function ClinicalAppPage() {
               plan={plan}
               planApproved={planApproved}
               onPlanChange={updatePlan}
-              onApprove={() => setPlanApproved(true)}
+              onApprove={() => {
+                setPlanApproved(true);
+                setSetupApproved(false);
+              }}
             />
           ) : (
-            <SetupWorkspace />
+            <SetupWorkspace onSetupApprovalChange={setSetupApproved} />
           )}
         </section>
 
@@ -1172,7 +1189,7 @@ function ClinicalAppPage() {
             </div>
             <div className="app-inspector__row">
               <span>3D setup</span>
-              <strong>Not approved</strong>
+              <strong>{setupApproved ? "Approved" : "Not approved"}</strong>
             </div>
           </div>
 
@@ -1181,13 +1198,19 @@ function ClinicalAppPage() {
               className="app-primary-action"
               type="button"
               disabled={!planningReady}
-              onClick={() => setActiveSection(planApproved ? "Setup" : "Plan")}
+              onClick={() =>
+                setActiveSection(
+                  !planApproved ? "Plan" : setupApproved ? "Stages" : "Setup",
+                )
+              }
             >
               {!planningReady
                 ? "Complete required records"
-                : planApproved
-                  ? "Continue to 3D setup"
-                  : "Review clinical plan"}
+                : !planApproved
+                  ? "Review clinical plan"
+                  : setupApproved
+                    ? "Continue to stages"
+                    : "Continue to 3D setup"}
             </button>
           </div>
         </aside>
