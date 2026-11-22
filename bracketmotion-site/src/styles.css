@@ -266,6 +266,182 @@ a {
     0 3px 12px rgba(17, 24, 39, 0.035);
 }
 
+
+
+.workflow {
+  padding: 30px 0 110px;
+}
+
+.section-heading {
+  max-width: 760px;
+  margin-bottom: 38px;
+}
+
+.section-kicker {
+  margin: 0 0 12px;
+  color: var(--accent);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.section-heading h2,
+.final-cta h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(2.15rem, 4.2vw, 4rem);
+  font-weight: 780;
+  line-height: 1.02;
+  letter-spacing: -0.06em;
+  text-wrap: balance;
+}
+
+.workflow-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  margin: 0;
+  padding: 1px;
+  list-style: none;
+  border-radius: 24px;
+  overflow: hidden;
+  background: var(--border);
+}
+
+.workflow-step {
+  min-height: 260px;
+  padding: 26px;
+  background: rgba(255, 255, 255, 0.96);
+}
+
+.workflow-step__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 52px;
+}
+
+.workflow-step__number {
+  color: var(--subtle);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.workflow-step__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 5px var(--accent-soft);
+}
+
+.workflow-step h3 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 1.2rem;
+  font-weight: 760;
+  letter-spacing: -0.04em;
+}
+
+.workflow-step p {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.62;
+}
+
+.final-cta {
+  padding: 0 0 84px;
+}
+
+.final-cta__card {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 48px;
+  padding: clamp(32px, 5vw, 58px);
+  border: 1px solid rgba(109, 76, 245, 0.12);
+  border-radius: 30px;
+  background:
+    radial-gradient(circle at 86% 8%, rgba(109, 76, 245, 0.09), transparent 20rem),
+    #ffffff;
+  box-shadow: 0 26px 70px rgba(31, 25, 63, 0.07);
+}
+
+.final-cta__copy {
+  max-width: 720px;
+}
+
+.final-cta__copy > p:last-child {
+  max-width: 620px;
+  margin: 18px 0 0;
+  color: var(--muted);
+  font-size: 0.98rem;
+  line-height: 1.65;
+}
+
+.final-cta__actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 10px;
+}
+
+.site-footer {
+  border-top: 1px solid rgba(17, 24, 39, 0.07);
+  background: rgba(248, 250, 252, 0.9);
+}
+
+.footer-inner {
+  display: flex;
+  min-height: 148px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 48px;
+  padding-block: 34px;
+}
+
+.wordmark--footer {
+  display: inline-block;
+  font-size: 1.18rem;
+}
+
+.footer-brand p {
+  margin: 10px 0 0;
+  color: var(--subtle);
+  font-size: 0.8rem;
+}
+
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px 24px;
+}
+
+.footer-links a {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.footer-links a:hover {
+  color: var(--accent);
+}
+
+.footer-links a:focus-visible {
+  border-radius: 4px;
+  outline: 3px solid rgba(109, 76, 245, 0.18);
+  outline-offset: 3px;
+}
+
+
 @media (max-width: 1024px) {
   .header-actions {
     display: none;
@@ -277,6 +453,33 @@ a {
 
   .hero h1 {
     font-size: clamp(3.65rem, 10.5vw, 6.2rem);
+  }
+
+  .workflow {
+    padding-bottom: 84px;
+  }
+
+  .workflow-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .workflow-step {
+    min-height: 230px;
+  }
+
+  .final-cta__card {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .footer-inner {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .footer-links {
+    justify-content: flex-start;
   }
 }
 
@@ -338,6 +541,57 @@ a {
   .demo-glow {
     inset: 10% 6% -5%;
     filter: blur(38px);
+  }
+
+  .workflow {
+    padding: 14px 0 64px;
+  }
+
+  .section-heading {
+    margin-bottom: 26px;
+  }
+
+  .workflow-grid {
+    grid-template-columns: 1fr;
+    border-radius: 20px;
+  }
+
+  .workflow-step {
+    min-height: 0;
+    padding: 24px 22px;
+  }
+
+  .workflow-step__top {
+    margin-bottom: 30px;
+  }
+
+  .final-cta {
+    padding-bottom: 56px;
+  }
+
+  .final-cta__card {
+    gap: 30px;
+    border-radius: 22px;
+  }
+
+  .final-cta__actions {
+    display: grid;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .footer-inner {
+    min-height: 0;
+    padding-block: 30px;
+  }
+
+  .footer-links {
+    display: grid;
+    gap: 0;
+  }
+
+  .footer-links a {
+    min-height: 42px;
   }
 }
 
