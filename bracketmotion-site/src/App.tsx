@@ -1584,40 +1584,138 @@ function SetupWorkspace({
 function ClinicalAppPage() {
   const [activeSection, setActiveSection] = useState<ClinicalSection>("Case");
   const [showCaseHub, setShowCaseHub] = useState(false);
+  const [session, setSession] = useState<BracketMotionSession | null>(null);
+  const [authReady, setAuthReady] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const [savedCases, setSavedCases] = useState<BracketMotionCaseSummary[]>([]);
+  const [casesLoading, setCasesLoading] = useState(false);
+  const [caseError, setCaseError] = useState("");
+  const [caseId, setCaseId] = useState<string | null>(null);
   const [caseLabel, setCaseLabel] = useState("Demo Case");
+  const [caseDetails, setCaseDetails] = useState<CaseDetailsState>(defaultCaseDetails);
+  const [findings, setFindings] = useState<FindingsState>(defaultFindings);
   const [scopeIssue, setScopeIssue] = useState("");
   const [planApproved, setPlanApproved] = useState(false);
   const [setupApproved, setSetupApproved] = useState(false);
-  const [plan, setPlan] = useState<TreatmentPlanState>({
-    problemList: "Mild maxillary crowding; moderate mandibular crowding; mild lower anterior rotations; 4 mm overjet; 45% overbite.",
-    goals: "Resolve crowding and rotations; coordinate the arches; maintain a Class I molar/canine relationship; normalize overjet and overbite while preserving facial balance.",
-    primaryStrategy: "Non-extraction fixed-appliance treatment. Align and level both arches with progressive NiTi wires, coordinate arch form, then finish on stainless steel with controlled settling as needed.",
-    alternativeStrategy: "Consider limited space creation if alignment cannot be achieved within the approved arch-form and incisor-position goals. Reassess space requirements before progressing beyond alignment.",
-  });
-  const [records, setRecords] = useState<Record<RecordKey, boolean>>({
-    history: true,
-    exam: true,
-    scans: true,
-    photos: true,
-    pano: false,
-    ceph: false,
-    cephSummary: true,
-  });
+  const [plan, setPlan] = useState<TreatmentPlanState>(demoPlan);
+  const [records, setRecords] = useState<Record<RecordKey, boolean>>(demoRecords);
+  const [scanInitialState, setScanInitialState] =
+    useState<ScanPersistenceState | null>(null);
+  const [scanState, setScanState] = useState<ScanPersistenceState | null>(null);
+  const [stageState, setStageState] = useState<StagePersistenceState | null>(null);
+  const [saveState, setSaveState] =
+    useState<"local" | "saving" | "saved" | "error">("local");
+  const [aiReview, setAiReview] = useState<ClinicalAiReviewResult | null>(null);
+  const [aiReviewLoading, setAiReviewLoading] = useState(false);
+  const [aiReviewError, setAiReviewError] = useState("");
+  const skipNextAutosaveRef = useRef(false);
+  const previousUserIdRef = useRef<string | null>(null);
 
   const missingCount = useMemo(
     () => requiredRecords.filter((record) => !records[record.key]).length,
     [records],
   );
   const planningReady = missingCount === 0 && !scopeIssue;
+  const userId = session?.user.id ?? null;
+  const accountInitial = (
+    String(session?.user.user_metadata?.full_name || session?.user.email || "A")
+      .trim()
+      .charAt(0) || "A"
+  ).toUpperCase();
+
+  const refreshCases = useCallback(async () => {
+    if (!userId) {
+      setSavedCases([]);
+      return;
+    }
+
+    setCasesLoading(true);
+    setCaseError("");
+
+    try {
+      setSavedCases(await listBracketMotionCases());
+    } catch {
+      setCaseError("Saved cases could not be loaded.");
+    } finally {
+      setCasesLoading(false);
+    }
+  }, [userId]);
+
+  useEffect(() => {
+    let active = true;
+
+    void supabase.auth.getSession().then(({ data }) => {
+      if (!active) return;
+      setSession(data.session);
+      setAuthReady(true);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      if (!active) return;
+      setSession(nextSession);
+      setAuthReady(true);
+    });
+
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    const previousUserId = previousUserIdRef.current;
+    previousUserIdRef.current = userId;
+
+    if (!userId) {
+      setSavedCases([]);
+
+      if (previousUserId) {
+        setCaseId(null);
+        setCaseLabel("Demo Case");
+        setCaseDetails(defaultCaseDetails);
+        setFindings(defaultFindings);
+        setRecords(demoRecords);
+        setScopeIssue("");
+        setPlan(demoPlan);
+        setPlanApproved(false);
+        setSetupApproved(false);
+        setScanInitialState(null);
+        setScanState(null);
+        setStageState(null);
+        setAiReview(null);
+        setAiReviewError("");
+        setSaveState("local");
+        setShowCaseHub(false);
+        setActiveSection("Case");
+      }
+
+      return;
+    }
+
+    void refreshCases();
+  }, [refreshCases, userId]);
 
   const completeRecord = (key: RecordKey) => {
     setRecords((current) => ({ ...current, [key]: true }));
+  };
+
+  const updateCaseDetail = (field: keyof CaseDetailsState, value: string) => {
+    setCaseDetails((current) => ({ ...current, [field]: value }));
+  };
+
+  const updateFinding = (field: keyof FindingsState, value: string) => {
+    setFindings((current) => ({ ...current, [field]: value }));
+    setPlanApproved(false);
+    setSetupApproved(false);
   };
 
   const updatePlan = (field: keyof TreatmentPlanState, value: string) => {
     setPlan((current) => ({ ...current, [field]: value }));
     setPlanApproved(false);
     setSetupApproved(false);
+    setAiReview(null);
   };
 
   const openSection = (section: ClinicalSection) => {
@@ -1637,52 +1735,298 @@ function ClinicalAppPage() {
   };
 
   const openDemoCase = () => {
+    setCaseId(null);
     setCaseLabel("Demo Case");
+    setCaseDetails(defaultCaseDetails);
+    setFindings(defaultFindings);
     setScopeIssue("");
     setPlanApproved(false);
     setSetupApproved(false);
-    setPlan({
-      problemList: "Mild maxillary crowding; moderate mandibular crowding; mild lower anterior rotations; 4 mm overjet; 45% overbite.",
-      goals: "Resolve crowding and rotations; coordinate the arches; maintain a Class I molar/canine relationship; normalize overjet and overbite while preserving facial balance.",
-      primaryStrategy: "Non-extraction fixed-appliance treatment. Align and level both arches with progressive NiTi wires, coordinate arch form, then finish on stainless steel with controlled settling as needed.",
-      alternativeStrategy: "Consider limited space creation if alignment cannot be achieved within the approved arch-form and incisor-position goals. Reassess space requirements before progressing beyond alignment.",
-    });
-    setRecords({
-      history: true,
-      exam: true,
-      scans: true,
-      photos: true,
-      pano: false,
-      ceph: false,
-      cephSummary: true,
-    });
+    setPlan(demoPlan);
+    setRecords(demoRecords);
+    setScanInitialState(null);
+    setScanState(null);
+    setStageState(null);
+    setAiReview(null);
+    setAiReviewError("");
+    setSaveState("local");
     setShowCaseHub(false);
     setActiveSection("Case");
   };
 
-  const startNewCase = () => {
-    setCaseLabel("Untitled Case");
-    setScopeIssue("");
-    setPlanApproved(false);
-    setSetupApproved(false);
-    setPlan({
-      problemList: "",
-      goals: "",
-      primaryStrategy: "",
-      alternativeStrategy: "",
-    });
-    setRecords({
-      history: false,
-      exam: false,
-      scans: false,
-      photos: false,
-      pano: false,
-      ceph: false,
-      cephSummary: false,
-    });
+  const applySavedCase = useCallback((row: Awaited<ReturnType<typeof loadBracketMotionCase>>) => {
+    const storedRecords =
+      row.records && typeof row.records === "object"
+        ? (row.records as StoredRecordsState)
+        : {};
+    const storedPlan =
+      row.plan && typeof row.plan === "object"
+        ? (row.plan as Partial<TreatmentPlanState>)
+        : {};
+    const storedScan =
+      row.scan_state &&
+      typeof row.scan_state === "object" &&
+      (row.scan_state as Partial<ScanPersistenceState>).version === 1
+        ? ({
+            ...(row.scan_state as ScanPersistenceState),
+            setupApproved: row.setup_approved,
+          } as ScanPersistenceState)
+        : null;
+    const storedStages =
+      row.stage_state &&
+      typeof row.stage_state === "object" &&
+      (row.stage_state as Partial<StagePersistenceState>).version === 1
+        ? (row.stage_state as StagePersistenceState)
+        : null;
+
+    skipNextAutosaveRef.current = true;
+    setCaseId(row.id);
+    setCaseLabel(row.label || "Untitled Case");
+    setRecords({ ...emptyRecords, ...(storedRecords.checklist || {}) });
+    setCaseDetails({ ...emptyCaseDetails, ...(storedRecords.details || {}) });
+    setFindings({ ...emptyFindings, ...(storedRecords.findings || {}) });
+    setScopeIssue(row.scope_issue || "");
+    setPlan({ ...emptyPlan, ...storedPlan });
+    setPlanApproved(row.plan_approved === true);
+    setSetupApproved(row.setup_approved === true);
+    setScanInitialState(storedScan);
+    setScanState(storedScan);
+    setStageState(storedStages);
+    setAiReview(null);
+    setAiReviewError("");
+    setSaveState("saved");
     setShowCaseHub(false);
     setActiveSection("Case");
+  }, []);
+
+  const openSavedCase = async (savedCaseId: string) => {
+    setCasesLoading(true);
+    setCaseError("");
+
+    try {
+      applySavedCase(await loadBracketMotionCase(savedCaseId));
+    } catch {
+      setCaseError("This case could not be opened.");
+    } finally {
+      setCasesLoading(false);
+    }
   };
+
+  const startNewCase = async () => {
+    if (!session) {
+      setAccountOpen(true);
+      return;
+    }
+
+    setCasesLoading(true);
+    setCaseError("");
+
+    try {
+      const row = await createBracketMotionCase(session.user.id, "Untitled Case");
+      applySavedCase(row);
+      await refreshCases();
+    } catch {
+      setCaseError("A new case could not be created.");
+      setShowCaseHub(true);
+    } finally {
+      setCasesLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!session || !caseId) return;
+
+    if (skipNextAutosaveRef.current) {
+      skipNextAutosaveRef.current = false;
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      const dbLabel = caseLabel.trim() || "Untitled Case";
+      setSaveState("saving");
+
+      void saveBracketMotionCase(caseId, {
+        label: dbLabel,
+        records: {
+          checklist: records,
+          details: caseDetails,
+          findings,
+        },
+        scope_issue: scopeIssue,
+        plan,
+        plan_approved: planApproved,
+        setup_approved: setupApproved,
+        scan_state: scanState || {},
+        stage_state: stageState || {},
+      })
+        .then(() => {
+          const now = new Date().toISOString();
+          setSaveState("saved");
+          setSavedCases((current) =>
+            current
+              .map((item) =>
+                item.id === caseId
+                  ? {
+                      ...item,
+                      label: dbLabel,
+                      plan_approved: planApproved,
+                      setup_approved: setupApproved,
+                      updated_at: now,
+                    }
+                  : item,
+              )
+              .sort(
+                (a, b) =>
+                  new Date(b.updated_at).getTime() -
+                  new Date(a.updated_at).getTime(),
+              ),
+          );
+        })
+        .catch(() => setSaveState("error"));
+    }, 850);
+
+    return () => window.clearTimeout(timer);
+  }, [
+    caseDetails,
+    caseId,
+    caseLabel,
+    findings,
+    plan,
+    planApproved,
+    records,
+    scanState,
+    scopeIssue,
+    session,
+    setupApproved,
+    stageState,
+  ]);
+
+  const buildAiPayload = (mode: AiReviewMode) => {
+    const movedTeeth = scanState
+      ? Object.entries(scanState.targetTransforms)
+          .filter(([, transform]) => {
+            const translation = Math.hypot(...transform.position);
+            const rotation =
+              Math.abs(transform.rotation[0]) +
+              Math.abs(transform.rotation[1]) +
+              Math.abs(transform.rotation[2]);
+            return translation > 0.01 || rotation > 0.005;
+          })
+          .map(([id]) => {
+            const segment = scanState.segments.find((item) => item.id === id);
+            return segment?.label || id;
+          })
+      : [];
+
+    return {
+      mode,
+      gates: {
+        planning_ready: planningReady,
+        clinical_plan_approved: planApproved,
+        setup_approved: setupApproved,
+      },
+      findings: {
+        oral_periodontal: [
+          `Oral hygiene: ${findings.oralHygiene}`,
+          `Periodontal status: ${findings.periodontalStatus}`,
+          `Active caries/pathology: ${findings.activeCaries}`,
+          `Restorative considerations: ${findings.restorativeConsiderations}`,
+          `Missing teeth: ${findings.missingTeeth}`,
+          `Impacted/unerupted teeth: ${findings.impactedTeeth}`,
+          `Movement exclusions: ${findings.unsuitableTeeth}`,
+        ].join("; "),
+        facial: [
+          `Profile: ${findings.profile}`,
+          `Lip competence: ${findings.lipCompetence}`,
+          `Vertical pattern: ${findings.facialVerticalPattern}`,
+          `Asymmetry: ${findings.facialAsymmetry}`,
+          `Smile/incisor display: ${findings.smileConcern}`,
+        ].join("; "),
+        occlusal: [
+          `Molar R/L: ${findings.molarRight}/${findings.molarLeft}`,
+          `Canine R/L: ${findings.canineRight}/${findings.canineLeft}`,
+          `Overjet: ${findings.overjet} mm`,
+          `Overbite: ${findings.overbite}%`,
+          `Maxillary crowding/spacing: ${findings.maxillaryCrowding} mm`,
+          `Mandibular crowding/spacing: ${findings.mandibularCrowding} mm`,
+          `Upper midline: ${findings.upperMidline}`,
+          `Lower midline: ${findings.lowerMidline}`,
+          `Interarch midline discrepancy: ${findings.midlineDiscrepancy} mm`,
+          `Curve of Spee: ${findings.curveOfSpee}`,
+          `Crossbite: ${findings.crossbite}`,
+          `Scissor bite: ${findings.scissorBite}`,
+          `Rotations/displacements: ${findings.rotations}`,
+        ].join("; "),
+        cephalometric: [
+          `Skeletal AP: ${findings.skeletalAp}`,
+          `Skeletal vertical: ${findings.skeletalVertical}`,
+          `Maxillary incisors: ${findings.maxillaryIncisors}`,
+          `Mandibular incisors: ${findings.mandibularIncisors}`,
+          `Concern: ${findings.cephConcern}`,
+        ].join("; "),
+      },
+      plan: {
+        problem_list: plan.problemList,
+        goals: plan.goals,
+        primary_strategy: plan.primaryStrategy,
+        alternative_strategy: plan.alternativeStrategy,
+      },
+      setup: {
+        overjet_mm: null,
+        overbite_mm: null,
+        midline_mm: null,
+        moved_teeth: movedTeeth,
+        collision_warning: false,
+      },
+      mechanics: {
+        power_chain: scanState?.applianceLayers.powerChain === true,
+        closed_coil: scanState?.applianceLayers.coilSpring === true,
+        interarch_elastics: scanState?.applianceLayers.elastics === true,
+        closing_loop: scanState?.applianceLayers.closingLoop === true,
+        stage_summaries:
+          stageState?.stages.map((stage) => ({
+            title: stage.title,
+            active_unit: stage.activeUnits,
+            anchorage_unit: stage.anchorageUnits,
+            movement_tendency: stage.intendedMovement,
+            reciprocal_effects: stage.reciprocalEffects,
+            control_strategy: stage.controlStrategy,
+          })) || [],
+      },
+    };
+  };
+
+  const runPlanAiReview = async () => {
+    if (!session) {
+      setAccountOpen(true);
+      return;
+    }
+
+    setAiReviewLoading(true);
+    setAiReviewError("");
+
+    try {
+      const data = await invokeBracketMotionClinicalReview(
+        buildAiPayload("plan_review"),
+      );
+      setAiReview((data?.review || null) as ClinicalAiReviewResult | null);
+    } catch {
+      setAiReviewError(
+        "The clinical review could not be generated. Your case and approvals were not changed.",
+      );
+    } finally {
+      setAiReviewLoading(false);
+    }
+  };
+
+  const saveLabel =
+    !session || !caseId
+      ? "Local preview"
+      : saveState === "saving"
+        ? "Saving…"
+        : saveState === "error"
+          ? "Save failed"
+          : "Saved";
 
   return (
     <main className="clinical-app">
@@ -1699,15 +2043,29 @@ function ClinicalAppPage() {
         </div>
 
         <div className="app-topbar__actions">
-          <span className="app-save-state">Local preview</span>
+          <span
+            className={`app-save-state${saveState === "error" ? " is-error" : ""}`}
+          >
+            {saveLabel}
+          </span>
           <button
             className="app-quiet-button"
             type="button"
-            onClick={() => setShowCaseHub(true)}
+            onClick={() => {
+              setShowCaseHub(true);
+              if (session) void refreshCases();
+            }}
           >
             Cases
           </button>
-          <button className="app-account-button" type="button" aria-label="Account">A</button>
+          <button
+            className="app-account-button"
+            type="button"
+            aria-label={session ? "Account" : "Sign in"}
+            onClick={() => setAccountOpen(true)}
+          >
+            {session ? accountInitial : "A"}
+          </button>
         </div>
       </header>
 
@@ -1768,16 +2126,23 @@ function ClinicalAppPage() {
                 <div>
                   <span className="case-page-kicker">Cases</span>
                   <h1>Open or create a case.</h1>
-                  <p>Task 2 establishes the case-entry workflow. Database persistence arrives in Task 10.</p>
+                  <p>
+                    {session
+                      ? "Saved cases sync to your private BracketMotion account."
+                      : "The demo remains local. Sign in to create and reopen private saved cases."}
+                  </p>
                 </div>
                 <button
                   className="app-primary-action case-page-primary"
                   type="button"
                   onClick={startNewCase}
+                  disabled={casesLoading}
                 >
-                  New case
+                  {session ? "New case" : "Sign in to save"}
                 </button>
               </div>
+
+              {caseError && <div className="case-hub__message is-error">{caseError}</div>}
 
               <button
                 className="case-card"
@@ -1786,18 +2151,72 @@ function ClinicalAppPage() {
               >
                 <div>
                   <span>Demo Case</span>
-                  <strong>Permanent dentition</strong>
+                  <strong>Local example · not saved</strong>
                 </div>
                 <div className="case-card__status">
-                  <span>{planningReady ? "Planning ready" : "Draft"}</span>
+                  <span>Demo</span>
                   <small>Open →</small>
                 </div>
               </button>
+
+              {!authReady && (
+                <div className="case-hub__message">Checking your account…</div>
+              )}
+
+              {authReady && !session && (
+                <button
+                  className="case-signin-card"
+                  type="button"
+                  onClick={() => setAccountOpen(true)}
+                >
+                  <strong>Sign in with your DentAIstudy account</strong>
+                  <span>Enable private case storage, autosave and clinical AI review.</span>
+                </button>
+              )}
+
+              {session && casesLoading && (
+                <div className="case-hub__message">Loading saved cases…</div>
+              )}
+
+              {session &&
+                savedCases.map((savedCase) => (
+                  <button
+                    className={`case-card${caseId === savedCase.id ? " is-current" : ""}`}
+                    type="button"
+                    onClick={() => void openSavedCase(savedCase.id)}
+                    key={savedCase.id}
+                  >
+                    <div>
+                      <span>{savedCase.label}</span>
+                      <strong>
+                        {savedCase.setup_approved
+                          ? "3D setup approved"
+                          : savedCase.plan_approved
+                            ? "Clinical plan approved"
+                            : "Draft"}
+                      </strong>
+                    </div>
+                    <div className="case-card__status">
+                      <span>
+                        {new Date(savedCase.updated_at).toLocaleDateString()}
+                      </span>
+                      <small>Open →</small>
+                    </div>
+                  </button>
+                ))}
+
+              {session && !casesLoading && savedCases.length === 0 && (
+                <div className="case-hub__message">
+                  No saved cases yet. Create your first case above.
+                </div>
+              )}
             </div>
           ) : activeSection === "Case" ? (
             <CaseRecordsView
               caseLabel={caseLabel}
               onCaseLabel={setCaseLabel}
+              caseDetails={caseDetails}
+              onCaseDetail={updateCaseDetail}
               records={records}
               onCompleteRecord={completeRecord}
               planningReady={planningReady}
@@ -1813,6 +2232,8 @@ function ClinicalAppPage() {
                 setPlanApproved(false);
                 setSetupApproved(false);
               }}
+              findings={findings}
+              onFindingChange={updateFinding}
               planningReady={planningReady}
               missingCount={missingCount}
               onBackToCase={() => setActiveSection("Case")}
@@ -1823,6 +2244,12 @@ function ClinicalAppPage() {
               scopeIssue={scopeIssue}
               plan={plan}
               planApproved={planApproved}
+              sessionActive={Boolean(session)}
+              aiReview={aiReview}
+              aiReviewLoading={aiReviewLoading}
+              aiReviewError={aiReviewError}
+              onRunAiReview={() => void runPlanAiReview()}
+              onSignIn={() => setAccountOpen(true)}
               onPlanChange={updatePlan}
               onApprove={() => {
                 setPlanApproved(true);
@@ -1832,7 +2259,12 @@ function ClinicalAppPage() {
           ) : (
             <SetupWorkspace
               onSetupApprovalChange={setSetupApproved}
+              onPersistenceChange={setScanState}
+              onStageStateChange={setStageState}
               clinicalSection={activeSection as "Setup" | "Stages"}
+              caseId={caseId}
+              userId={userId}
+              initialScanState={scanInitialState}
             />
           )}
         </section>
@@ -1869,6 +2301,10 @@ function ClinicalAppPage() {
               <span>3D setup</span>
               <strong>{setupApproved ? "Approved" : "Not approved"}</strong>
             </div>
+            <div className="app-inspector__row">
+              <span>Storage</span>
+              <strong>{session && caseId ? saveLabel : "Local only"}</strong>
+            </div>
           </div>
 
           <div className="app-inspector__footer">
@@ -1893,6 +2329,12 @@ function ClinicalAppPage() {
           </div>
         </aside>
       </div>
+
+      <AuthDialog
+        open={accountOpen}
+        session={session}
+        onClose={() => setAccountOpen(false)}
+      />
     </main>
   );
 }
