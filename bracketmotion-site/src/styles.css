@@ -1506,6 +1506,119 @@ a {
 
 
 
+/* PWA install + network state */
+.install-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(30, 35, 45, 0.34);
+  backdrop-filter: blur(4px);
+}
+
+.install-dialog {
+  width: min(440px, 100%);
+  max-height: min(680px, calc(100vh - 40px));
+  overflow-y: auto;
+  border: 1px solid #dfe2e8;
+  border-radius: 15px;
+  background: #ffffff;
+  box-shadow: 0 24px 70px rgba(25, 31, 42, 0.18);
+}
+
+.install-dialog__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 17px 18px 14px;
+  border-bottom: 1px solid #eceef2;
+}
+
+.install-dialog__header span {
+  color: #858d98;
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.install-dialog__header h2 {
+  margin: 4px 0 0;
+  font-size: 0.95rem;
+}
+
+.install-dialog__header > button {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 7px;
+  color: #66707c;
+  background: #f2f3f5;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.install-dialog__body {
+  display: grid;
+  gap: 11px;
+  padding: 16px 18px 18px;
+}
+
+.install-dialog__body p,
+.install-dialog__body small {
+  margin: 0;
+  color: #69717d;
+  font-size: 0.64rem;
+  line-height: 1.55;
+}
+
+.install-dialog__body small {
+  color: #858d98;
+  font-size: 0.59rem;
+}
+
+.install-dialog__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 3px;
+}
+
+.install-dialog__actions .app-primary-action,
+.install-dialog__actions .app-quiet-button {
+  width: auto;
+  min-height: 36px;
+}
+
+.install-dialog__header > button:focus-visible,
+.install-dialog__actions button:focus-visible {
+  outline: 3px solid rgba(109, 76, 245, 0.2);
+  outline-offset: 2px;
+}
+
+.app-offline-banner {
+  position: fixed;
+  top: 66px;
+  left: 50%;
+  z-index: 25;
+  width: min(620px, calc(100% - 28px));
+  transform: translateX(-50%);
+  padding: 9px 12px;
+  border: 1px solid #ead4a9;
+  border-radius: 9px;
+  color: #785a27;
+  background: #fff9ed;
+  box-shadow: 0 8px 24px rgba(35, 39, 47, 0.08);
+  font-size: 0.62rem;
+  font-weight: 650;
+  line-height: 1.45;
+  text-align: center;
+}
+
 /* Account + saved-case authentication */
 .auth-dialog-backdrop {
   position: fixed;
@@ -3876,6 +3989,33 @@ a {
 }
 
 @media (max-width: 640px) {
+  .install-dialog-backdrop {
+    align-items: end;
+    padding: 12px;
+  }
+
+  .install-dialog {
+    width: 100%;
+    max-height: calc(100vh - 24px);
+  }
+
+  .install-dialog__actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .install-dialog__actions .app-primary-action,
+  .install-dialog__actions .app-quiet-button {
+    width: 100%;
+  }
+
+  .app-offline-banner {
+    top: 62px;
+    width: calc(100% - 20px);
+    font-size: 0.59rem;
+  }
+
+
   .ai-review-card {
     padding: 14px 12px;
   }
