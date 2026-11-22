@@ -1,5 +1,27 @@
-import { lazy, Suspense, useMemo, useRef, useState } from "react";
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import type { ClinicalViewerHandle } from "./ClinicalViewer";
+import type {
+  ScanPersistenceState,
+  StagePersistenceState,
+} from "./ScanWorkflow";
+import {
+  createBracketMotionCase,
+  invokeBracketMotionClinicalReview,
+  listBracketMotionCases,
+  loadBracketMotionCase,
+  saveBracketMotionCase,
+  supabase,
+  type BracketMotionCaseSummary,
+  type BracketMotionSession,
+} from "./supabase";
 
 const ClinicalViewer = lazy(() => import("./ClinicalViewer"));
 const ScanWorkflow = lazy(() => import("./ScanWorkflow"));
@@ -182,6 +204,125 @@ const clinicalFlow = [
 
 type ClinicalSection = (typeof clinicalFlow)[number]["label"];
 type RecordKey = "history" | "exam" | "scans" | "photos" | "pano" | "ceph" | "cephSummary";
+
+type CaseDetailsState = {
+  age: string;
+  patientStage: string;
+  growthStatus: string;
+  chiefComplaint: string;
+  medicalHistory: string;
+  dentalHistory: string;
+  notes: string;
+};
+
+type FindingsState = {
+  oralHygiene: string;
+  periodontalStatus: string;
+  activeCaries: string;
+  restorativeConsiderations: string;
+  missingTeeth: string;
+  impactedTeeth: string;
+  unsuitableTeeth: string;
+  profile: string;
+  lipCompetence: string;
+  facialVerticalPattern: string;
+  facialAsymmetry: string;
+  smileConcern: string;
+  molarRight: string;
+  molarLeft: string;
+  canineRight: string;
+  canineLeft: string;
+  overjet: string;
+  overbite: string;
+  maxillaryCrowding: string;
+  mandibularCrowding: string;
+  upperMidline: string;
+  lowerMidline: string;
+  midlineDiscrepancy: string;
+  curveOfSpee: string;
+  crossbite: string;
+  scissorBite: string;
+  rotations: string;
+  skeletalAp: string;
+  skeletalVertical: string;
+  maxillaryIncisors: string;
+  mandibularIncisors: string;
+  cephConcern: string;
+};
+
+const defaultCaseDetails: CaseDetailsState = {
+  age: "24",
+  patientStage: "Adult",
+  growthStatus: "Adult",
+  chiefComplaint: "Improve alignment and bite.",
+  medicalHistory: "No relevant medical-history flags reported.",
+  dentalHistory: "No previous orthodontic treatment.",
+  notes: "None reported.",
+};
+
+const emptyCaseDetails: CaseDetailsState = {
+  age: "",
+  patientStage: "Adult",
+  growthStatus: "Uncertain",
+  chiefComplaint: "",
+  medicalHistory: "",
+  dentalHistory: "",
+  notes: "",
+};
+
+const defaultFindings: FindingsState = {
+  oralHygiene: "Acceptable",
+  periodontalStatus: "Healthy",
+  activeCaries: "No",
+  restorativeConsiderations: "None",
+  missingTeeth: "None",
+  impactedTeeth: "None",
+  unsuitableTeeth: "None",
+  profile: "Straight",
+  lipCompetence: "Competent",
+  facialVerticalPattern: "Average",
+  facialAsymmetry: "None",
+  smileConcern: "None",
+  molarRight: "Class I",
+  molarLeft: "Class I",
+  canineRight: "Class I",
+  canineLeft: "Class I",
+  overjet: "4",
+  overbite: "45",
+  maxillaryCrowding: "-3",
+  mandibularCrowding: "-4",
+  upperMidline: "Coincident",
+  lowerMidline: "1 mm left",
+  midlineDiscrepancy: "1",
+  curveOfSpee: "Mild",
+  crossbite: "None",
+  scissorBite: "None",
+  rotations: "Mild lower anterior rotations.",
+  skeletalAp: "Class I",
+  skeletalVertical: "Average",
+  maxillaryIncisors: "Normal",
+  mandibularIncisors: "Normal",
+  cephConcern: "None",
+};
+
+const emptyFindings: FindingsState = {
+  ...defaultFindings,
+  missingTeeth: "",
+  impactedTeeth: "",
+  unsuitableTeeth: "",
+  smileConcern: "",
+  overjet: "",
+  overbite: "",
+  maxillaryCrowding: "",
+  mandibularCrowding: "",
+  upperMidline: "",
+  lowerMidline: "",
+  midlineDiscrepancy: "",
+  crossbite: "",
+  scissorBite: "",
+  rotations: "",
+  cephConcern: "",
+};
 
 const viewerLayers = ["Initial", "Planned", "Upper", "Lower", "Gingiva", "Brackets", "Wire"];
 const viewerViews = ["Front", "Right", "Left", "Upper", "Lower"];
