@@ -1234,7 +1234,8 @@ a {
   box-shadow: 0 0 0 3px rgba(109, 76, 245, 0.1);
 }
 
-.case-form-grid__wide {
+.case-form-grid__wide,
+.finding-grid__wide {
   grid-column: span 2;
 }
 
@@ -1644,7 +1645,8 @@ a {
     grid-template-columns: 1fr;
   }
 
-  .case-form-grid__wide {
+  .case-form-grid__wide,
+  .finding-grid__wide {
     grid-column: auto;
   }
 
