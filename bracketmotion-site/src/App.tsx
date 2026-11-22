@@ -10,6 +10,7 @@ import {
 import type { ClinicalViewerHandle } from "./ClinicalViewer";
 import type {
   ScanPersistenceState,
+  StageAiReviewResult,
   StagePersistenceState,
 } from "./ScanWorkflow";
 import {
@@ -1419,6 +1420,12 @@ function SetupWorkspace({
   caseId,
   userId,
   initialScanState,
+  sessionActive,
+  stageAiReview,
+  stageAiReviewLoading,
+  stageAiReviewError,
+  onRunStageAiReview,
+  onSignIn,
 }: {
   onSetupApprovalChange: (approved: boolean) => void;
   onPersistenceChange: (state: ScanPersistenceState) => void;
@@ -1427,6 +1434,12 @@ function SetupWorkspace({
   caseId: string | null;
   userId: string | null;
   initialScanState: ScanPersistenceState | null;
+  sessionActive: boolean;
+  stageAiReview: StageAiReviewResult | null;
+  stageAiReviewLoading: boolean;
+  stageAiReviewError: string;
+  onRunStageAiReview: () => void;
+  onSignIn: () => void;
 }) {
   const viewerRef = useRef<ClinicalViewerHandle | null>(null);
   const [selectedTooth, setSelectedTooth] = useState<string | null>(null);
@@ -1520,6 +1533,12 @@ function SetupWorkspace({
             caseId={caseId}
             userId={userId}
             initialState={initialScanState}
+            sessionActive={sessionActive}
+            stageAiReview={stageAiReview}
+            stageAiReviewLoading={stageAiReviewLoading}
+            stageAiReviewError={stageAiReviewError}
+            onRunStageAiReview={onRunStageAiReview}
+            onSignIn={onSignIn}
           />
         </Suspense>
       </div>
@@ -1606,6 +1625,9 @@ function ClinicalAppPage() {
   const [aiReview, setAiReview] = useState<ClinicalAiReviewResult | null>(null);
   const [aiReviewLoading, setAiReviewLoading] = useState(false);
   const [aiReviewError, setAiReviewError] = useState("");
+  const [stageAiReview, setStageAiReview] = useState<StageAiReviewResult | null>(null);
+  const [stageAiReviewLoading, setStageAiReviewLoading] = useState(false);
+  const [stageAiReviewError, setStageAiReviewError] = useState("");
   const skipNextAutosaveRef = useRef(false);
   const previousUserIdRef = useRef<string | null>(null);
 
@@ -1683,6 +1705,8 @@ function ClinicalAppPage() {
         setStageState(null);
         setAiReview(null);
         setAiReviewError("");
+        setStageAiReview(null);
+        setStageAiReviewError("");
         setSaveState("local");
         setShowCaseHub(false);
         setActiveSection("Case");
@@ -1745,6 +1769,8 @@ function ClinicalAppPage() {
     setStageState(null);
     setAiReview(null);
     setAiReviewError("");
+    setStageAiReview(null);
+    setStageAiReviewError("");
     setSaveState("local");
     setShowCaseHub(false);
     setActiveSection("Case");
@@ -1789,6 +1815,8 @@ function ClinicalAppPage() {
     setStageState(storedStages);
     setAiReview(null);
     setAiReviewError("");
+    setStageAiReview(null);
+    setStageAiReviewError("");
     setSaveState("saved");
     setShowCaseHub(false);
     setActiveSection("Case");
@@ -2011,6 +2039,29 @@ function ClinicalAppPage() {
       );
     } finally {
       setAiReviewLoading(false);
+    }
+  };
+
+  const runStageAiReview = async () => {
+    if (!session) {
+      setAccountOpen(true);
+      return;
+    }
+
+    setStageAiReviewLoading(true);
+    setStageAiReviewError("");
+
+    try {
+      const data = await invokeBracketMotionClinicalReview(
+        buildAiPayload("stage_review"),
+      );
+      setStageAiReview((data?.review || null) as StageAiReviewResult | null);
+    } catch {
+      setStageAiReviewError(
+        "The mechanics review could not be generated. Your stages and approvals were not changed.",
+      );
+    } finally {
+      setStageAiReviewLoading(false);
     }
   };
 
@@ -2260,6 +2311,12 @@ function ClinicalAppPage() {
               caseId={caseId}
               userId={userId}
               initialScanState={scanState}
+              sessionActive={Boolean(session)}
+              stageAiReview={stageAiReview}
+              stageAiReviewLoading={stageAiReviewLoading}
+              stageAiReviewError={stageAiReviewError}
+              onRunStageAiReview={() => void runStageAiReview()}
+              onSignIn={() => setAccountOpen(true)}
             />
           )}
         </section>
