@@ -1407,23 +1407,61 @@ export default function ScanWorkflow({
     [segments],
   );
 
+  const allSegmentLabels = useMemo(
+    () => [...upperSegmentLabels, ...lowerSegmentLabels],
+    [lowerSegmentLabels, upperSegmentLabels],
+  );
+
+  const sameArchLabels = useCallback(
+    (label: string) =>
+      upperSegmentLabels.includes(label) ? upperSegmentLabels : lowerSegmentLabels,
+    [lowerSegmentLabels, upperSegmentLabels],
+  );
+
   useEffect(() => {
     const upperFirst = upperSegmentLabels[0] || "";
     const upperLast = upperSegmentLabels.at(-1) || "";
     const lowerFirst = lowerSegmentLabels[0] || "";
-    const lowerLast = lowerSegmentLabels.at(-1) || "";
 
-    setMechanicEndpoints((current) => ({
-      chainStart: current.chainStart || upperFirst,
-      chainEnd: current.chainEnd || upperLast,
-      coilStart: current.coilStart || upperFirst,
-      coilEnd: current.coilEnd || upperLast,
-      elasticUpper: current.elasticUpper || upperFirst,
-      elasticLower: current.elasticLower || lowerFirst,
-      loopStart: current.loopStart || upperFirst,
-      loopEnd: current.loopEnd || upperLast,
-    }));
-  }, [lowerSegmentLabels, upperSegmentLabels]);
+    setMechanicEndpoints((current) => {
+      const chainStart =
+        allSegmentLabels.includes(current.chainStart)
+          ? current.chainStart
+          : upperFirst || lowerFirst;
+      const chainOptions = sameArchLabels(chainStart);
+      const coilStart =
+        allSegmentLabels.includes(current.coilStart)
+          ? current.coilStart
+          : upperFirst || lowerFirst;
+      const coilOptions = sameArchLabels(coilStart);
+      const loopStart =
+        allSegmentLabels.includes(current.loopStart)
+          ? current.loopStart
+          : upperFirst || lowerFirst;
+      const loopOptions = sameArchLabels(loopStart);
+
+      return {
+        chainStart,
+        chainEnd: chainOptions.includes(current.chainEnd)
+          ? current.chainEnd
+          : chainOptions.at(-1) || chainStart,
+        coilStart,
+        coilEnd: coilOptions.includes(current.coilEnd)
+          ? current.coilEnd
+          : coilOptions.at(-1) || coilStart,
+        elasticUpper: upperSegmentLabels.includes(current.elasticUpper)
+          ? current.elasticUpper
+          : upperFirst,
+        elasticLower: lowerSegmentLabels.includes(current.elasticLower)
+          ? current.elasticLower
+          : lowerFirst,
+        loopStart,
+        loopEnd: loopOptions.includes(current.loopEnd)
+          ? current.loopEnd
+          : loopOptions.at(-1) || loopStart,
+      };
+    });
+  }, [allSegmentLabels, lowerSegmentLabels, sameArchLabels, upperSegmentLabels]);
 
   useEffect(() => {
     if (!setupApproved && workflowMode === "appliance") {
