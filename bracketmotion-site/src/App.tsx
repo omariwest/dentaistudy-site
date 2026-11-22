@@ -1413,10 +1413,20 @@ function AuthDialog({
 
 function SetupWorkspace({
   onSetupApprovalChange,
+  onPersistenceChange,
+  onStageStateChange,
   clinicalSection,
+  caseId,
+  userId,
+  initialScanState,
 }: {
   onSetupApprovalChange: (approved: boolean) => void;
+  onPersistenceChange: (state: ScanPersistenceState) => void;
+  onStageStateChange: (state: StagePersistenceState) => void;
   clinicalSection: "Setup" | "Stages";
+  caseId: string | null;
+  userId: string | null;
+  initialScanState: ScanPersistenceState | null;
 }) {
   const viewerRef = useRef<ClinicalViewerHandle | null>(null);
   const [selectedTooth, setSelectedTooth] = useState<string | null>(null);
@@ -1504,7 +1514,12 @@ function SetupWorkspace({
         >
           <ScanWorkflow
             onSetupApprovalChange={onSetupApprovalChange}
+            onPersistenceChange={onPersistenceChange}
+            onStageStateChange={onStageStateChange}
             clinicalView={isStages ? "stages" : "setup"}
+            caseId={caseId}
+            userId={userId}
+            initialState={initialScanState}
           />
         </Suspense>
       </div>
