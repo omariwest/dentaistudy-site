@@ -1,3 +1,5 @@
+import { useMemo, useState } from "react";
+
 type Platform = "Windows" | "macOS";
 
 function PlatformIcon({ platform }: { platform: Platform }) {
@@ -170,15 +172,447 @@ const clinicalFlow = [
   { label: "Case", detail: "Records" },
   { label: "Findings", detail: "Review" },
   { label: "Plan", detail: "Strategies" },
-  { label: "Setup", detail: "3D target", active: true },
+  { label: "Setup", detail: "3D target" },
   { label: "Stages", detail: "Mechanics" },
-];
+] as const;
+
+type ClinicalSection = (typeof clinicalFlow)[number]["label"];
+type RecordKey = "history" | "exam" | "scans" | "photos" | "pano" | "ceph" | "cephSummary";
 
 const viewerLayers = ["Initial", "Planned", "Upper", "Lower", "Gingiva", "Brackets", "Wire"];
 const viewerViews = ["Front", "Right", "Left", "Upper", "Lower"];
 const demoStages = ["Initial", "Alignment", "Leveling", "Space", "Finishing", "Final"];
 
+const requiredRecords: Array<{ key: RecordKey; title: string; detail: string }> = [
+  { key: "history", title: "History + chief complaint", detail: "Medical, dental and treatment history" },
+  { key: "exam", title: "Clinical examination", detail: "Periodontal, facial and occlusal findings" },
+  { key: "scans", title: "Upper + lower scans", detail: "STL/PLY with correct bite relationship" },
+  { key: "photos", title: "Clinical photographs", detail: "3 facial + 5 intraoral minimum" },
+  { key: "pano", title: "Panoramic radiograph", detail: "Required for planning-ready status" },
+  { key: "ceph", title: "Lateral cephalogram", detail: "Required for planning-ready status" },
+  { key: "cephSummary", title: "Cephalometric summary", detail: "Clinician-entered categorical summary" },
+];
+
+const outOfScopeOptions = [
+  "Class III correction",
+  "Orthognathic surgery",
+  "TAD/miniscrew-supported mechanics",
+  "Expansion / MARPE",
+  "Impacted-tooth traction",
+];
+
+function RecordStatus({
+  complete,
+  onAdd,
+}: {
+  complete: boolean;
+  onAdd: () => void;
+}) {
+  return (
+    <div className="record-status">
+      <span className={`record-status__pill${complete ? " is-complete" : ""}`}>
+        {complete ? "Complete" : "Missing"}
+      </span>
+      {!complete && (
+        <button className="record-status__action" type="button" onClick={onAdd}>
+          Add
+        </button>
+      )}
+    </div>
+  );
+}
+
+function ReadinessCard({
+  planningReady,
+  missingCount,
+  scopeIssue,
+}: {
+  planningReady: boolean;
+  missingCount: number;
+  scopeIssue: string;
+}) {
+  if (scopeIssue) {
+    return (
+      <div className="readiness-card is-blocked" role="status">
+        <div>
+          <span>Planning status</span>
+          <strong>Out of V1 scope</strong>
+        </div>
+        <p>{scopeIssue} is outside the frozen BracketMotion V1 boundary. Treatment-plan generation is blocked.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`readiness-card${planningReady ? " is-ready" : ""}`} role="status">
+      <div>
+        <span>Planning status</span>
+        <strong>{planningReady ? "Planning ready" : "Draft case"}</strong>
+      </div>
+      <p>
+        {planningReady
+          ? "All mandatory Gate 2 records are present. The case can move to treatment planning."
+          : `${missingCount} required record${missingCount === 1 ? "" : "s"} missing. Planning remains locked.`}
+      </p>
+    </div>
+  );
+}
+
+function CaseRecordsView({
+  records,
+  onCompleteRecord,
+  planningReady,
+  missingCount,
+  scopeIssue,
+  onOpenFindings,
+}: {
+  records: Record<RecordKey, boolean>;
+  onCompleteRecord: (key: RecordKey) => void;
+  planningReady: boolean;
+  missingCount: number;
+  scopeIssue: string;
+  onOpenFindings: () => void;
+}) {
+  return (
+    <div className="case-workflow-page">
+      <div className="case-workflow-page__header">
+        <div>
+          <span className="case-page-kicker">Case records</span>
+          <h1>Build a planning-ready case.</h1>
+          <p>Only the records BracketMotion needs for the frozen V1 workflow are collected here.</p>
+        </div>
+        <button className="app-primary-action case-page-primary" type="button" onClick={onOpenFindings}>
+          Review findings
+        </button>
+      </div>
+
+      <ReadinessCard
+        planningReady={planningReady}
+        missingCount={missingCount}
+        scopeIssue={scopeIssue}
+      />
+
+      <section className="case-section" aria-labelledby="case-details-title">
+        <div className="case-section__heading">
+          <div>
+            <span>01</span>
+            <h2 id="case-details-title">Case details</h2>
+          </div>
+          <p>Use a patient label rather than unnecessary identifiers.</p>
+        </div>
+
+        <div className="case-form-grid">
+          <label>
+            <span>Case label</span>
+            <input defaultValue="Demo Case" type="text" />
+          </label>
+          <label>
+            <span>Age at records</span>
+            <input defaultValue="24" min="12" type="number" />
+          </label>
+          <label>
+            <span>Dentition</span>
+            <select defaultValue="Permanent">
+              <option>Permanent</option>
+            </select>
+          </label>
+          <label>
+            <span>Growth status</span>
+            <select defaultValue="Adult">
+              <option>Adult</option>
+              <option>Prepubertal</option>
+              <option>Pubertal</option>
+              <option>Postpubertal</option>
+              <option>Uncertain</option>
+            </select>
+          </label>
+          <label className="case-form-grid__wide">
+            <span>Chief complaint / treatment goal</span>
+            <input defaultValue="Improve alignment and bite." type="text" />
+          </label>
+        </div>
+      </section>
+
+      <section className="case-section" aria-labelledby="required-records-title">
+        <div className="case-section__heading">
+          <div>
+            <span>02</span>
+            <h2 id="required-records-title">Required records</h2>
+          </div>
+          <p>Planning is blocked until every mandatory group is complete.</p>
+        </div>
+
+        <div className="record-list">
+          {requiredRecords.map((record) => (
+            <div className="record-row" key={record.key}>
+              <div className="record-row__copy">
+                <strong>{record.title}</strong>
+                <span>{record.detail}</span>
+              </div>
+              <RecordStatus
+                complete={records[record.key]}
+                onAdd={() => onCompleteRecord(record.key)}
+              />
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function FindingsView({
+  scopeIssue,
+  onScopeIssue,
+  planningReady,
+  missingCount,
+  onBackToCase,
+}: {
+  scopeIssue: string;
+  onScopeIssue: (value: string) => void;
+  planningReady: boolean;
+  missingCount: number;
+  onBackToCase: () => void;
+}) {
+  return (
+    <div className="case-workflow-page">
+      <div className="case-workflow-page__header">
+        <div>
+          <span className="case-page-kicker">Clinician-confirmed findings</span>
+          <h1>Review the clinical source of truth.</h1>
+          <p>BracketMotion reasons from these findings. It does not silently replace them with AI inference.</p>
+        </div>
+        <button className="app-quiet-button case-page-secondary" type="button" onClick={onBackToCase}>
+          Back to records
+        </button>
+      </div>
+
+      <ReadinessCard
+        planningReady={planningReady}
+        missingCount={missingCount}
+        scopeIssue={scopeIssue}
+      />
+
+      <section className="case-section" aria-labelledby="occlusion-title">
+        <div className="case-section__heading">
+          <div>
+            <span>01</span>
+            <h2 id="occlusion-title">Occlusion</h2>
+          </div>
+          <p>Compact structured findings for treatment reasoning.</p>
+        </div>
+
+        <div className="finding-grid">
+          <label>
+            <span>Molar relationship — right</span>
+            <select defaultValue="Class I">
+              <option>Class I</option>
+              <option>Class II</option>
+              <option>Class III</option>
+            </select>
+          </label>
+          <label>
+            <span>Molar relationship — left</span>
+            <select defaultValue="Class I">
+              <option>Class I</option>
+              <option>Class II</option>
+              <option>Class III</option>
+            </select>
+          </label>
+          <label>
+            <span>Canine relationship — right</span>
+            <select defaultValue="Class I">
+              <option>Class I</option>
+              <option>Class II</option>
+              <option>Class III</option>
+            </select>
+          </label>
+          <label>
+            <span>Canine relationship — left</span>
+            <select defaultValue="Class I">
+              <option>Class I</option>
+              <option>Class II</option>
+              <option>Class III</option>
+            </select>
+          </label>
+          <label>
+            <span>Overjet</span>
+            <div className="field-with-unit"><input defaultValue="4" type="number" /><small>mm</small></div>
+          </label>
+          <label>
+            <span>Overbite</span>
+            <div className="field-with-unit"><input defaultValue="45" type="number" /><small>%</small></div>
+          </label>
+          <label>
+            <span>Maxillary crowding / spacing</span>
+            <div className="field-with-unit"><input defaultValue="-3" type="number" /><small>mm</small></div>
+          </label>
+          <label>
+            <span>Mandibular crowding / spacing</span>
+            <div className="field-with-unit"><input defaultValue="-4" type="number" /><small>mm</small></div>
+          </label>
+        </div>
+      </section>
+
+      <section className="case-section" aria-labelledby="ceph-title">
+        <div className="case-section__heading">
+          <div>
+            <span>02</span>
+            <h2 id="ceph-title">Cephalometric summary</h2>
+          </div>
+          <p>No proprietary analysis is required.</p>
+        </div>
+
+        <div className="finding-grid">
+          <label>
+            <span>Skeletal AP pattern</span>
+            <select defaultValue="Class I">
+              <option>Class I</option>
+              <option>Class II</option>
+              <option>Class III</option>
+            </select>
+          </label>
+          <label>
+            <span>Vertical skeletal pattern</span>
+            <select defaultValue="Average">
+              <option>Low</option>
+              <option>Average</option>
+              <option>High</option>
+            </select>
+          </label>
+          <label>
+            <span>Maxillary incisors</span>
+            <select defaultValue="Normal">
+              <option>Retroclined</option>
+              <option>Normal</option>
+              <option>Proclined</option>
+            </select>
+          </label>
+          <label>
+            <span>Mandibular incisors</span>
+            <select defaultValue="Normal">
+              <option>Retroclined</option>
+              <option>Normal</option>
+              <option>Proclined</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <section className="case-section" aria-labelledby="scope-screen-title">
+        <div className="case-section__heading">
+          <div>
+            <span>03</span>
+            <h2 id="scope-screen-title">V1 scope screen</h2>
+          </div>
+          <p>If the primary treatment need is unsupported, planning stops here.</p>
+        </div>
+
+        <label className="scope-select">
+          <span>Primary unsupported treatment need</span>
+          <select value={scopeIssue} onChange={(event) => onScopeIssue(event.target.value)}>
+            <option value="">None — within current V1 scope</option>
+            {outOfScopeOptions.map((option) => (
+              <option value={option} key={option}>{option}</option>
+            ))}
+          </select>
+        </label>
+
+        {scopeIssue && (
+          <div className="scope-warning" role="alert">
+            <strong>Planning blocked</strong>
+            <p>{scopeIssue} is not supported in BracketMotion V1. The clinician can keep the case as a record, but treatment-plan generation stays unavailable.</p>
+          </div>
+        )}
+      </section>
+    </div>
+  );
+}
+
+function SetupWorkspace() {
+  return (
+    <>
+      <div className="app-viewer-toolbar">
+        <div className="app-viewer-toolbar__group" aria-label="Viewer layers">
+          {viewerLayers.map((tool, index) => (
+            <button
+              className={`app-tool-button${index < 2 ? " is-selected" : ""}`}
+              type="button"
+              key={tool}
+            >
+              {tool}
+            </button>
+          ))}
+        </div>
+
+        <div className="app-viewer-toolbar__group app-viewer-toolbar__views" aria-label="Canonical views">
+          {viewerViews.map((view) => (
+            <button className="app-view-button" type="button" key={view}>{view}</button>
+          ))}
+        </div>
+      </div>
+
+      <div className="app-viewport">
+        <div className="app-viewport__empty">
+          <span className="app-viewport__mark" aria-hidden="true" />
+          <strong>3D treatment workspace</strong>
+          <p>The patient model will occupy this canvas. The 3D engine arrives in Task 4.</p>
+        </div>
+
+        <div className="app-viewport__corner">
+          <span>Setup</span>
+          <strong>Initial → Planned</strong>
+        </div>
+      </div>
+
+      <div className="app-timeline">
+        <button className="app-play-button" type="button" aria-label="Play treatment stages">▶</button>
+        <div className="app-timeline__track">
+          {demoStages.map((stage, index) => (
+            <button
+              className={`app-stage-chip${index === 0 ? " is-current" : ""}`}
+              type="button"
+              key={stage}
+            >
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              {stage}
+            </button>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
+
 function ClinicalAppPage() {
+  const [activeSection, setActiveSection] = useState<ClinicalSection>("Case");
+  const [showCaseHub, setShowCaseHub] = useState(false);
+  const [scopeIssue, setScopeIssue] = useState("");
+  const [records, setRecords] = useState<Record<RecordKey, boolean>>({
+    history: true,
+    exam: true,
+    scans: true,
+    photos: true,
+    pano: false,
+    ceph: false,
+    cephSummary: true,
+  });
+
+  const missingCount = useMemo(
+    () => requiredRecords.filter((record) => !records[record.key]).length,
+    [records],
+  );
+  const planningReady = missingCount === 0 && !scopeIssue;
+
+  const completeRecord = (key: RecordKey) => {
+    setRecords((current) => ({ ...current, [key]: true }));
+  };
+
+  const openSection = (section: ClinicalSection) => {
+    setShowCaseHub(false);
+    setActiveSection(section);
+  };
+
   return (
     <main className="clinical-app">
       <header className="app-topbar">
@@ -189,13 +623,19 @@ function ClinicalAppPage() {
           <span className="app-topbar__divider" aria-hidden="true" />
           <div className="app-case-title">
             <strong>Demo Case</strong>
-            <span>Permanent dentition · Draft</span>
+            <span>Permanent dentition · {planningReady ? "Planning ready" : "Draft"}</span>
           </div>
         </div>
 
         <div className="app-topbar__actions">
-          <span className="app-save-state">Saved</span>
-          <button className="app-quiet-button" type="button">Cases</button>
+          <span className="app-save-state">Local preview</span>
+          <button
+            className="app-quiet-button"
+            type="button"
+            onClick={() => setShowCaseHub(true)}
+          >
+            Cases
+          </button>
           <button className="app-account-button" type="button" aria-label="Account">A</button>
         </div>
       </header>
@@ -210,9 +650,10 @@ function ClinicalAppPage() {
           <nav className="app-flow-nav">
             {clinicalFlow.map((item, index) => (
               <button
-                className={`app-flow-item${item.active ? " is-active" : ""}`}
+                className={`app-flow-item${activeSection === item.label && !showCaseHub ? " is-active" : ""}`}
                 type="button"
                 key={item.label}
+                onClick={() => openSection(item.label)}
               >
                 <span className="app-flow-item__index">{String(index + 1).padStart(2, "0")}</span>
                 <span className="app-flow-item__copy">
@@ -223,90 +664,113 @@ function ClinicalAppPage() {
             ))}
           </nav>
 
-          <div className="app-sidebar__status">
+          <div className={`app-sidebar__status${scopeIssue ? " is-blocked" : planningReady ? " is-ready" : ""}`}>
             <span>Planning status</span>
-            <strong>Draft case</strong>
-            <p>Clinical planning remains locked until required records are complete.</p>
+            <strong>{scopeIssue ? "Out of V1 scope" : planningReady ? "Planning ready" : "Draft case"}</strong>
+            <p>
+              {scopeIssue
+                ? "Treatment planning is blocked by the scope screen."
+                : planningReady
+                  ? "All required records are complete."
+                  : `${missingCount} required records are still missing.`}
+            </p>
           </div>
         </aside>
 
-        <section className="app-workspace" aria-label="3D treatment workspace">
-          <div className="app-viewer-toolbar">
-            <div className="app-viewer-toolbar__group" aria-label="Viewer layers">
-              {viewerLayers.map((tool, index) => (
-                <button
-                  className={`app-tool-button${index < 2 ? " is-selected" : ""}`}
-                  type="button"
-                  key={tool}
-                >
-                  {tool}
-                </button>
-              ))}
-            </div>
-
-            <div className="app-viewer-toolbar__group app-viewer-toolbar__views" aria-label="Canonical views">
-              {viewerViews.map((view) => (
-                <button className="app-view-button" type="button" key={view}>{view}</button>
-              ))}
-            </div>
-          </div>
-
+        <section className={`app-workspace${activeSection === "Case" || activeSection === "Findings" || showCaseHub ? " is-clinical-form" : ""}`}>
           <div className="app-mobile-flow" aria-label="Case workflow">
             {clinicalFlow.map((item) => (
               <button
-                className={`app-mobile-flow__item${item.active ? " is-active" : ""}`}
+                className={`app-mobile-flow__item${activeSection === item.label && !showCaseHub ? " is-active" : ""}`}
                 type="button"
                 key={item.label}
+                onClick={() => openSection(item.label)}
               >
                 {item.label}
               </button>
             ))}
           </div>
 
-          <div className="app-viewport">
-            <div className="app-viewport__empty">
-              <span className="app-viewport__mark" aria-hidden="true" />
-              <strong>3D treatment workspace</strong>
-              <p>The patient model will occupy this canvas. Task 1 builds the workspace only.</p>
-            </div>
-
-            <div className="app-viewport__corner">
-              <span>Setup</span>
-              <strong>Initial → Planned</strong>
-            </div>
-          </div>
-
-          <div className="app-timeline">
-            <button className="app-play-button" type="button" aria-label="Play treatment stages">▶</button>
-            <div className="app-timeline__track">
-              {demoStages.map((stage, index) => (
+          {showCaseHub ? (
+            <div className="case-hub">
+              <div className="case-workflow-page__header">
+                <div>
+                  <span className="case-page-kicker">Cases</span>
+                  <h1>Open or create a case.</h1>
+                  <p>Task 2 establishes the case-entry workflow. Database persistence arrives in Task 10.</p>
+                </div>
                 <button
-                  className={`app-stage-chip${index === 0 ? " is-current" : ""}`}
+                  className="app-primary-action case-page-primary"
                   type="button"
-                  key={stage}
+                  onClick={() => {
+                    setShowCaseHub(false);
+                    setActiveSection("Case");
+                  }}
                 >
-                  <span>{String(index + 1).padStart(2, "0")}</span>
-                  {stage}
+                  New case
                 </button>
-              ))}
+              </div>
+
+              <button
+                className="case-card"
+                type="button"
+                onClick={() => {
+                  setShowCaseHub(false);
+                  setActiveSection("Case");
+                }}
+              >
+                <div>
+                  <span>Demo Case</span>
+                  <strong>Permanent dentition</strong>
+                </div>
+                <div className="case-card__status">
+                  <span>{planningReady ? "Planning ready" : "Draft"}</span>
+                  <small>Open →</small>
+                </div>
+              </button>
             </div>
-          </div>
+          ) : activeSection === "Case" ? (
+            <CaseRecordsView
+              records={records}
+              onCompleteRecord={completeRecord}
+              planningReady={planningReady}
+              missingCount={missingCount}
+              scopeIssue={scopeIssue}
+              onOpenFindings={() => setActiveSection("Findings")}
+            />
+          ) : activeSection === "Findings" ? (
+            <FindingsView
+              scopeIssue={scopeIssue}
+              onScopeIssue={setScopeIssue}
+              planningReady={planningReady}
+              missingCount={missingCount}
+              onBackToCase={() => setActiveSection("Case")}
+            />
+          ) : (
+            <SetupWorkspace />
+          )}
         </section>
 
-        <aside className="app-inspector" aria-label="Selection inspector">
+        <aside className="app-inspector" aria-label="Case inspector">
           <div className="app-inspector__header">
             <div>
               <span>Inspector</span>
-              <strong>Setup</strong>
+              <strong>{showCaseHub ? "Cases" : activeSection}</strong>
             </div>
             <button className="app-icon-button" type="button" aria-label="Inspector settings">•••</button>
           </div>
 
           <div className="app-inspector__section">
-            <span className="app-inspector__label">Selection</span>
+            <span className="app-inspector__label">Readiness</span>
             <div className="app-empty-selection">
-              <strong>Nothing selected</strong>
-              <p>Select a tooth, bracket or mechanic in the 3D workspace to inspect it here.</p>
+              <strong>{scopeIssue ? "Planning blocked" : planningReady ? "Planning ready" : "Draft case"}</strong>
+              <p>
+                {scopeIssue
+                  ? scopeIssue
+                  : planningReady
+                    ? "All mandatory records are present and the V1 scope screen is clear."
+                    : `${missingCount} mandatory record${missingCount === 1 ? "" : "s"} still missing.`}
+              </p>
             </div>
           </div>
 
@@ -322,7 +786,14 @@ function ClinicalAppPage() {
           </div>
 
           <div className="app-inspector__footer">
-            <button className="app-primary-action" type="button">Review setup</button>
+            <button
+              className="app-primary-action"
+              type="button"
+              disabled={!planningReady}
+              onClick={() => setActiveSection("Plan")}
+            >
+              {planningReady ? "Continue to plan" : "Complete required records"}
+            </button>
           </div>
         </aside>
       </div>
