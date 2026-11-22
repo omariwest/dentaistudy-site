@@ -1085,12 +1085,6 @@ function deriveStages({
   targetTransforms: Record<string, RigidTransform>;
   applianceLayers: ApplianceLayerState;
   endpoints: MechanicEndpoints;
-  sessionActive: boolean;
-  aiReview: StageAiReviewResult | null;
-  aiReviewLoading: boolean;
-  aiReviewError: string;
-  onRunAiReview: () => void;
-  onSignIn: () => void;
 }) {
   const stages: Omit<StageDefinition, "progress">[] = [];
   const movedLabels = segments
@@ -1596,6 +1590,12 @@ function StageWorkspace({
   targetTransforms: Record<string, RigidTransform>;
   applianceLayers: ApplianceLayerState;
   endpoints: MechanicEndpoints;
+  sessionActive: boolean;
+  aiReview: StageAiReviewResult | null;
+  aiReviewLoading: boolean;
+  aiReviewError: string;
+  onRunAiReview: () => void;
+  onSignIn: () => void;
 }) {
   const stages = useMemo(
     () =>
