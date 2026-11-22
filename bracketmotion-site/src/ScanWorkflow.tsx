@@ -305,10 +305,12 @@ function SegmentMesh({
 function CameraRig({
   assets,
   alignJaw,
+  alignMode,
   jawGroup,
 }: {
   assets: ScanAsset[];
   alignJaw: Exclude<Jaw, "bite"> | null;
+  alignMode: "translate" | "rotate";
   jawGroup: Group | null;
 }) {
   const { camera, gl, scene } = useThree();
@@ -359,7 +361,7 @@ function CameraRig({
     if (!jawGroup || !alignJaw) return;
 
     const transform = new TransformControls(camera, gl.domElement);
-    transform.setMode("translate");
+    transform.setMode(alignMode);
     transform.setSize(0.8);
     transform.attach(jawGroup);
     scene.add(transform.getHelper());
@@ -383,7 +385,7 @@ function CameraRig({
       transform.dispose();
       transformRef.current = null;
     };
-  }, [alignJaw, camera, gl.domElement, jawGroup, scene]);
+  }, [alignJaw, alignMode, camera, gl.domElement, jawGroup, scene]);
 
   return null;
 }
@@ -397,6 +399,7 @@ function ScanScene({
   brushPercent,
   editMode,
   alignJaw,
+  alignMode,
   onBrush,
 }: {
   assets: ScanAsset[];
@@ -407,6 +410,7 @@ function ScanScene({
   brushPercent: number;
   editMode: EditMode;
   alignJaw: Exclude<Jaw, "bite"> | null;
+  alignMode: "translate" | "rotate";
   onBrush: (faces: Set<number>, mode: EditMode) => void;
 }) {
   const upperRef = useRef<Group>(null);
@@ -516,6 +520,7 @@ function ScanScene({
       <CameraRig
         assets={assets}
         alignJaw={alignJaw}
+        alignMode={alignMode}
         jawGroup={
           alignJaw === "upper"
             ? upperRef.current
@@ -584,6 +589,8 @@ export default function ScanWorkflow() {
   const [activeSegmentId, setActiveSegmentId] = useState<string | null>(null);
   const [toothLabel, setToothLabel] = useState("11");
   const [alignJaw, setAlignJaw] = useState<Exclude<Jaw, "bite"> | null>(null);
+  const [alignMode, setAlignMode] = useState<"translate" | "rotate">("translate");
+  const assetsRef = useRef<ScanAsset[]>([]);
 
   const activeAsset = assets.find((asset) => asset.jaw === activeJaw);
   const teethForJaw = activeJaw === "upper" ? upperTeeth : lowerTeeth;
@@ -607,10 +614,15 @@ export default function ScanWorkflow() {
   }, [teethForJaw, toothLabel]);
 
   useEffect(() => {
-    return () => {
-      assets.forEach((asset) => asset.geometry.dispose());
-    };
+    assetsRef.current = assets;
   }, [assets]);
+
+  useEffect(
+    () => () => {
+      assetsRef.current.forEach((asset) => asset.geometry.dispose());
+    },
+    [],
+  );
 
   const setAsset = async (jaw: Jaw, file: File) => {
     setError("");
@@ -778,12 +790,31 @@ export default function ScanWorkflow() {
               <button
                 className={alignJaw === activeJaw ? "is-active" : ""}
                 type="button"
-                onClick={() =>
-                  setAlignJaw((current) => (current === activeJaw ? null : activeJaw))
-                }
+                onClick={() => {
+                  setAlignMode("translate");
+                  setAlignJaw((current) => (current === activeJaw ? null : activeJaw));
+                }}
               >
                 {alignJaw === activeJaw ? "Finish alignment" : "Align jaw"}
               </button>
+              {alignJaw === activeJaw && (
+                <>
+                  <button
+                    className={alignMode === "translate" ? "is-active" : ""}
+                    type="button"
+                    onClick={() => setAlignMode("translate")}
+                  >
+                    Move
+                  </button>
+                  <button
+                    className={alignMode === "rotate" ? "is-active" : ""}
+                    type="button"
+                    onClick={() => setAlignMode("rotate")}
+                  >
+                    Rotate
+                  </button>
+                </>
+              )}
             </div>
 
             <div className="scan-editor__toolbar-group">
@@ -832,6 +863,7 @@ export default function ScanWorkflow() {
                   brushPercent={brushPercent}
                   editMode={editMode}
                   alignJaw={alignJaw}
+                  alignMode={alignMode}
                   onBrush={applyBrush}
                 />
               </Canvas>
