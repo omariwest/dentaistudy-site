@@ -226,10 +226,10 @@ function PrivacyPage() {
 
       <h2>4. Service providers</h2>
       <p>
-        BracketMotion is designed to use <strong>Vercel</strong> for web delivery, <strong>Supabase</strong> for authentication, database and file storage, and the <strong>OpenAI API</strong> for controlled AI features. These providers process information only as needed to provide their services and under their own contractual and privacy obligations.
+        BracketMotion is designed to use <strong>Vercel</strong> for web delivery, <strong>Supabase</strong> for authentication, database and file storage, and the <strong>Google Gemini API</strong> for controlled AI features. These providers process information only as needed to provide their services and under their own contractual and privacy obligations.
       </p>
       <p>
-        OpenAI states that data submitted through its API is not used to train or improve its models unless the API customer explicitly opts in. API safety and service-retention rules may still apply according to the configured OpenAI account and endpoint.
+        Before real patient data is sent to any AI service, BracketMotion will use an appropriate production configuration and review the provider's current privacy, retention and contractual terms. Patient clinical data must not be sent through an AI tier that permits submitted content to be used for product improvement.
       </p>
 
       <h2>5. Storage and security</h2>
