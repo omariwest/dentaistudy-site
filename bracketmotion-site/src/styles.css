@@ -1451,6 +1451,202 @@ a {
 }
 
 
+
+/* Interactive 3D proof of concept */
+.app-viewport--interactive {
+  background: #bfc1c9;
+}
+
+.app-viewport--interactive::before {
+  display: none;
+}
+
+.clinical-viewer {
+  position: absolute;
+  inset: 0;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.clinical-viewer canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+.clinical-viewer__message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 4;
+  display: grid;
+  width: min(360px, calc(100% - 36px));
+  gap: 6px;
+  transform: translate(-50%, -50%);
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  border-radius: 13px;
+  background: rgba(249, 250, 252, 0.86);
+  box-shadow: 0 14px 34px rgba(20, 25, 35, 0.08);
+  backdrop-filter: blur(10px);
+  text-align: center;
+}
+
+.clinical-viewer__message strong {
+  color: #383e49;
+  font-size: 0.82rem;
+}
+
+.clinical-viewer__message span {
+  color: #6f7682;
+  font-size: 0.68rem;
+  line-height: 1.45;
+}
+
+.clinical-viewer__message.is-error {
+  border-color: #efcccc;
+  background: rgba(255, 248, 248, 0.94);
+}
+
+.clinical-viewer__hint {
+  position: absolute;
+  right: 12px;
+  bottom: 62px;
+  z-index: 3;
+  padding: 7px 9px;
+  border-radius: 8px;
+  color: #5f6672;
+  background: rgba(250, 250, 252, 0.78);
+  backdrop-filter: blur(8px);
+  font-size: 0.6rem;
+  font-weight: 650;
+  pointer-events: none;
+}
+
+.clinical-viewer__controls {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  left: 12px;
+  z-index: 4;
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 9px 8px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  border-radius: 11px;
+  background: rgba(248, 249, 251, 0.84);
+  box-shadow: 0 9px 26px rgba(20, 25, 35, 0.08);
+  backdrop-filter: blur(10px);
+}
+
+.clinical-viewer__selection {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.clinical-viewer__selection span {
+  color: #8a919d;
+  font-size: 0.54rem;
+  font-weight: 780;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.clinical-viewer__selection strong {
+  overflow: hidden;
+  color: #3d434d;
+  font-size: 0.66rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.clinical-viewer__control-group {
+  display: flex;
+  min-width: 0;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 5px;
+}
+
+.viewer-mode-button,
+.viewer-preview-button {
+  min-height: 30px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 0.61rem;
+  font-weight: 730;
+}
+
+.viewer-mode-button {
+  color: #5e6672;
+  background: #eef0f3;
+}
+
+.viewer-mode-button.is-active {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.viewer-preview-button {
+  color: #ffffff;
+  background: #252a33;
+}
+
+.viewer-mode-button:disabled,
+.viewer-preview-button:disabled,
+.app-tool-button:disabled,
+.app-stage-chip:disabled,
+.app-play-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
+.viewer-mode-button:not(:disabled):hover {
+  background: #e4e7eb;
+}
+
+.viewer-preview-button:not(:disabled):hover {
+  background: #111827;
+}
+
+.clinical-viewer__credit {
+  position: absolute;
+  bottom: 58px;
+  left: 12px;
+  z-index: 3;
+  max-width: min(56%, 480px);
+  overflow: hidden;
+  color: rgba(62, 68, 79, 0.74);
+  font-size: 0.52rem;
+  line-height: 1.35;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.clinical-viewer__credit:hover {
+  color: #343a45;
+}
+
+.clinical-viewer__state {
+  display: none;
+}
+
+.viewer-mode-button:focus-visible,
+.viewer-preview-button:focus-visible,
+.clinical-viewer__credit:focus-visible {
+  outline: 3px solid rgba(109, 76, 245, 0.2);
+  outline-offset: 2px;
+}
+
 /* Treatment plan + approval */
 .plan-blocked-card {
   width: min(980px, 100%);
@@ -1767,6 +1963,41 @@ a {
 }
 
 @media (max-width: 640px) {
+  .clinical-viewer__controls {
+    right: 8px;
+    bottom: 8px;
+    left: 8px;
+    align-items: stretch;
+    flex-direction: column;
+    gap: 7px;
+    padding: 8px;
+  }
+
+  .clinical-viewer__control-group {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .viewer-mode-button,
+  .viewer-preview-button {
+    flex: 0 0 auto;
+  }
+
+  .clinical-viewer__hint {
+    right: 8px;
+    bottom: 92px;
+    left: 8px;
+    text-align: center;
+  }
+
+  .clinical-viewer__credit {
+    right: 8px;
+    bottom: 112px;
+    left: 8px;
+    max-width: none;
+    text-align: center;
+  }
+
   .plan-approval-badge {
     align-self: flex-start;
   }
