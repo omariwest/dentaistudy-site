@@ -2688,6 +2688,18 @@ a {
   background: var(--accent-soft);
 }
 
+.target-tooth-strip button.is-extraction {
+  border-color: #e7c9c9;
+  color: #9a4b4b;
+  background: #fff7f7;
+}
+
+.target-tooth-strip button.is-active.is-extraction {
+  border-color: #dcaeae;
+  color: #873e3e;
+  background: #fff0f0;
+}
+
 .target-panel__section {
   padding: 11px;
   border-bottom: 1px solid #e8eaee;
@@ -2739,6 +2751,65 @@ a {
   border-color: rgba(109, 76, 245, 0.55);
   outline: 0;
   box-shadow: 0 0 0 3px rgba(109, 76, 245, 0.1);
+}
+
+.target-extraction-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 9px;
+  padding: 9px;
+  border: 1px solid #e4e7eb;
+  border-radius: 8px;
+  background: #fafbfc;
+}
+
+.target-extraction-card.is-active {
+  border-color: #e7c9c9;
+  background: #fff7f7;
+}
+
+.target-extraction-card > div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.target-extraction-card span {
+  color: #858d98;
+  font-size: 0.52rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.target-extraction-card strong {
+  font-size: 0.62rem;
+}
+
+.target-extraction-card small {
+  color: #7f8792;
+  font-size: 0.54rem;
+  line-height: 1.4;
+}
+
+.target-extraction-card button {
+  min-height: 30px;
+  padding: 0 8px;
+  border: 1px solid #dfe2e8;
+  border-radius: 7px;
+  color: #5d6570;
+  background: #ffffff;
+  cursor: pointer;
+  font-size: 0.56rem;
+  font-weight: 730;
+  white-space: nowrap;
+}
+
+.target-extraction-card button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
 }
 
 .target-panel__empty {
@@ -2844,6 +2915,7 @@ a {
 .target-setup__toolbar button:focus-visible,
 .target-tooth-strip button:focus-visible,
 .target-value-grid input:focus-visible,
+.target-extraction-card button:focus-visible,
 .target-approve-button:focus-visible {
   outline: 3px solid rgba(109, 76, 245, 0.2);
   outline-offset: 2px;
