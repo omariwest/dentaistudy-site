@@ -108,7 +108,7 @@ Preview: Vercel.
 - [x] Finalize Windows/macOS button styling.
 - [x] Add platform icons.
 - [x] Keep demo box completely empty.
-- [ ] Publish Task 2 preview.
+- [x] Publish Task 2 preview.
 - [ ] User approves Task 2.
 
 ### Task 3 — Complete landing page
@@ -143,7 +143,7 @@ Preview: Vercel.
 
 **Task 2 — Header + hero refinement.**
 
-Implementation is complete. Publish preview and wait for user approval.
+Implementation and preview are complete. Wait for user approval before Task 3.
 
 ## Rule
 
@@ -151,3 +151,9 @@ Implementation is complete. Publish preview and wait for user approval.
 2. Update it in GitHub every approved step.
 3. Mark only work that truly exists.
 4. Detailed research stays outside this file.
+
+
+### Task 2 preview
+
+- Vercel: https://bracketmotion-preview-git-bracketmotion-amarsaaliomer-6121.vercel.app
+- Verified deployment: `dpl_4XKrWsgGJcfe2LEgAdR8H3fYNVr1`
