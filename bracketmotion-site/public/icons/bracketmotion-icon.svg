@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="BracketMotion">
+  <rect width="512" height="512" rx="112" fill="#6d4cf5"/>
+  <path d="M142 128h106c67 0 112 31 112 82 0 31-17 56-49 69 40 12 61 41 61 82 0 61-48 99-125 99H142V128Zm102 128c35 0 55-14 55-39 0-25-20-38-55-38h-41v77h41Zm5 153c40 0 61-16 61-48 0-30-21-46-61-46h-46v94h46Z" fill="#fff"/>
+  <circle cx="385" cy="116" r="28" fill="#c9bfff"/>
+</svg>
