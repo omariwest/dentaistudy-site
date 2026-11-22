@@ -6,10 +6,13 @@ import {
   BufferGeometry,
   Color,
   DoubleSide,
+  Euler,
   Group,
+  Matrix4,
   Mesh,
   MeshStandardMaterial,
   MOUSE,
+  Quaternion,
   Vector3,
 } from "three";
 import { STLLoader } from "three/addons/loaders/STLLoader.js";
@@ -20,6 +23,13 @@ import { mergeVertices } from "three/addons/utils/BufferGeometryUtils.js";
 
 type Jaw = "upper" | "lower" | "bite";
 type EditMode = "add" | "erase";
+type SetupMode = "translate" | "rotate";
+type VectorTuple = [number, number, number];
+
+type RigidTransform = {
+  position: VectorTuple;
+  rotation: VectorTuple;
+};
 
 type Topology = {
   neighbors: number[][];
@@ -41,6 +51,11 @@ type ToothSegment = {
   label: string;
   faces: number[];
 };
+
+const identityTransform = (): RigidTransform => ({
+  position: [0, 0, 0],
+  rotation: [0, 0, 0],
+});
 
 const jawLabels: Record<Jaw, string> = {
   upper: "Upper scan",
