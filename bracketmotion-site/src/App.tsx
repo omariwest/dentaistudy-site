@@ -1271,20 +1271,10 @@ function ClinicalAppPage() {
               }}
             />
           ) : (
-            <>
-              {activeSection === "Stages" && (
-                <ClinicalAiReviewCard
-                  mode="stage_review"
-                  planningReady={planningReady}
-                  planApproved={planApproved}
-                  setupApproved={setupApproved}
-                />
-              )}
-              <SetupWorkspace
-                onSetupApprovalChange={setSetupApproved}
-                clinicalSection={activeSection as "Setup" | "Stages"}
-              />
-            </>
+            <SetupWorkspace
+              onSetupApprovalChange={setSetupApproved}
+              clinicalSection={activeSection as "Setup" | "Stages"}
+            />
           )}
         </section>
 
