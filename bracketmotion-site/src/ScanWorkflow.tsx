@@ -980,6 +980,7 @@ export type ScanPersistenceState = {
   segments: ToothSegment[];
   jawTransforms: Record<Exclude<Jaw, "bite">, RigidTransform>;
   targetTransforms: Record<string, RigidTransform>;
+  plannedExtractions: string[];
   setupApproved: boolean;
   applianceLayers: ApplianceLayerState;
   mechanicEndpoints: MechanicEndpoints;
@@ -1078,11 +1079,13 @@ function scaleTargetTransforms(
 function deriveStages({
   segments,
   targetTransforms,
+  plannedExtractions,
   applianceLayers,
   endpoints,
 }: {
   segments: ToothSegment[];
   targetTransforms: Record<string, RigidTransform>;
+  plannedExtractions: Set<string>;
   applianceLayers: ApplianceLayerState;
   endpoints: MechanicEndpoints;
 }) {
@@ -1101,6 +1104,36 @@ function deriveStages({
     elastics: false,
     closingLoop: false,
   };
+
+  const extractionLabels = segments
+    .filter((segment) => plannedExtractions.has(segment.id))
+    .map((segment) => segment.label);
+
+  if (extractionLabels.length) {
+    stages.push({
+      id: "extractions",
+      title: "Planned extractions + space preparation",
+      activeUnits: extractionLabels.map((label) => `FDI ${label}`).join(", "),
+      anchorageUnits:
+        "Remaining teeth in the involved arch; anchorage demand is defined by the approved space-closure strategy.",
+      intendedMovement:
+        "Remove the clinician-selected symmetric first-premolar pair before closing the resulting extraction space toward the approved target.",
+      reciprocalEffects:
+        "Extraction changes the available space and anchorage balance; subsequent retraction or protraction produces reciprocal effects in the opposing unit.",
+      warning:
+        "Confirm the planned extraction teeth clinically before treatment. BracketMotion does not decide which teeth should be extracted.",
+      controlStrategy:
+        "Verify the symmetric extraction prescription, preserve the intended anchorage unit and begin space closure only after the clinician confirms the extraction stage.",
+      layers: {
+        brackets: true,
+        archwire: true,
+        powerChain: false,
+        coilSpring: false,
+        elastics: false,
+        closingLoop: false,
+      },
+    });
+  }
 
   if (movedLabels.length) {
     stages.push({
