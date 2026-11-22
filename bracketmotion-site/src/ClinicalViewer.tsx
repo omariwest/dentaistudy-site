@@ -1,5 +1,6 @@
 import {
   forwardRef,
+  useCallback,
   useEffect,
   useImperativeHandle,
   useMemo,
@@ -151,18 +152,21 @@ function ViewerControls({
   mode,
   view,
   viewNonce,
-  onTargetChange,
 }: {
   model: Group;
   selected: Object3D | null;
   mode: TransformMode;
   view: ViewName;
   viewNonce: number;
-  onTargetChange: () => void;
 }) {
   const { camera, gl, scene } = useThree();
   const orbitRef = useRef<OrbitControls | null>(null);
   const transformRef = useRef<TransformControls | null>(null);
+  const selectedRef = useRef<Object3D | null>(selected);
+
+  useEffect(() => {
+    selectedRef.current = selected;
+  }, [selected]);
 
   const bounds = useMemo(() => {
     const box = new Box3().setFromObject(model);
@@ -196,12 +200,12 @@ function ViewerControls({
       orbit.enabled = true;
     };
     const onObjectChange = () => {
-      if (!selected || !isTooth(selected)) return;
-      selected.userData.bmTarget = {
-        position: selected.position.clone(),
-        quaternion: selected.quaternion.clone(),
+      const current = selectedRef.current;
+      if (!current || !isTooth(current)) return;
+      current.userData.bmTarget = {
+        position: current.position.clone(),
+        quaternion: current.quaternion.clone(),
       } satisfies StoredTransform;
-      onTargetChange();
     };
 
     transform.addEventListener("mouseDown", onMouseDown);
@@ -219,7 +223,7 @@ function ViewerControls({
       transformRef.current = null;
       orbitRef.current = null;
     };
-  }, [bounds.center, bounds.radius, camera, gl.domElement, mode, onTargetChange, scene, selected]);
+  }, [bounds.center, bounds.radius, camera, gl.domElement, scene]);
 
   useEffect(() => {
     const orbit = orbitRef.current;
@@ -352,7 +356,6 @@ const ClinicalViewer = forwardRef<ClinicalViewerHandle, Props>(
     const [view, setView] = useState<ViewName>("Front");
     const [viewNonce, setViewNonce] = useState(0);
     const [animationNonce, setAnimationNonce] = useState(0);
-    const [targetNonce, setTargetNonce] = useState(0);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -411,7 +414,6 @@ const ClinicalViewer = forwardRef<ClinicalViewerHandle, Props>(
       if (!base) return;
       selected.position.copy(base.position);
       selected.quaternion.copy(base.quaternion);
-      setTargetNonce((value) => value + 1);
     };
 
     const showTarget = () => {
@@ -420,13 +422,12 @@ const ClinicalViewer = forwardRef<ClinicalViewerHandle, Props>(
       if (!target) return;
       selected.position.copy(target.position);
       selected.quaternion.copy(target.quaternion);
-      setTargetNonce((value) => value + 1);
     };
 
-    const previewMovement = () => {
+    const previewMovement = useCallback(() => {
       if (!selected) return;
       setAnimationNonce((value) => value + 1);
-    };
+    }, [selected]);
 
     useImperativeHandle(
       ref,
@@ -481,7 +482,6 @@ const ClinicalViewer = forwardRef<ClinicalViewerHandle, Props>(
                 mode={mode}
                 view={view}
                 viewNonce={viewNonce}
-                onTargetChange={() => setTargetNonce((value) => value + 1)}
               />
               <MovementAnimator
                 selected={selected}
@@ -552,9 +552,6 @@ const ClinicalViewer = forwardRef<ClinicalViewerHandle, Props>(
               Demo anatomy: BodyParts3D / DBCLS · CC BY-SA 2.1 JP · adapted by OrganUI
             </a>
 
-            <span className="clinical-viewer__state" aria-hidden="true">
-              {targetNonce}
-            </span>
           </>
         )}
       </div>
