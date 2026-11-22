@@ -634,13 +634,52 @@ const requiredRecords: Array<{ key: RecordKey; title: string; detail: string }> 
   { key: "cephSummary", title: "Cephalometric summary", detail: "Clinician-entered categorical summary" },
 ];
 
-const outOfScopeOptions = [
-  "Class III correction",
-  "Orthognathic surgery",
-  "TAD/miniscrew-supported mechanics",
-  "Expansion / MARPE",
-  "Impacted-tooth traction",
-];
+const outOfScopeGroups = [
+  {
+    label: "Unsupported case types",
+    options: [
+      "Mixed or primary dentition treatment",
+      "Class III correction",
+      "Orthognathic surgery",
+      "Severe skeletal Class II correction",
+      "Major facial asymmetry",
+      "Asymmetric extraction strategy",
+      "Impacted tooth requiring surgical exposure / traction",
+      "Ankylosed tooth",
+      "Complex missing-tooth / prosthetic space management",
+      "Severe periodontal attachment / bone loss",
+      "Craniofacial syndrome or cleft-related treatment",
+      "Significant transverse correction requiring expansion",
+      "Severe anterior / posterior crossbite as primary problem",
+      "Complex retreatment with major root / periodontal limitations",
+      "TMD treatment planning",
+      "Main treatment depends on CBCT / root-bone simulation",
+      "Severe skeletal deep bite / short-face correction",
+      "Growth modification as primary deep-bite treatment",
+      "Severe skeletal long-face open bite",
+      "Open bite requiring posterior molar intrusion with TADs",
+      "Open bite with unresolved etiologic habit",
+      "Complex unilateral / asymmetric open bite",
+    ],
+  },
+  {
+    label: "Unsupported mechanics",
+    options: [
+      "TAD / miniscrew-supported mechanics",
+      "Molar intrusion with skeletal anchorage",
+      "Functional appliance treatment",
+      "Headgear",
+      "Palatal expansion / MARPE / surgically assisted expansion",
+      "Orthognathic-surgical mechanics",
+      "Impacted-tooth traction",
+      "Lingual appliance treatment",
+      "Clear-aligner treatment",
+      "Fully customized printed bracket system",
+      "Robotic / custom wire manufacturing",
+      "Manufacturer-specific prescription / workflow",
+    ],
+  },
+] as const;
 
 function RecordStatus({
   complete,
@@ -1079,8 +1118,12 @@ function FindingsView({
           <span>Primary unsupported treatment need</span>
           <select value={scopeIssue} onChange={(event) => onScopeIssue(event.target.value)}>
             <option value="">None — within current V1 scope</option>
-            {outOfScopeOptions.map((option) => (
-              <option value={option} key={option}>{option}</option>
+            {outOfScopeGroups.map((group) => (
+              <optgroup label={group.label} key={group.label}>
+                {group.options.map((option) => (
+                  <option value={option} key={option}>{option}</option>
+                ))}
+              </optgroup>
             ))}
           </select>
         </label>
