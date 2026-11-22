@@ -341,11 +341,13 @@ function CameraRig({
   alignJaw,
   alignMode,
   jawGroup,
+  onJawTransform,
 }: {
   assets: ScanAsset[];
   alignJaw: Exclude<Jaw, "bite"> | null;
   alignMode: "translate" | "rotate";
   jawGroup: Group | null;
+  onJawTransform: (jaw: Exclude<Jaw, "bite">, transform: RigidTransform) => void;
 }) {
   const { camera, gl, scene } = useThree();
   const orbitRef = useRef<OrbitControls | null>(null);
@@ -407,19 +409,28 @@ function CameraRig({
     const onUp = () => {
       if (orbitRef.current) orbitRef.current.enabled = true;
     };
+    const onObjectChange = () => {
+      if (!alignJaw) return;
+      onJawTransform(alignJaw, {
+        position: [jawGroup.position.x, jawGroup.position.y, jawGroup.position.z],
+        rotation: [jawGroup.rotation.x, jawGroup.rotation.y, jawGroup.rotation.z],
+      });
+    };
 
     transform.addEventListener("mouseDown", onDown);
     transform.addEventListener("mouseUp", onUp);
+    transform.addEventListener("objectChange", onObjectChange);
 
     return () => {
       transform.detach();
       transform.removeEventListener("mouseDown", onDown);
       transform.removeEventListener("mouseUp", onUp);
+      transform.removeEventListener("objectChange", onObjectChange);
       scene.remove(transform.getHelper());
       transform.dispose();
       transformRef.current = null;
     };
-  }, [alignJaw, alignMode, camera, gl.domElement, jawGroup, scene]);
+  }, [alignJaw, alignMode, camera, gl.domElement, jawGroup, onJawTransform, scene]);
 
   return null;
 }
@@ -434,6 +445,8 @@ function ScanScene({
   editMode,
   alignJaw,
   alignMode,
+  jawTransforms,
+  onJawTransform,
   onBrush,
 }: {
   assets: ScanAsset[];
@@ -445,6 +458,8 @@ function ScanScene({
   editMode: EditMode;
   alignJaw: Exclude<Jaw, "bite"> | null;
   alignMode: "translate" | "rotate";
+  jawTransforms: Record<Exclude<Jaw, "bite">, RigidTransform>;
+  onJawTransform: (jaw: Exclude<Jaw, "bite">, transform: RigidTransform) => void;
   onBrush: (faces: Set<number>, mode: EditMode) => void;
 }) {
   const upperRef = useRef<Group>(null);
@@ -490,7 +505,11 @@ function ScanScene({
       <directionalLight position={[-5, 7, 8]} intensity={2.3} />
       <directionalLight position={[5, 1, -5]} intensity={1.1} />
 
-      <group ref={upperRef}>
+      <group
+        ref={upperRef}
+        position={jawTransforms.upper.position}
+        rotation={jawTransforms.upper.rotation}
+      >
         {assetFor("upper") && (
           <>
             <mesh
@@ -514,7 +533,11 @@ function ScanScene({
         )}
       </group>
 
-      <group ref={lowerRef}>
+      <group
+        ref={lowerRef}
+        position={jawTransforms.lower.position}
+        rotation={jawTransforms.lower.rotation}
+      >
         {assetFor("lower") && (
           <>
             <mesh
@@ -555,6 +578,7 @@ function ScanScene({
         assets={assets}
         alignJaw={alignJaw}
         alignMode={alignMode}
+        onJawTransform={onJawTransform}
         jawGroup={
           alignJaw === "upper"
             ? upperRef.current
