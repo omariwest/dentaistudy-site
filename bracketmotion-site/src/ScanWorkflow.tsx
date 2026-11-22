@@ -1026,9 +1026,11 @@ function TubePath({
 
 function GenericBracket({
   anchor,
+  orientation,
   scale,
 }: {
   anchor: Vector3;
+  orientation: Quaternion;
   scale: number;
 }) {
   const width = scale * 1.35;
@@ -1036,7 +1038,7 @@ function GenericBracket({
   const depth = scale * 0.42;
 
   return (
-    <group position={anchor}>
+    <group position={anchor} quaternion={orientation}>
       <mesh>
         <boxGeometry args={[width, height, depth]} />
         <meshStandardMaterial color="#d8dde3" metalness={0.68} roughness={0.26} />
@@ -1131,7 +1133,14 @@ function ApplianceLayer({
   endpoints: MechanicEndpoints;
 }) {
   const anchors = useMemo(() => {
-    const map = new Map<string, { point: Vector3; jaw: Exclude<Jaw, "bite"> }>();
+    const map = new Map<
+      string,
+      {
+        point: Vector3;
+        jaw: Exclude<Jaw, "bite">;
+        orientation: Quaternion;
+      }
+    >();
     const combined = new Box3();
 
     segments.forEach((segment) => {
@@ -1149,9 +1158,17 @@ function ApplianceLayer({
       const center = box.getCenter(new Vector3());
       const depth = Math.max(0.6, box.max.z - box.min.z);
 
+      const jawQuaternion = new Quaternion().setFromEuler(
+        new Euler(...jawTransforms[segment.jaw].rotation),
+      );
+      const toothQuaternion = new Quaternion().setFromEuler(
+        new Euler(...(targetTransforms[segment.id] || identityTransform()).rotation),
+      );
+
       map.set(segment.label, {
         point: new Vector3(center.x, center.y, box.max.z + depth * 0.08),
         jaw: segment.jaw,
+        orientation: jawQuaternion.multiply(toothQuaternion),
       });
     });
 
@@ -1169,8 +1186,13 @@ function ApplianceLayer({
     (jaw === "upper" ? upperTeeth : lowerTeeth)
       .map((label) => anchors.map.get(label))
       .filter(
-        (item): item is { point: Vector3; jaw: Exclude<Jaw, "bite"> } =>
-          Boolean(item),
+        (
+          item,
+        ): item is {
+          point: Vector3;
+          jaw: Exclude<Jaw, "bite">;
+          orientation: Quaternion;
+        } => Boolean(item),
       )
       .map((item) => item.point);
 
@@ -1212,6 +1234,7 @@ function ApplianceLayer({
         [...anchors.map.entries()].map(([label, anchor]) => (
           <GenericBracket
             anchor={anchor.point}
+            orientation={anchor.orientation}
             scale={anchors.scale}
             key={`bracket-${label}`}
           />
