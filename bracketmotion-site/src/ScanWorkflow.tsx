@@ -1452,7 +1452,7 @@ function ApplianceLayer({
     >();
     const combined = new Box3();
 
-    treatmentSegments.forEach((segment) => {
+    segments.forEach((segment) => {
       const asset = assets.find((item) => item.jaw === segment.jaw);
       if (!asset) return;
 
@@ -1489,14 +1489,7 @@ function ApplianceLayer({
       map,
       scale: Math.max(0.75, Math.min(2.2, diagonal * 0.018)),
     };
-  }, [
-    assets,
-    jawTransforms,
-    plannedExtractions,
-    segments,
-    targetTransforms,
-    treatmentSegments,
-  ]);
+  }, [assets, jawTransforms, segments, targetTransforms]);
 
   const sequenceFor = (jaw: Exclude<Jaw, "bite">) =>
     (jaw === "upper" ? upperTeeth : lowerTeeth)
