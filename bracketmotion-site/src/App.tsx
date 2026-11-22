@@ -11,7 +11,7 @@ function PlatformIcon({ platform }: { platform: Platform }) {
 
   return (
     <svg className="platform-icon" viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M16.9 12.8c0-2.6 2.1-3.9 2.2-4-1.2-1.8-3.2-2-3.9-2-1.7-.2-3.2 1-4 1-0.8 0-2-.9-3.3-.9-1.7 0-3.3 1-4.2 2.5-1.8 3.1-.5 7.7 1.3 10.2.9 1.2 1.9 2.5 3.2 2.4 1.3-.1 1.8-.8 3.4-.8 1.6 0 2 .8 3.4.8 1.4 0 2.3-1.2 3.1-2.5 1-1.4 1.4-2.8 1.4-2.9-.1 0-2.6-1-2.6-3.8ZM14.1 5c.7-.9 1.2-2.1 1.1-3.3-1.1 0-2.4.7-3.2 1.6-.7.8-1.3 2-1.2 3.2 1.2.1 2.5-.6 3.3-1.5Z" />
+      <path d="M16.9 12.8c0-2.6 2.1-3.9 2.2-4-1.2-1.8-3.2-2-3.9-2-1.7-.2-3.2 1-4 1-.8 0-2-.9-3.3-.9-1.7 0-3.3 1-4.2 2.5-1.8 3.1-.5 7.7 1.3 10.2.9 1.2 1.9 2.5 3.2 2.4 1.3-.1 1.8-.8 3.4-.8 1.6 0 2 .8 3.4.8 1.4 0 2.3-1.2 3.1-2.5 1-1.4 1.4-2.8 1.4-2.9-.1 0-2.6-1-2.6-3.8ZM14.1 5c.7-.9 1.2-2.1 1.1-3.3-1.1 0-2.4.7-3.2 1.6-.7.8-1.3 2-1.2 3.2 1.2.1 2.5-.6 3.3-1.5Z" />
     </svg>
   );
 }
@@ -42,6 +42,13 @@ function InstallButton({
     </button>
   );
 }
+
+const workflowSteps = [
+  { number: "01", title: "Case", text: "Bring the patient's records and 3D dentition into one workspace." },
+  { number: "02", title: "Plan", text: "Compare a primary treatment strategy with a clear alternative." },
+  { number: "03", title: "Mechanics", text: "Choose the fixed-appliance mechanics that carry the plan." },
+  { number: "04", title: "Movement", text: "See the planned stages unfold on the patient's own dentition." },
+];
 
 export default function App() {
   return (
@@ -89,7 +96,62 @@ export default function App() {
             </div>
           </div>
         </section>
+
+        <section className="workflow" aria-labelledby="workflow-title">
+          <div className="container">
+            <div className="section-heading">
+              <p className="section-kicker">One clinical flow</p>
+              <h2 id="workflow-title">Case to movement, without changing how you practice.</h2>
+            </div>
+
+            <ol className="workflow-grid">
+              {workflowSteps.map((step) => (
+                <li className="workflow-step" key={step.title}>
+                  <div className="workflow-step__top">
+                    <span className="workflow-step__number">{step.number}</span>
+                    <span className="workflow-step__dot" aria-hidden="true" />
+                  </div>
+                  <h3>{step.title}</h3>
+                  <p>{step.text}</p>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+
+        <section className="final-cta" aria-labelledby="final-cta-title">
+          <div className="container final-cta__card">
+            <div className="final-cta__copy">
+              <p className="section-kicker">BracketMotion</p>
+              <h2 id="final-cta-title">The fixed-appliance workflow, made visible.</h2>
+              <p>Install it where you work. Your cases, plans, mechanics and movement stay one step away.</p>
+            </div>
+
+            <div className="final-cta__actions" aria-label="Install BracketMotion">
+              <InstallButton platform="Windows" primary />
+              <InstallButton platform="macOS" />
+            </div>
+          </div>
+        </section>
       </main>
+
+      <footer className="site-footer">
+        <div className="container footer-inner">
+          <div className="footer-brand">
+            <a className="wordmark wordmark--footer" href="/" aria-label="BracketMotion home">
+              BracketMotion<span>.</span>
+            </a>
+            <p>Plan the mechanics. See the movement.</p>
+          </div>
+
+          <nav className="footer-links" aria-label="Legal">
+            <a href="/privacy">Privacy</a>
+            <a href="/terms">Terms</a>
+            <a href="/clinical-disclaimer">Clinical Disclaimer</a>
+            <a href="mailto:support@bracketmotion.com">support@bracketmotion.com</a>
+          </nav>
+        </div>
+      </footer>
     </div>
   );
 }
