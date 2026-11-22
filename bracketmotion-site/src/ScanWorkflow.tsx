@@ -1680,10 +1680,13 @@ function StageWorkspace({
           )}
 
           <div className="stage-panel__source-note">
-            <strong>V1 mechanics boundary</strong>
+            <strong>Gemini mechanics review</strong>
             <p>
-              Deterministic stage guidance uses the current case geometry and enabled appliance mechanics. Gemini-generated case reasoning arrives in Task 9 and still requires clinician review.
+              The authenticated server-side review endpoint is deployed and source-grounded. Live patient-data calls unlock with BracketMotion sign-in in Task 10; Gemini cannot change geometry or approvals.
             </p>
+            <button type="button" disabled>
+              Sign in required
+            </button>
           </div>
         </aside>
       </div>
