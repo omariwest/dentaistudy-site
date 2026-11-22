@@ -80,6 +80,13 @@ const lowerTeeth = [
   "31","32","33","34","35","36","37","38",
 ];
 
+const firstPremolarPair: Record<string, string> = {
+  "14": "24",
+  "24": "14",
+  "44": "34",
+  "34": "44",
+};
+
 function buildTopology(indexed: BufferGeometry): Topology {
   const position = indexed.getAttribute("position");
   const index = indexed.getIndex();
@@ -1445,7 +1452,7 @@ function ApplianceLayer({
     >();
     const combined = new Box3();
 
-    segments.forEach((segment) => {
+    treatmentSegments.forEach((segment) => {
       const asset = assets.find((item) => item.jaw === segment.jaw);
       if (!asset) return;
 
@@ -1482,7 +1489,14 @@ function ApplianceLayer({
       map,
       scale: Math.max(0.75, Math.min(2.2, diagonal * 0.018)),
     };
-  }, [assets, jawTransforms, segments, targetTransforms]);
+  }, [
+    assets,
+    jawTransforms,
+    plannedExtractions,
+    segments,
+    targetTransforms,
+    treatmentSegments,
+  ]);
 
   const sequenceFor = (jaw: Exclude<Jaw, "bite">) =>
     (jaw === "upper" ? upperTeeth : lowerTeeth)
@@ -2165,13 +2179,24 @@ export default function ScanWorkflow({
     }
   }, [teethForJaw, toothLabel]);
 
+  const treatmentSegments = useMemo(
+    () => segments.filter((segment) => !plannedExtractions.has(segment.id)),
+    [plannedExtractions, segments],
+  );
+
   const upperSegmentLabels = useMemo(
-    () => upperTeeth.filter((label) => segments.some((segment) => segment.label === label)),
-    [segments],
+    () =>
+      upperTeeth.filter((label) =>
+        treatmentSegments.some((segment) => segment.label === label),
+      ),
+    [treatmentSegments],
   );
   const lowerSegmentLabels = useMemo(
-    () => lowerTeeth.filter((label) => segments.some((segment) => segment.label === label)),
-    [segments],
+    () =>
+      lowerTeeth.filter((label) =>
+        treatmentSegments.some((segment) => segment.label === label),
+      ),
+    [treatmentSegments],
   );
 
   const allSegmentLabels = useMemo(
@@ -2523,7 +2548,7 @@ export default function ScanWorkflow({
       Math.min(0.5, caseDiagonal * 0.004),
     );
 
-    const segmentList = segments.filter((segment) => boxes.has(segment.id));
+    const segmentList = treatmentSegments.filter((segment) => boxes.has(segment.id));
 
     for (let i = 0; i < segmentList.length; i += 1) {
       for (let j = i + 1; j < segmentList.length; j += 1) {
@@ -2549,7 +2574,7 @@ export default function ScanWorkflow({
     }
 
     const byLabel = new Map(
-      segments.map((segment) => [segment.label, segment] as const),
+      treatmentSegments.map((segment) => [segment.label, segment] as const),
     );
     const incisorLabels = ["11", "21", "31", "41"];
     const metricsReady = incisorLabels.every((label) => byLabel.has(label));
@@ -2580,16 +2605,18 @@ export default function ScanWorkflow({
       midline = Math.abs(upperCenter.x - lowerCenter.x);
     }
 
-    const movedCount = segments.filter((segment) => {
-      const transform = targetTransforms[segment.id] || identityTransform();
-      const translation = new Vector3(...transform.position).length();
-      const rotation =
-        Math.abs(transform.rotation[0]) +
-        Math.abs(transform.rotation[1]) +
-        Math.abs(transform.rotation[2]);
+    const movedCount =
+      treatmentSegments.filter((segment) => {
+        const transform = targetTransforms[segment.id] || identityTransform();
+        const translation = new Vector3(...transform.position).length();
+        const rotation =
+          Math.abs(transform.rotation[0]) +
+          Math.abs(transform.rotation[1]) +
+          Math.abs(transform.rotation[2]);
 
-      return translation > 0.01 || rotation > 0.005;
-    }).length;
+        return translation > 0.01 || rotation > 0.005;
+      }).length +
+      segments.filter((segment) => plannedExtractions.has(segment.id)).length;
 
     const unitWarning =
       caseDiagonal > 0 && (caseDiagonal < 20 || caseDiagonal > 300);
@@ -2612,6 +2639,33 @@ export default function ScanWorkflow({
   const selectedTransform = selectedTargetId
     ? targetTransforms[selectedTargetId] || identityTransform()
     : identityTransform();
+  const selectedIsPlannedExtraction = Boolean(
+    selectedTargetId && plannedExtractions.has(selectedTargetId),
+  );
+  const selectedExtractionPartner = selectedSegment
+    ? segments.find(
+        (segment) =>
+          segment.label === firstPremolarPair[selectedSegment.label],
+      ) || null
+    : null;
+
+  const toggleSelectedExtractionPair = () => {
+    if (!selectedSegment || !selectedExtractionPartner) return;
+
+    const pairIds = [selectedSegment.id, selectedExtractionPartner.id];
+    setPlannedExtractions((current) => {
+      const next = new Set(current);
+      const pairSelected = pairIds.every((id) => next.has(id));
+
+      pairIds.forEach((id) => {
+        if (pairSelected) next.delete(id);
+        else next.add(id);
+      });
+
+      return next;
+    });
+    setSetupApproved(false);
+  };
 
   const setupReady =
     setupAnalysis.metricsReady &&
@@ -2649,6 +2703,7 @@ export default function ScanWorkflow({
       next[segment.id] = identityTransform();
     });
     setTargetTransforms(next);
+    setPlannedExtractions(new Set());
     setSetupApproved(false);
   };
 
@@ -2659,6 +2714,7 @@ export default function ScanWorkflow({
         segments={segments}
         jawTransforms={jawTransforms}
         targetTransforms={targetTransforms}
+        plannedExtractions={plannedExtractions}
         applianceLayers={applianceLayers}
         endpoints={mechanicEndpoints}
         sessionActive={sessionActive}
