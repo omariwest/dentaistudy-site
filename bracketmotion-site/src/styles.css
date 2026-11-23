@@ -1157,10 +1157,7 @@ a {
 }
 
 .case-form-grid input,
-.case-form-grid select,
-.finding-grid input,
-.finding-grid select,
-.scope-select select {
+.finding-grid input {
   width: 100%;
   min-width: 0;
   min-height: 38px;
@@ -1174,12 +1171,182 @@ a {
 }
 
 .case-form-grid input:focus,
-.case-form-grid select:focus,
-.finding-grid input:focus,
-.finding-grid select:focus,
-.scope-select select:focus {
-  border-color: rgba(109, 76, 245, 0.55);
-  box-shadow: 0 0 0 3px rgba(109, 76, 245, 0.1);
+.finding-grid input:focus {
+  border-color: rgba(109, 76, 245, 0.36);
+  box-shadow: 0 0 0 2px rgba(109, 76, 245, 0.055);
+}
+
+/* Shared UIORI-style select control */
+.ui-select {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+.ui-select-button {
+  position: relative;
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  min-height: 38px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 34px 0 10px;
+  border: 1px solid #dfe2e8;
+  border-radius: 8px;
+  color: #27303b;
+  background: #ffffff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.72rem;
+  text-align: left;
+  outline: none;
+  transition:
+    border-color 0.14s ease,
+    box-shadow 0.14s ease,
+    background 0.14s ease;
+}
+
+.ui-select-button:hover {
+  border-color: #cfd4dc;
+}
+
+.ui-select-button:focus-visible,
+.ui-select.is-open .ui-select-button {
+  border-color: rgba(109, 76, 245, 0.36);
+  box-shadow: 0 0 0 2px rgba(109, 76, 245, 0.055);
+}
+
+.ui-select-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.ui-select-button-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ui-select-chevron {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  width: 15px;
+  height: 15px;
+  transform: translateY(-50%);
+  fill: none;
+  stroke: #7b828d;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+  transition:
+    transform 0.14s ease,
+    stroke 0.14s ease;
+}
+
+.ui-select.is-open .ui-select-chevron {
+  transform: translateY(-50%) rotate(180deg);
+  stroke: #565d67;
+}
+
+.ui-select-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  left: 0;
+  z-index: 180;
+  max-height: 230px;
+  padding: 5px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  border: 1px solid rgba(17, 24, 39, 0.1);
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.1);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-3px);
+  transform-origin: top center;
+  pointer-events: none;
+  transition:
+    opacity 0.13s ease,
+    transform 0.13s ease,
+    visibility 0s linear 0.13s;
+}
+
+.ui-select.is-dropup .ui-select-menu {
+  top: auto;
+  bottom: calc(100% + 6px);
+  transform: translateY(3px);
+  transform-origin: bottom center;
+}
+
+.ui-select.is-open .ui-select-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+  transition-delay: 0s;
+}
+
+.ui-select-group {
+  display: grid;
+  gap: 2px;
+}
+
+.ui-select-group + .ui-select-group {
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid #eef0f3;
+}
+
+.ui-select-group-label {
+  padding: 5px 8px 3px;
+  color: #8a919c;
+  font-size: 0.55rem;
+  font-weight: 760;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.ui-select-option {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  min-height: 34px;
+  align-items: center;
+  padding: 0 8px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 7px;
+  color: #2f3742;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.68rem;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ui-select-option:hover,
+.ui-select-option:focus-visible {
+  background: #f5f6f8;
+  outline: none;
+}
+
+.ui-select-option.is-selected {
+  background: #f0f1f3;
+  font-weight: 680;
+}
+
+.ui-select-option:disabled {
+  color: #a1a6ae;
+  cursor: default;
 }
 
 .case-form-grid__wide,
@@ -1278,7 +1445,7 @@ a {
 
 .field-with-unit:focus-within {
   border-color: rgba(109, 76, 245, 0.55);
-  box-shadow: 0 0 0 3px rgba(109, 76, 245, 0.1);
+  box-shadow: 0 0 0 2px rgba(109, 76, 245, 0.055);
 }
 
 .field-with-unit input {
@@ -1438,12 +1605,9 @@ a {
 
 .record-status__action:focus-visible,
 .case-form-grid input:focus-visible,
-.case-form-grid select:focus-visible,
 .finding-grid input:focus-visible,
-.finding-grid select:focus-visible,
-.scope-select select:focus-visible,
 .case-card:focus-visible {
-  outline: 3px solid rgba(109, 76, 245, 0.2);
+  outline: 3px solid rgba(109, 76, 245, 0.12);
   outline-offset: 2px;
 }
 
@@ -1495,15 +1659,29 @@ a {
 }
 
 .install-dialog__header > button {
+  display: grid;
   width: 30px;
   height: 30px;
   flex: 0 0 auto;
+  place-items: center;
   border: 0;
-  border-radius: 7px;
-  color: #66707c;
-  background: #f2f3f5;
+  border-radius: 50%;
+  color: #69717d;
+  background: transparent;
   cursor: pointer;
-  font-size: 1rem;
+}
+
+.install-dialog__header > button:hover {
+  background: #f3f4f6;
+}
+
+.install-dialog__header > button svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
 }
 
 .install-dialog__body {
@@ -1540,7 +1718,7 @@ a {
 
 .install-dialog__header > button:focus-visible,
 .install-dialog__actions button:focus-visible {
-  outline: 3px solid rgba(109, 76, 245, 0.2);
+  outline: 3px solid rgba(109, 76, 245, 0.12);
   outline-offset: 2px;
 }
 
@@ -1609,15 +1787,29 @@ a {
 }
 
 .auth-dialog__header > button {
+  display: grid;
   width: 30px;
   height: 30px;
   flex: 0 0 auto;
+  place-items: center;
   border: 0;
-  border-radius: 7px;
-  color: #66707c;
-  background: #f2f3f5;
+  border-radius: 50%;
+  color: #69717d;
+  background: transparent;
   cursor: pointer;
-  font-size: 1rem;
+}
+
+.auth-dialog__header > button:hover {
+  background: #f3f4f6;
+}
+
+.auth-dialog__header > button svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
 }
 
 .auth-dialog__form,
@@ -1653,15 +1845,24 @@ a {
   border: 1px solid #dfe2e8;
   border-radius: 8px;
   color: #343b45;
-  background: #ffffff;
+  background: #fafafa;
   font: inherit;
   font-size: 0.66rem;
+  outline: none;
+  transition:
+    border-color 0.14s ease,
+    box-shadow 0.14s ease,
+    background 0.14s ease;
+}
+
+.auth-dialog__form input:hover {
+  border-color: #cfd4dc;
 }
 
 .auth-dialog__form input:focus {
-  border-color: rgba(109, 76, 245, 0.55);
-  outline: 0;
-  box-shadow: 0 0 0 3px rgba(109, 76, 245, 0.1);
+  border-color: rgba(109, 76, 245, 0.36);
+  box-shadow: 0 0 0 2px rgba(109, 76, 245, 0.055);
+  background: #ffffff;
 }
 
 .auth-dialog__form .app-primary-action,
@@ -2264,15 +2465,16 @@ a {
   gap: 5px;
 }
 
-.scan-tooth-label select {
-  width: 100%;
+.scan-tooth-label .ui-select-button {
   min-height: 34px;
-  padding: 0 8px;
-  border: 1px solid #dfe2e8;
+  padding-left: 8px;
   border-radius: 7px;
-  color: #343b45;
-  background: #ffffff;
   font-size: 0.66rem;
+}
+
+.scan-tooth-label .ui-select-option {
+  min-height: 32px;
+  font-size: 0.64rem;
 }
 
 .scan-selection-summary {
@@ -2395,10 +2597,9 @@ a {
 .scan-file-button:focus-within,
 .scan-editor__toolbar button:focus-visible,
 .scan-segment-panel__heading button:focus-visible,
-.scan-tooth-label select:focus-visible,
 .scan-save-segment:focus-visible,
 .scan-segment-row button:focus-visible {
-  outline: 3px solid rgba(109, 76, 245, 0.2);
+  outline: 3px solid rgba(109, 76, 245, 0.12);
   outline-offset: 2px;
 }
 
@@ -2694,7 +2895,7 @@ a {
 .target-value-grid input:focus {
   border-color: rgba(109, 76, 245, 0.55);
   outline: 0;
-  box-shadow: 0 0 0 3px rgba(109, 76, 245, 0.1);
+  box-shadow: 0 0 0 2px rgba(109, 76, 245, 0.055);
 }
 
 .target-extraction-card {
@@ -3045,16 +3246,22 @@ a {
   font-weight: 690;
 }
 
-.mechanic-endpoints select {
-  width: 100%;
-  min-width: 0;
+.mechanic-endpoints .ui-select-button {
   min-height: 31px;
-  padding: 0 6px;
-  border: 1px solid #dfe2e8;
+  padding: 0 28px 0 6px;
   border-radius: 6px;
-  color: #343b45;
-  background: #ffffff;
   font-size: 0.61rem;
+}
+
+.mechanic-endpoints .ui-select-chevron {
+  right: 8px;
+  width: 13px;
+  height: 13px;
+}
+
+.mechanic-endpoints .ui-select-option {
+  min-height: 30px;
+  font-size: 0.6rem;
 }
 
 .appliance-panel__empty {
@@ -3079,9 +3286,8 @@ a {
   line-height: 1.45;
 }
 
-.appliance-layer-buttons button:focus-visible,
-.mechanic-endpoints select:focus-visible {
-  outline: 3px solid rgba(109, 76, 245, 0.2);
+.appliance-layer-buttons button:focus-visible {
+  outline: 3px solid rgba(109, 76, 245, 0.12);
   outline-offset: 2px;
 }
 
@@ -3729,7 +3935,7 @@ a {
 
 .plan-textarea:focus {
   border-color: rgba(109, 76, 245, 0.55);
-  box-shadow: 0 0 0 3px rgba(109, 76, 245, 0.1);
+  box-shadow: 0 0 0 2px rgba(109, 76, 245, 0.055);
 }
 
 .plan-strategy-grid {
