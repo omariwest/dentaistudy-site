@@ -10,6 +10,7 @@ import {
   useState,
 } from "react";
 import type { ClinicalViewerHandle } from "./ClinicalViewer";
+import UiSelect from "./UiSelect";
 import type {
   ScanPersistenceState,
   StageAiReviewResult,
@@ -158,7 +159,10 @@ function PwaInstallProvider({ children }: { children: React.ReactNode }) {
                 aria-label="Close install instructions"
                 onClick={() => setGuidePlatform(null)}
               >
-                ×
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M18 6 6 18" />
+                  <path d="m6 6 12 12" />
+                </svg>
               </button>
             </div>
 
@@ -803,26 +807,21 @@ function CaseRecordsView({
           </label>
           <label>
             <span>Patient stage</span>
-            <select
+            <UiSelect
               value={caseDetails.patientStage}
-              onChange={(event) => onCaseDetail("patientStage", event.target.value)}
-            >
-              <option>Adult</option>
-              <option>Adolescent</option>
-            </select>
+              onChange={(value) => onCaseDetail("patientStage", value)}
+              options={["Adult", "Adolescent"]}
+              ariaLabel="Patient stage"
+            />
           </label>
           <label>
             <span>Growth status</span>
-            <select
+            <UiSelect
               value={caseDetails.growthStatus}
-              onChange={(event) => onCaseDetail("growthStatus", event.target.value)}
-            >
-              <option>Adult</option>
-              <option>Prepubertal</option>
-              <option>Pubertal</option>
-              <option>Postpubertal</option>
-              <option>Uncertain</option>
-            </select>
+              onChange={(value) => onCaseDetail("growthStatus", value)}
+              options={["Adult", "Prepubertal", "Pubertal", "Postpubertal", "Uncertain"]}
+              ariaLabel="Growth status"
+            />
           </label>
           <label className="case-form-grid__wide">
             <span>Chief complaint / treatment goal</span>
@@ -932,19 +931,19 @@ function FindingsView({
         <div className="finding-grid">
           <label>
             <span>Oral hygiene</span>
-            <select value={findings.oralHygiene} onChange={(event) => onFindingChange("oralHygiene", event.target.value)}><option>Acceptable</option><option>Concern</option></select>
+            <UiSelect value={findings.oralHygiene} onChange={(value) => onFindingChange("oralHygiene", value)} options={["Acceptable","Concern"]} ariaLabel="Oral hygiene" />
           </label>
           <label>
             <span>Gingival / periodontal status</span>
-            <select value={findings.periodontalStatus} onChange={(event) => onFindingChange("periodontalStatus", event.target.value)}><option>Healthy</option><option>Concern</option></select>
+            <UiSelect value={findings.periodontalStatus} onChange={(value) => onFindingChange("periodontalStatus", value)} options={["Healthy","Concern"]} ariaLabel="Gingival / periodontal status" />
           </label>
           <label>
             <span>Active caries / untreated pathology</span>
-            <select value={findings.activeCaries} onChange={(event) => onFindingChange("activeCaries", event.target.value)}><option>No</option><option>Yes</option></select>
+            <UiSelect value={findings.activeCaries} onChange={(value) => onFindingChange("activeCaries", value)} options={["No","Yes"]} ariaLabel="Active caries / untreated pathology" />
           </label>
           <label>
             <span>Restorative / prosthetic considerations</span>
-            <select value={findings.restorativeConsiderations} onChange={(event) => onFindingChange("restorativeConsiderations", event.target.value)}><option>None</option><option>Present</option></select>
+            <UiSelect value={findings.restorativeConsiderations} onChange={(value) => onFindingChange("restorativeConsiderations", value)} options={["None","Present"]} ariaLabel="Restorative / prosthetic considerations" />
           </label>
           <label>
             <span>Missing permanent teeth</span>
@@ -972,19 +971,19 @@ function FindingsView({
         <div className="finding-grid">
           <label>
             <span>Profile</span>
-            <select value={findings.profile} onChange={(event) => onFindingChange("profile", event.target.value)}><option>Convex</option><option>Straight</option><option>Concave</option></select>
+            <UiSelect value={findings.profile} onChange={(value) => onFindingChange("profile", value)} options={["Convex","Straight","Concave"]} ariaLabel="Profile" />
           </label>
           <label>
             <span>Lip competence</span>
-            <select value={findings.lipCompetence} onChange={(event) => onFindingChange("lipCompetence", event.target.value)}><option>Competent</option><option>Incompetent</option></select>
+            <UiSelect value={findings.lipCompetence} onChange={(value) => onFindingChange("lipCompetence", value)} options={["Competent","Incompetent"]} ariaLabel="Lip competence" />
           </label>
           <label>
             <span>Facial vertical pattern</span>
-            <select value={findings.facialVerticalPattern} onChange={(event) => onFindingChange("facialVerticalPattern", event.target.value)}><option>Low</option><option>Average</option><option>High</option></select>
+            <UiSelect value={findings.facialVerticalPattern} onChange={(value) => onFindingChange("facialVerticalPattern", value)} options={["Low","Average","High"]} ariaLabel="Facial vertical pattern" />
           </label>
           <label>
             <span>Facial asymmetry</span>
-            <select value={findings.facialAsymmetry} onChange={(event) => onFindingChange("facialAsymmetry", event.target.value)}><option>None</option><option>Present</option></select>
+            <UiSelect value={findings.facialAsymmetry} onChange={(value) => onFindingChange("facialAsymmetry", value)} options={["None","Present"]} ariaLabel="Facial asymmetry" />
           </label>
           <label className="finding-grid__wide">
             <span>Smile / incisor display concern</span>
@@ -1004,19 +1003,19 @@ function FindingsView({
         <div className="finding-grid">
           <label>
             <span>Molar relationship — right</span>
-            <select value={findings.molarRight} onChange={(event) => onFindingChange("molarRight", event.target.value)}><option>Class I</option><option>Class II</option><option>Class III</option></select>
+            <UiSelect value={findings.molarRight} onChange={(value) => onFindingChange("molarRight", value)} options={["Class I","Class II","Class III"]} ariaLabel="Molar relationship — right" />
           </label>
           <label>
             <span>Molar relationship — left</span>
-            <select value={findings.molarLeft} onChange={(event) => onFindingChange("molarLeft", event.target.value)}><option>Class I</option><option>Class II</option><option>Class III</option></select>
+            <UiSelect value={findings.molarLeft} onChange={(value) => onFindingChange("molarLeft", value)} options={["Class I","Class II","Class III"]} ariaLabel="Molar relationship — left" />
           </label>
           <label>
             <span>Canine relationship — right</span>
-            <select value={findings.canineRight} onChange={(event) => onFindingChange("canineRight", event.target.value)}><option>Class I</option><option>Class II</option><option>Class III</option></select>
+            <UiSelect value={findings.canineRight} onChange={(value) => onFindingChange("canineRight", value)} options={["Class I","Class II","Class III"]} ariaLabel="Canine relationship — right" />
           </label>
           <label>
             <span>Canine relationship — left</span>
-            <select value={findings.canineLeft} onChange={(event) => onFindingChange("canineLeft", event.target.value)}><option>Class I</option><option>Class II</option><option>Class III</option></select>
+            <UiSelect value={findings.canineLeft} onChange={(value) => onFindingChange("canineLeft", value)} options={["Class I","Class II","Class III"]} ariaLabel="Canine relationship — left" />
           </label>
           <label>
             <span>Overjet</span>
@@ -1048,7 +1047,7 @@ function FindingsView({
           </label>
           <label>
             <span>Curve of Spee</span>
-            <select value={findings.curveOfSpee} onChange={(event) => onFindingChange("curveOfSpee", event.target.value)}><option>Flat</option><option>Mild</option><option>Moderate</option><option>Deep</option></select>
+            <UiSelect value={findings.curveOfSpee} onChange={(value) => onFindingChange("curveOfSpee", value)} options={["Flat","Mild","Moderate","Deep"]} ariaLabel="Curve of Spee" />
           </label>
           <label>
             <span>Anterior / posterior crossbite</span>
@@ -1076,19 +1075,19 @@ function FindingsView({
         <div className="finding-grid">
           <label>
             <span>Skeletal AP pattern</span>
-            <select value={findings.skeletalAp} onChange={(event) => onFindingChange("skeletalAp", event.target.value)}><option>Class I</option><option>Class II</option><option>Class III</option></select>
+            <UiSelect value={findings.skeletalAp} onChange={(value) => onFindingChange("skeletalAp", value)} options={["Class I","Class II","Class III"]} ariaLabel="Skeletal AP pattern" />
           </label>
           <label>
             <span>Vertical skeletal pattern</span>
-            <select value={findings.skeletalVertical} onChange={(event) => onFindingChange("skeletalVertical", event.target.value)}><option>Low</option><option>Average</option><option>High</option></select>
+            <UiSelect value={findings.skeletalVertical} onChange={(value) => onFindingChange("skeletalVertical", value)} options={["Low","Average","High"]} ariaLabel="Vertical skeletal pattern" />
           </label>
           <label>
             <span>Maxillary incisors</span>
-            <select value={findings.maxillaryIncisors} onChange={(event) => onFindingChange("maxillaryIncisors", event.target.value)}><option>Retroclined</option><option>Normal</option><option>Proclined</option></select>
+            <UiSelect value={findings.maxillaryIncisors} onChange={(value) => onFindingChange("maxillaryIncisors", value)} options={["Retroclined","Normal","Proclined"]} ariaLabel="Maxillary incisors" />
           </label>
           <label>
             <span>Mandibular incisors</span>
-            <select value={findings.mandibularIncisors} onChange={(event) => onFindingChange("mandibularIncisors", event.target.value)}><option>Retroclined</option><option>Normal</option><option>Proclined</option></select>
+            <UiSelect value={findings.mandibularIncisors} onChange={(value) => onFindingChange("mandibularIncisors", value)} options={["Retroclined","Normal","Proclined"]} ariaLabel="Mandibular incisors" />
           </label>
           <label className="finding-grid__wide">
             <span>Important cephalometric concern</span>
@@ -1107,16 +1106,21 @@ function FindingsView({
 
         <label className="scope-select">
           <span>Primary unsupported treatment need</span>
-          <select value={scopeIssue} onChange={(event) => onScopeIssue(event.target.value)}>
-            <option value="">None — within current V1 scope</option>
-            {outOfScopeGroups.map((group) => (
-              <optgroup label={group.label} key={group.label}>
-                {group.options.map((option) => (
-                  <option value={option} key={option}>{option}</option>
-                ))}
-              </optgroup>
-            ))}
-          </select>
+          <UiSelect
+            value={scopeIssue}
+            onChange={onScopeIssue}
+            ariaLabel="Primary unsupported treatment need"
+            options={[
+              { value: "", label: "None — within current V1 scope" },
+              ...outOfScopeGroups.flatMap((group) =>
+                group.options.map((option) => ({
+                  value: option,
+                  label: option,
+                  group: group.label,
+                })),
+              ),
+            ]}
+          />
         </label>
 
         {scopeIssue && (
@@ -1579,7 +1583,12 @@ function AuthDialog({
               {session ? "Account" : mode === "login" ? "Sign in to BracketMotion" : "Create your account"}
             </h2>
           </div>
-          <button type="button" aria-label="Close account dialog" onClick={onClose}>×</button>
+          <button type="button" aria-label="Close account dialog" onClick={onClose}>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M18 6 6 18" />
+              <path d="m6 6 12 12" />
+            </svg>
+          </button>
         </div>
 
         {session ? (
