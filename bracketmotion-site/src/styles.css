@@ -126,6 +126,12 @@ a {
   box-shadow: 0 10px 25px rgba(17, 24, 39, 0.075);
 }
 
+.install-button[aria-disabled="true"] {
+  transform: none;
+  cursor: progress;
+  opacity: 0.68;
+}
+
 .install-button--compact {
   min-height: 40px;
   padding: 0 14px;
