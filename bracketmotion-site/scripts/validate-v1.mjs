@@ -91,8 +91,8 @@ const representativeFamilies = [
   {
     name: "Selected Class II Division 1",
     checks: [
-      [app, "<option>Class II</option>"],
-      [app, "<option>Proclined</option>"],
+      [app, '"Class II"'],
+      [app, '"Proclined"'],
       [scan, 'title: "Interarch correction"'],
       [scan, "elastics"],
     ],
