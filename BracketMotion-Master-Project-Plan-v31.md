@@ -757,7 +757,7 @@ These findings came from direct founder/clinician use before the formal closed-a
 - [x] TypeScript/Vite production build passes.
 - [x] Preview deployment returns READY.
 
-## Correction Task 2 — Shared controls + auth craftsmanship — COMPLETE
+## Correction Task 2 — Shared controls + auth craftsmanship — IMPLEMENTED / USER APPROVAL PENDING
 - [x] Reuse the existing DentAIstudy/UIORI-quality dropdown/select interaction instead of native-looking generic selects.
 - [x] Replace all 29 native application dropdowns, including FDI and mechanics endpoint controls.
 - [x] Preserve keyboard navigation, Escape close, outside-click close and automatic drop-up when space below is limited.
@@ -835,7 +835,7 @@ BracketMotion must feel like it belongs in the same professional software catego
 
 ## Current task
 
-**Founder pre-alpha Correction Task 2 is complete. Correction Task 3 is next.**
+**Founder pre-alpha Correction Task 2 implementation is complete; user approval is pending.**
 
 Task 2 replaced the remaining native-looking dropdowns with the proven UIORI interaction pattern across Case, Findings, scope screening, FDI selection and appliance mechanics.
 
@@ -848,7 +848,7 @@ Completed:
 - release guard updated to validate clinical option data rather than HTML implementation details,
 - guarded production build + preview deployment pass.
 
-Formal closed alpha remains pending. Correction Task 3 now focuses only on the 3D workflow findings: accidental painting while orbiting, loading presentation, patient-scan workspace size, demo-vs-patient clarity and measured performance.
+Formal closed alpha remains pending. After user approval, Correction Task 3 focuses only on the 3D workflow findings: accidental painting while orbiting, loading presentation, patient-scan workspace size, demo-vs-patient clarity and measured performance.
 
 ## Rule
 
