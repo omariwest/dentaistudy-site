@@ -30,6 +30,7 @@ import UiSelect from "./UiSelect";
 
 type Jaw = "upper" | "lower" | "bite";
 type EditMode = "add" | "erase";
+type SegmentationInteraction = "orbit" | EditMode;
 type SetupMode = "translate" | "rotate";
 type VectorTuple = [number, number, number];
 
@@ -457,7 +458,7 @@ function ScanScene({
   activeFaces,
   savedFaces,
   brushPercent,
-  editMode,
+  interactionMode,
   alignJaw,
   alignMode,
   jawTransforms,
@@ -470,7 +471,7 @@ function ScanScene({
   activeFaces: Set<number>;
   savedFaces: Set<number>;
   brushPercent: number;
-  editMode: EditMode;
+  interactionMode: SegmentationInteraction;
   alignJaw: Exclude<Jaw, "bite"> | null;
   alignMode: "translate" | "rotate";
   jawTransforms: Record<Exclude<Jaw, "bite">, RigidTransform>;
@@ -492,8 +493,16 @@ function ScanScene({
     updateScanColors(activeAsset, activeFaces, savedFaces);
   }, [activeAsset, activeFaces, savedFaces]);
 
-  const handleBrush = (event: ThreeEvent<PointerEvent>, asset: ScanAsset) => {
-    if (alignJaw || asset.jaw !== activeJaw || event.faceIndex == null) return;
+  const handleBrush = (event: ThreeEvent<MouseEvent>, asset: ScanAsset) => {
+    if (
+      alignJaw ||
+      interactionMode === "orbit" ||
+      asset.jaw !== activeJaw ||
+      event.faceIndex == null ||
+      event.delta > 4
+    ) {
+      return;
+    }
 
     event.stopPropagation();
 
@@ -506,7 +515,7 @@ function ScanScene({
       brushPercent,
     );
 
-    onBrush(faces, editMode);
+    onBrush(faces, interactionMode);
   };
 
   const assetFor = (jaw: Jaw) => assets.find((asset) => asset.jaw === jaw);
@@ -529,7 +538,7 @@ function ScanScene({
           <>
             <mesh
               geometry={assetFor("upper")!.geometry}
-              onPointerDown={(event) => handleBrush(event, assetFor("upper")!)}
+              onClick={(event) => handleBrush(event, assetFor("upper")!)}
             >
               <meshStandardMaterial
                 vertexColors
@@ -557,7 +566,7 @@ function ScanScene({
           <>
             <mesh
               geometry={assetFor("lower")!.geometry}
-              onPointerDown={(event) => handleBrush(event, assetFor("lower")!)}
+              onClick={(event) => handleBrush(event, assetFor("lower")!)}
             >
               <meshStandardMaterial
                 vertexColors
@@ -1927,7 +1936,12 @@ function ScanUploadCard({
           </button>
         )}
         <label className="scan-file-button">
-          {loading ? "Reading…" : asset ? "Replace" : "Choose file"}
+          {loading ? (
+            <span className="scan-file-button__loading">
+              <span className="clinical-loader" aria-hidden="true" />
+              Reading
+            </span>
+          ) : asset ? "Replace" : "Choose file"}
           <input
             type="file"
             accept=".stl,.ply,model/stl,application/sla"
@@ -1977,7 +1991,8 @@ export default function ScanWorkflow({
   const [loadingJaw, setLoadingJaw] = useState<Jaw | null>(null);
   const [error, setError] = useState("");
   const [activeJaw, setActiveJaw] = useState<Exclude<Jaw, "bite">>("upper");
-  const [editMode, setEditMode] = useState<EditMode>("add");
+  const [interactionMode, setInteractionMode] =
+    useState<SegmentationInteraction>("orbit");
   const [brushPercent, setBrushPercent] = useState(2.2);
   const [activeFaces, setActiveFaces] = useState<Set<number>>(new Set());
   const [segments, setSegments] = useState<ToothSegment[]>([]);
@@ -2030,6 +2045,7 @@ export default function ScanWorkflow({
     setActiveSegmentId(null);
     setSelectedTargetId(null);
     setAlignJaw(null);
+    setInteractionMode("orbit");
     setWorkflowMode("segment");
 
     assetsRef.current.forEach((asset) => asset.geometry.dispose());
@@ -2360,6 +2376,10 @@ export default function ScanWorkflow({
     setError("");
     setLoadingJaw(jaw);
 
+    await new Promise<void>((resolve) => {
+      requestAnimationFrame(() => resolve());
+    });
+
     try {
       const next = await parseScan(file, jaw);
 
@@ -2391,6 +2411,7 @@ export default function ScanWorkflow({
         setJawTransforms((current) => ({ ...current, [jaw]: identityTransform() }));
         setActiveFaces(new Set());
         setActiveSegmentId(null);
+        setInteractionMode("orbit");
         setWorkflowMode("segment");
         setSetupApproved(false);
       }
@@ -2420,6 +2441,7 @@ export default function ScanWorkflow({
       setJawTransforms((current) => ({ ...current, [jaw]: identityTransform() }));
       setActiveFaces(new Set());
       setActiveSegmentId(null);
+      setInteractionMode("orbit");
       setWorkflowMode("segment");
       setSetupApproved(false);
     }
@@ -2493,11 +2515,13 @@ export default function ScanWorkflow({
     setActiveSegmentId(segment.id);
     setActiveFaces(new Set(segment.faces));
     setAlignJaw(null);
+    setInteractionMode("orbit");
   };
 
   const newSegment = () => {
     setActiveSegmentId(null);
     setActiveFaces(new Set());
+    setInteractionMode("orbit");
   };
 
   const deleteSegment = (segmentId: string) => {
@@ -2773,7 +2797,7 @@ export default function ScanWorkflow({
         </div>
       </div>
 
-      <div className="scan-upload-grid">
+      <div className={`scan-upload-grid${scanReady ? " is-ready" : ""}`}>
         {(["upper", "lower", "bite"] as Jaw[]).map((jaw) => (
           <ScanUploadCard
             jaw={jaw}
@@ -2793,7 +2817,7 @@ export default function ScanWorkflow({
             type="button"
             onClick={() => setWorkflowMode("segment")}
           >
-            <span>01</span>
+            <span>1</span>
             Segmentation
           </button>
           <button
@@ -2807,7 +2831,7 @@ export default function ScanWorkflow({
               if (!selectedTargetId && segments[0]) setSelectedTargetId(segments[0].id);
             }}
           >
-            <span>02</span>
+            <span>2</span>
             Target setup
           </button>
           <button
@@ -2816,7 +2840,7 @@ export default function ScanWorkflow({
             disabled={!setupApproved}
             onClick={() => setWorkflowMode("appliance")}
           >
-            <span>03</span>
+            <span>3</span>
             Appliances
           </button>
         </div>
@@ -2867,6 +2891,7 @@ export default function ScanWorkflow({
                 className={alignJaw === activeJaw ? "is-active" : ""}
                 type="button"
                 onClick={() => {
+                  setInteractionMode("orbit");
                   setAlignMode("translate");
                   setAlignJaw((current) => (current === activeJaw ? null : activeJaw));
                 }}
@@ -2895,35 +2920,45 @@ export default function ScanWorkflow({
 
             <div className="scan-editor__toolbar-group">
               <button
-                className={editMode === "add" ? "is-active" : ""}
+                className={interactionMode === "orbit" ? "is-active" : ""}
                 type="button"
                 disabled={alignJaw !== null}
-                onClick={() => setEditMode("add")}
+                onClick={() => setInteractionMode("orbit")}
+              >
+                Orbit
+              </button>
+              <button
+                className={interactionMode === "add" ? "is-active" : ""}
+                type="button"
+                disabled={alignJaw !== null}
+                onClick={() => setInteractionMode("add")}
               >
                 Add brush
               </button>
               <button
-                className={editMode === "erase" ? "is-active" : ""}
+                className={interactionMode === "erase" ? "is-active" : ""}
                 type="button"
                 disabled={alignJaw !== null}
-                onClick={() => setEditMode("erase")}
+                onClick={() => setInteractionMode("erase")}
               >
                 Erase
               </button>
             </div>
 
-            <label className="scan-brush-size">
-              <span>Brush</span>
-              <input
-                type="range"
-                min="0.8"
-                max="6"
-                step="0.2"
-                value={brushPercent}
-                onChange={(event) => setBrushPercent(Number(event.target.value))}
-              />
-              <small>{brushPercent.toFixed(1)}%</small>
-            </label>
+            {interactionMode !== "orbit" && alignJaw === null && (
+              <label className="scan-brush-size">
+                <span>Brush</span>
+                <input
+                  type="range"
+                  min="0.8"
+                  max="6"
+                  step="0.2"
+                  value={brushPercent}
+                  onChange={(event) => setBrushPercent(Number(event.target.value))}
+                />
+                <small>{brushPercent.toFixed(1)}%</small>
+              </label>
+            )}
           </div>
 
           <div className="scan-editor__body">
@@ -2937,7 +2972,7 @@ export default function ScanWorkflow({
                   activeFaces={activeFaces}
                   savedFaces={savedFaces}
                   brushPercent={brushPercent}
-                  editMode={editMode}
+                  interactionMode={interactionMode}
                   alignJaw={alignJaw}
                   alignMode={alignMode}
                   jawTransforms={jawTransforms}
@@ -2949,7 +2984,9 @@ export default function ScanWorkflow({
               <div className="scan-canvas__hint">
                 {alignJaw
                   ? "Use the gizmo to align the active arch · right-drag pans · wheel zooms"
-                  : "Click the tooth surface to paint · Add/Erase corrects the boundary · drag background to rotate"}
+                  : interactionMode === "orbit"
+                    ? "Orbit mode · drag to rotate · right-drag pans · wheel zooms · choose Add brush or Erase before editing"
+                    : `${interactionMode === "add" ? "Add brush" : "Erase"} mode · click a tooth surface to edit · drag to rotate`}
               </div>
             </div>
 
