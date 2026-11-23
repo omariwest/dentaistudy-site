@@ -40,8 +40,13 @@ type BeforeInstallPromptEvent = Event & {
   }>;
 };
 
+type NavigatorWithInstall = Navigator & {
+  install?: () => Promise<unknown>;
+};
+
 type InstallContextValue = {
   installed: boolean;
+  installing: boolean;
   requestInstall: (platform: Platform) => Promise<void>;
 };
 
@@ -59,6 +64,7 @@ function PwaInstallProvider({ children }: { children: React.ReactNode }) {
   const [installPrompt, setInstallPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
   const [installed, setInstalled] = useState(isStandaloneMode);
+  const [installing, setInstalling] = useState(false);
   const [guidePlatform, setGuidePlatform] = useState<Platform | null>(null);
 
   useEffect(() => {
@@ -104,32 +110,49 @@ function PwaInstallProvider({ children }: { children: React.ReactNode }) {
   const requestInstall = useCallback(
     async (platform: Platform) => {
       if (installed) {
-        window.location.href = "/app";
+        window.location.assign("/app");
         return;
       }
 
-      if (installPrompt) {
-        try {
-          await installPrompt.prompt();
-          const choice = await installPrompt.userChoice;
-          setInstallPrompt(null);
+      if (installing) return;
 
-          if (choice.outcome === "accepted") {
-            return;
-          }
-        } catch {
-          setInstallPrompt(null);
+      setInstalling(true);
+      setGuidePlatform(null);
+
+      try {
+        const webInstall = (navigator as NavigatorWithInstall).install;
+
+        if (typeof webInstall === "function") {
+          await webInstall.call(navigator);
+          return;
         }
-      }
 
-      setGuidePlatform(platform);
+        if (installPrompt) {
+          const promptEvent = installPrompt;
+          setInstallPrompt(null);
+          await promptEvent.prompt();
+          await promptEvent.userChoice;
+          return;
+        }
+
+        setGuidePlatform(platform);
+      } catch (cause) {
+        if (cause instanceof DOMException && cause.name === "AbortError") {
+          return;
+        }
+
+        console.error("BracketMotion install prompt failed:", cause);
+        setGuidePlatform(platform);
+      } finally {
+        setInstalling(false);
+      }
     },
-    [installPrompt, installed],
+    [installPrompt, installed, installing],
   );
 
   const value = useMemo(
-    () => ({ installed, requestInstall }),
-    [installed, requestInstall],
+    () => ({ installed, installing, requestInstall }),
+    [installed, installing, requestInstall],
   );
 
   return (
@@ -170,40 +193,26 @@ function PwaInstallProvider({ children }: { children: React.ReactNode }) {
               {guidePlatform === "Windows" ? (
                 <>
                   <p>
-                    In Chrome or Edge, use the install icon in the address bar when it
-                    appears. You can also open the browser menu and choose its app/site
-                    install option.
+                    Chrome or Edge: use the install/app icon in the address bar. If it is
+                    not shown, open the browser menu and choose its install-app option.
                   </p>
                   <small>
-                    BracketMotion then opens in its own app window and remains available
-                    from your normal Windows app launcher.
+                    This browser is not exposing a direct install prompt to BracketMotion.
                   </small>
                 </>
               ) : (
                 <>
                   <p>
-                    In Safari on macOS Sonoma 14 or later, choose
-                    <strong> File → Add to Dock</strong>. In Chrome or Edge, use the
-                    install icon in the address bar or the browser's install-app option.
+                    Safari: choose <strong>File → Add to Dock</strong> or Share → Add to
+                    Dock. Chrome or Edge: use the install/app icon in the address bar.
                   </p>
                   <small>
-                    The installed web app opens separately from the browser and keeps
-                    using the same BracketMotion account.
+                    This browser is not exposing a direct install prompt to BracketMotion.
                   </small>
                 </>
               )}
 
               <div className="install-dialog__actions">
-                <button
-                  className="app-primary-action"
-                  type="button"
-                  onClick={() => {
-                    setGuidePlatform(null);
-                    window.location.href = "/app";
-                  }}
-                >
-                  Open web app
-                </button>
                 <button
                   className="app-quiet-button"
                   type="button"
@@ -270,7 +279,7 @@ function InstallButton({
   compact?: boolean;
   primary?: boolean;
 }) {
-  const { installed, requestInstall } = usePwaInstall();
+  const { installed, installing, requestInstall } = usePwaInstall();
 
   return (
     <button
@@ -282,12 +291,17 @@ function InstallButton({
         .filter(Boolean)
         .join(" ")}
       type="button"
+      aria-disabled={installing}
       aria-label={
         installed
           ? "Open BracketMotion"
-          : `Install BracketMotion for ${platform}`
+          : installing
+            ? "Installing BracketMotion"
+            : `Install BracketMotion for ${platform}`
       }
-      onClick={() => void requestInstall(platform)}
+      onClick={() => {
+        if (!installing) void requestInstall(platform);
+      }}
     >
       <PlatformIcon platform={platform} />
       <span>
@@ -295,9 +309,11 @@ function InstallButton({
           ? compact
             ? "Open"
             : "Open BracketMotion"
-          : compact
-            ? platform
-            : `Install for ${platform}`}
+          : installing
+            ? "Installing…"
+            : compact
+              ? platform
+              : `Install for ${platform}`}
       </span>
     </button>
   );
