@@ -139,6 +139,14 @@ representativeFamilies.forEach((family) => {
 if (manifest.start_url !== "/app" || manifest.display !== "standalone") {
   throw new Error("V1 validation failed: PWA manifest start/display mode regressed.");
 }
+if (manifest.id !== "/app") {
+  throw new Error("V1 validation failed: PWA manifest ID regressed.");
+}
+requireText(app, "NavigatorWithInstall", "modern browser install API");
+requireText(app, "beforeinstallprompt", "legacy browser install fallback");
+if (app.includes("Open web app")) {
+  throw new Error("V1 validation failed: install fallback must not imitate installation by navigating to the web app.");
+}
 if (!manifest.icons?.some((icon) => icon.sizes === "192x192")) {
   throw new Error("V1 validation failed: 192x192 PWA icon missing.");
 }
