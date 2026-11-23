@@ -1738,7 +1738,7 @@ function SetupWorkspace({
                 type="button"
                 onClick={() => setWorkspaceMode("demo")}
               >
-                Demo anatomy
+                Demo reference
               </button>
             </div>
 
@@ -1780,89 +1780,85 @@ function SetupWorkspace({
         )}
       </div>
 
-      <div
-        className={`setup-workspace__surface${showPatientSurface ? " is-visible" : ""}`}
-        aria-hidden={!showPatientSurface}
-      >
-        <Suspense
-          fallback={
-            <div className="clinical-viewer__message" role="status">
-              <strong>Preparing patient workspace…</strong>
-              <span>Loading local scan and mechanics tools.</span>
+      {showPatientSurface ? (
+        <div className="setup-workspace__surface is-visible">
+          <Suspense
+            fallback={
+              <div className="clinical-viewer__message" role="status">
+                <span className="clinical-loader" aria-hidden="true" />
+                <strong>Preparing patient workspace</strong>
+              </div>
+            }
+          >
+            <ScanWorkflow
+              onSetupApprovalChange={onSetupApprovalChange}
+              onPersistenceChange={onPersistenceChange}
+              onStageStateChange={onStageStateChange}
+              clinicalView={isStages ? "stages" : "setup"}
+              caseId={caseId}
+              userId={userId}
+              initialState={initialScanState}
+              sessionActive={sessionActive}
+              stageAiReview={stageAiReview}
+              stageAiReviewLoading={stageAiReviewLoading}
+              stageAiReviewError={stageAiReviewError}
+              onRunStageAiReview={onRunStageAiReview}
+              onSignIn={onSignIn}
+            />
+          </Suspense>
+        </div>
+      ) : (
+        <div className="setup-workspace__surface is-visible">
+          <div className="setup-demo-workspace">
+            <div className="app-viewport app-viewport--interactive">
+              <Suspense
+                fallback={
+                  <div className="clinical-viewer__message" role="status">
+                    <span className="clinical-loader" aria-hidden="true" />
+                    <strong>Loading demo reference</strong>
+                  </div>
+                }
+              >
+                <ClinicalViewer ref={viewerRef} onSelectionChange={setSelectedTooth} />
+              </Suspense>
+
+              <div className="app-viewport__corner">
+                <span>Reference model · not patient data</span>
+                <strong>{selectedTooth || "Select a tooth"}</strong>
+              </div>
             </div>
-          }
-        >
-          <ScanWorkflow
-            onSetupApprovalChange={onSetupApprovalChange}
-            onPersistenceChange={onPersistenceChange}
-            onStageStateChange={onStageStateChange}
-            clinicalView={isStages ? "stages" : "setup"}
-            caseId={caseId}
-            userId={userId}
-            initialState={initialScanState}
-            sessionActive={sessionActive}
-            stageAiReview={stageAiReview}
-            stageAiReviewLoading={stageAiReviewLoading}
-            stageAiReviewError={stageAiReviewError}
-            onRunStageAiReview={onRunStageAiReview}
-            onSignIn={onSignIn}
-          />
-        </Suspense>
-      </div>
 
-      <div
-        className={`setup-workspace__surface${!showPatientSurface ? " is-visible" : ""}`}
-        aria-hidden={showPatientSurface}
-      >
-        <div className="setup-demo-workspace">
-          <div className="app-viewport app-viewport--interactive">
-            <Suspense
-              fallback={
-                <div className="clinical-viewer__message" role="status">
-                  <strong>Preparing 3D workspace…</strong>
-                  <span>Loading the demo anatomy viewer.</span>
-                </div>
-              }
-            >
-              <ClinicalViewer ref={viewerRef} onSelectionChange={setSelectedTooth} />
-            </Suspense>
-
-            <div className="app-viewport__corner">
-              <span>3D proof of concept</span>
-              <strong>{selectedTooth || "Select a tooth"}</strong>
-            </div>
-          </div>
-
-          <div className="app-timeline">
-            <button
-              className="app-play-button"
-              type="button"
-              aria-label="Preview selected tooth movement"
-              onClick={() => viewerRef.current?.previewMovement()}
-              disabled={!selectedTooth}
-            >
-              ▶
-            </button>
-            <div className="app-timeline__track">
-              {demoStages.map((stage, index) => (
-                <button
-                  className={`app-stage-chip${index === 0 ? " is-current" : ""}`}
-                  type="button"
-                  key={stage}
-                  disabled={index > 1}
-                  onClick={() => {
-                    if (index === 0) viewerRef.current?.showInitial();
-                    if (index === 1) viewerRef.current?.showTarget();
-                  }}
-                >
-                  <span>{String(index + 1).padStart(2, "0")}</span>
-                  {stage}
-                </button>
-              ))}
+            <div className="app-timeline">
+              <button
+                className="app-play-button"
+                type="button"
+                aria-label="Preview selected tooth movement"
+                onClick={() => viewerRef.current?.previewMovement()}
+                disabled={!selectedTooth}
+              >
+                ▶
+              </button>
+              <div className="app-timeline__track">
+                {demoStages.map((stage, index) => (
+                  <button
+                    className={`app-stage-chip${index === 0 ? " is-current" : ""}`}
+                    type="button"
+                    key={stage}
+                    disabled={index > 1}
+                    onClick={() => {
+                      if (index === 0) viewerRef.current?.showInitial();
+                      if (index === 1) viewerRef.current?.showTarget();
+                    }}
+                  >
+                    <span>{index + 1}</span>
+                    {stage}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
