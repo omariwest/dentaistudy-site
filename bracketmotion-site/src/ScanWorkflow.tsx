@@ -2758,7 +2758,7 @@ export default function ScanWorkflow({
   }
 
   return (
-    <div className="scan-workflow">
+    <div className={`scan-workflow${scanReady ? " is-ready" : ""}`}>
       <div className="scan-workflow__top">
         <div>
           <span className="case-page-kicker">Patient scans</span>
