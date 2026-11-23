@@ -1933,16 +1933,33 @@ a {
   left: 50%;
   z-index: 4;
   display: grid;
-  width: min(360px, calc(100% - 36px));
-  gap: 6px;
+  width: min(320px, calc(100% - 36px));
+  justify-items: center;
+  gap: 8px;
   transform: translate(-50%, -50%);
-  padding: 18px;
+  padding: 16px;
   border: 1px solid rgba(255, 255, 255, 0.38);
   border-radius: 13px;
   background: rgba(249, 250, 252, 0.86);
   box-shadow: 0 14px 34px rgba(20, 25, 35, 0.08);
   backdrop-filter: blur(10px);
   text-align: center;
+}
+
+.clinical-loader {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(109, 76, 245, 0.18);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: clinical-loader-spin 0.72s linear infinite;
+}
+
+@keyframes clinical-loader-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .clinical-viewer__message strong {
@@ -2099,6 +2116,12 @@ a {
 }
 
 
+@media (prefers-reduced-motion: reduce) {
+  .clinical-loader {
+    animation: none;
+  }
+}
+
 /* Patient scan + segmentation workflow */
 .setup-workspace {
   display: grid;
@@ -2137,6 +2160,15 @@ a {
   overflow: hidden;
   padding: 12px;
   background: #f4f5f7;
+}
+
+.scan-workflow.is-ready {
+  gap: 7px;
+  padding: 9px;
+}
+
+.scan-workflow.is-ready .scan-workflow__top p {
+  display: none;
 }
 
 .scan-workflow__top {
@@ -2202,6 +2234,15 @@ a {
   background: #f8fcfa;
 }
 
+.scan-upload-grid.is-ready .scan-upload-card {
+  min-height: 46px;
+  padding: 7px 9px;
+}
+
+.scan-upload-grid.is-ready .scan-upload-card > div:first-child {
+  gap: 1px;
+}
+
 .scan-upload-card > div:first-child {
   display: grid;
   min-width: 0;
@@ -2247,6 +2288,18 @@ a {
 
 .scan-file-button input {
   display: none;
+}
+
+.scan-file-button__loading {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.scan-file-button__loading .clinical-loader {
+  width: 13px;
+  height: 13px;
+  border-width: 1.5px;
 }
 
 .scan-error {
@@ -2374,7 +2427,7 @@ a {
 
 .scan-editor__body {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 230px;
+  grid-template-columns: minmax(0, 1fr) 198px;
   min-width: 0;
   min-height: 0;
   overflow: hidden;
@@ -4146,7 +4199,7 @@ a {
   }
 
   .scan-editor__body {
-    grid-template-columns: minmax(0, 1fr) 210px;
+    grid-template-columns: minmax(0, 1fr) 188px;
   }
 
   .plan-strategy-grid {
