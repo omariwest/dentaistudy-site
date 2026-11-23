@@ -69,13 +69,16 @@ function cloneModel(source: Group) {
   copy.traverse((object) => {
     if (!(object instanceof Mesh)) return;
 
+    if (!isTooth(object)) {
+      object.visible = false;
+      return;
+    }
+
     if (Array.isArray(object.material)) {
       object.material = object.material.map((material) => material.clone());
     } else {
       object.material = object.material.clone();
     }
-
-    if (!isTooth(object)) return;
 
     object.userData.bmBase = {
       position: object.position.clone(),
@@ -169,7 +172,18 @@ function ViewerControls({
   }, [selected]);
 
   const bounds = useMemo(() => {
-    const box = new Box3().setFromObject(model);
+    const box = new Box3();
+
+    model.traverse((object) => {
+      if (object instanceof Mesh && isTooth(object)) {
+        box.expandByObject(object);
+      }
+    });
+
+    if (box.isEmpty()) {
+      box.setFromObject(model);
+    }
+
     const center = box.getCenter(new Vector3());
     const radius = Math.max(1, box.getSize(new Vector3()).length() / 2);
     return { center, radius };
@@ -447,8 +461,8 @@ const ClinicalViewer = forwardRef<ClinicalViewerHandle, Props>(
       <div className="clinical-viewer">
         {loading && (
           <div className="clinical-viewer__message" role="status">
-            <strong>Loading segmented demo dentition…</strong>
-            <span>Open anatomy model for the 3D proof of concept.</span>
+            <span className="clinical-loader" aria-hidden="true" />
+            <strong>Loading demo reference</strong>
           </div>
         )}
 
@@ -463,7 +477,7 @@ const ClinicalViewer = forwardRef<ClinicalViewerHandle, Props>(
           <>
             <Canvas
               camera={{ fov: 35, near: 0.01, far: 1000 }}
-              dpr={[1, 1.75]}
+              dpr={[1, 1.5]}
               onPointerMissed={() => setSelected(null)}
             >
               <color attach="background" args={["#bfc1c9"]} />
@@ -549,7 +563,7 @@ const ClinicalViewer = forwardRef<ClinicalViewerHandle, Props>(
               target="_blank"
               rel="noreferrer"
             >
-              Demo anatomy: BodyParts3D / DBCLS · CC BY-SA 2.1 JP · adapted by OrganUI
+              Demo dentition reference: BodyParts3D / DBCLS · CC BY-SA 2.1 JP · adapted by OrganUI
             </a>
 
           </>
