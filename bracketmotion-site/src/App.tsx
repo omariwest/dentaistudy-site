@@ -339,10 +339,10 @@ function Footer() {
 }
 
 const workflowSteps = [
-  { number: "01", title: "Case", text: "Bring the patient's records and 3D dentition into one workspace." },
-  { number: "02", title: "Plan", text: "Compare a primary treatment strategy with a clear alternative." },
-  { number: "03", title: "Mechanics", text: "Choose the fixed-appliance mechanics that carry the plan." },
-  { number: "04", title: "Movement", text: "See the planned stages unfold on the patient's own dentition." },
+  { number: "1", title: "Case", text: "Bring the patient's records and 3D dentition into one workspace." },
+  { number: "2", title: "Plan", text: "Compare a primary treatment strategy with a clear alternative." },
+  { number: "3", title: "Mechanics", text: "Choose the fixed-appliance mechanics that carry the plan." },
+  { number: "4", title: "Movement", text: "See the planned stages unfold on the patient's own dentition." },
 ];
 
 function HomePage() {
@@ -767,7 +767,6 @@ function CaseRecordsView({
         <div>
           <span className="case-page-kicker">Case records</span>
           <h1>Build a planning-ready case.</h1>
-          <p>Only the records BracketMotion needs for the frozen V1 workflow are collected here.</p>
         </div>
         <button className="app-primary-action case-page-primary" type="button" onClick={onOpenFindings}>
           Review findings
@@ -783,10 +782,9 @@ function CaseRecordsView({
       <section className="case-section" aria-labelledby="case-details-title">
         <div className="case-section__heading">
           <div>
-            <span>01</span>
+            <span>1</span>
             <h2 id="case-details-title">Case details</h2>
           </div>
-          <p>Use a patient label rather than unnecessary identifiers.</p>
         </div>
 
         <div className="case-form-grid">
@@ -864,10 +862,9 @@ function CaseRecordsView({
       <section className="case-section" aria-labelledby="required-records-title">
         <div className="case-section__heading">
           <div>
-            <span>02</span>
+            <span>2</span>
             <h2 id="required-records-title">Required records</h2>
           </div>
-          <p>Planning is blocked until every mandatory group is complete.</p>
         </div>
 
         <div className="record-list">
@@ -912,7 +909,6 @@ function FindingsView({
         <div>
           <span className="case-page-kicker">Clinician-confirmed findings</span>
           <h1>Review the clinical source of truth.</h1>
-          <p>BracketMotion reasons from these findings. It does not silently replace them with AI inference.</p>
         </div>
         <button className="app-quiet-button case-page-secondary" type="button" onClick={onBackToCase}>
           Back to records
@@ -928,10 +924,9 @@ function FindingsView({
       <section className="case-section" aria-labelledby="oral-title">
         <div className="case-section__heading">
           <div>
-            <span>01</span>
+            <span>1</span>
             <h2 id="oral-title">Oral + periodontal</h2>
           </div>
-          <p>Treatment-readiness findings stay above malocclusion findings.</p>
         </div>
 
         <div className="finding-grid">
@@ -969,10 +964,9 @@ function FindingsView({
       <section className="case-section" aria-labelledby="facial-title">
         <div className="case-section__heading">
           <div>
-            <span>02</span>
+            <span>2</span>
             <h2 id="facial-title">Facial + soft tissue</h2>
           </div>
-          <p>Clinician-entered findings only.</p>
         </div>
 
         <div className="finding-grid">
@@ -1002,10 +996,9 @@ function FindingsView({
       <section className="case-section" aria-labelledby="occlusion-title">
         <div className="case-section__heading">
           <div>
-            <span>03</span>
+            <span>3</span>
             <h2 id="occlusion-title">Occlusion</h2>
           </div>
-          <p>Structured findings for treatment reasoning.</p>
         </div>
 
         <div className="finding-grid">
@@ -1075,10 +1068,9 @@ function FindingsView({
       <section className="case-section" aria-labelledby="ceph-title">
         <div className="case-section__heading">
           <div>
-            <span>04</span>
+            <span>4</span>
             <h2 id="ceph-title">Cephalometric summary</h2>
           </div>
-          <p>No proprietary analysis is required.</p>
         </div>
 
         <div className="finding-grid">
@@ -1108,10 +1100,9 @@ function FindingsView({
       <section className="case-section" aria-labelledby="scope-screen-title">
         <div className="case-section__heading">
           <div>
-            <span>05</span>
+            <span>5</span>
             <h2 id="scope-screen-title">V1 scope screen</h2>
           </div>
-          <p>If the primary treatment need is unsupported, planning stops here.</p>
         </div>
 
         <label className="scope-select">
@@ -1363,7 +1354,6 @@ function TreatmentPlanView({
         <div>
           <span className="case-page-kicker">Treatment plan</span>
           <h1>Review the strategy before any tooth moves.</h1>
-          <p>The plan remains clinician-controlled. Gemini can review the structured strategy, but it cannot approve or alter the treatment geometry.</p>
         </div>
         <span className={`plan-approval-badge${planApproved ? " is-approved" : ""}`}>
           {planApproved ? "Clinical plan approved" : "Approval required"}
@@ -1373,10 +1363,9 @@ function TreatmentPlanView({
       <section className="case-section" aria-labelledby="problem-list-title">
         <div className="case-section__heading">
           <div>
-            <span>01</span>
+            <span>1</span>
             <h2 id="problem-list-title">Problem list</h2>
           </div>
-          <p>Only clinically relevant problems that drive the plan.</p>
         </div>
         <textarea
           className="plan-textarea"
@@ -1389,10 +1378,9 @@ function TreatmentPlanView({
       <section className="case-section" aria-labelledby="goals-title">
         <div className="case-section__heading">
           <div>
-            <span>02</span>
+            <span>2</span>
             <h2 id="goals-title">Treatment goals</h2>
           </div>
-          <p>Define the intended correction before mechanics are selected.</p>
         </div>
         <textarea
           className="plan-textarea"
@@ -1406,7 +1394,7 @@ function TreatmentPlanView({
         <section className="case-section plan-strategy-card is-primary" aria-labelledby="primary-strategy-title">
           <div className="case-section__heading">
             <div>
-              <span>03</span>
+              <span>3</span>
               <h2 id="primary-strategy-title">Primary strategy</h2>
             </div>
             <span className="strategy-label">Primary</span>
@@ -1422,7 +1410,7 @@ function TreatmentPlanView({
         <section className="case-section plan-strategy-card" aria-labelledby="alternative-strategy-title">
           <div className="case-section__heading">
             <div>
-              <span>04</span>
+              <span>4</span>
               <h2 id="alternative-strategy-title">Alternative strategy</h2>
             </div>
             <span className="strategy-label is-secondary">Alternative</span>
@@ -2440,7 +2428,7 @@ function ClinicalAppPage() {
                 key={item.label}
                 onClick={() => openSection(item.label)}
               >
-                <span className="app-flow-item__index">{String(index + 1).padStart(2, "0")}</span>
+                <span className="app-flow-item__index">{String(index + 1)}</span>
                 <span className="app-flow-item__copy">
                   <strong>{item.label}</strong>
                   <small>{item.detail}</small>
@@ -2449,17 +2437,6 @@ function ClinicalAppPage() {
             ))}
           </nav>
 
-          <div className={`app-sidebar__status${scopeIssue ? " is-blocked" : planningReady ? " is-ready" : ""}`}>
-            <span>Planning status</span>
-            <strong>{scopeIssue ? "Out of V1 scope" : planningReady ? "Planning ready" : "Draft case"}</strong>
-            <p>
-              {scopeIssue
-                ? "Treatment planning is blocked by the scope screen."
-                : planningReady
-                  ? "All required records are complete."
-                  : `${missingCount} required records are still missing.`}
-            </p>
-          </div>
         </aside>
 
         <section className={`app-workspace${activeSection === "Case" || activeSection === "Findings" || showCaseHub ? " is-clinical-form" : ""}`}>
@@ -2482,11 +2459,6 @@ function ClinicalAppPage() {
                 <div>
                   <span className="case-page-kicker">Cases</span>
                   <h1>Open or create a case.</h1>
-                  <p>
-                    {session
-                      ? "Saved cases sync to your private BracketMotion account."
-                      : "The demo remains local. Sign in to create and reopen private saved cases."}
-                  </p>
                 </div>
                 <button
                   className="app-primary-action case-page-primary"
@@ -2511,7 +2483,6 @@ function ClinicalAppPage() {
                 </div>
                 <div className="case-card__status">
                   <span>Demo</span>
-                  <small>Open →</small>
                 </div>
               </button>
 
@@ -2556,8 +2527,7 @@ function ClinicalAppPage() {
                       <span>
                         {new Date(savedCase.updated_at).toLocaleDateString()}
                       </span>
-                      <small>Open →</small>
-                    </div>
+                        </div>
                   </button>
                 ))}
 
@@ -2637,20 +2607,12 @@ function ClinicalAppPage() {
               <span>Inspector</span>
               <strong>{showCaseHub ? "Cases" : activeSection}</strong>
             </div>
-            <button className="app-icon-button" type="button" aria-label="Inspector settings">•••</button>
           </div>
 
           <div className="app-inspector__section">
             <span className="app-inspector__label">Readiness</span>
             <div className="app-empty-selection">
               <strong>{scopeIssue ? "Planning blocked" : planningReady ? "Planning ready" : "Draft case"}</strong>
-              <p>
-                {scopeIssue
-                  ? scopeIssue
-                  : planningReady
-                    ? "All mandatory records are present and the V1 scope screen is clear."
-                    : `${missingCount} mandatory record${missingCount === 1 ? "" : "s"} still missing.`}
-              </p>
             </div>
           </div>
 
