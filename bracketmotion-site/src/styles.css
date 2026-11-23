@@ -571,7 +571,7 @@ a {
 
 .clinical-app__body {
   display: grid;
-  grid-template-columns: 220px minmax(0, 1fr) 292px;
+  grid-template-columns: 168px minmax(0, 1fr) 214px;
   min-width: 0;
   min-height: 0;
 }
@@ -591,14 +591,13 @@ a {
 }
 
 .app-sidebar__heading {
-  padding: 20px 18px 16px;
+  padding: 14px 12px 12px;
   border-bottom: 1px solid #eceef2;
 }
 
 .app-sidebar__heading span,
 .app-inspector__header span,
-.app-inspector__label,
-.app-sidebar__status > span {
+.app-inspector__label {
   display: block;
   color: #8a919e;
   font-size: 0.66rem;
@@ -615,15 +614,15 @@ a {
 }
 
 .app-flow-nav {
-  padding: 10px;
+  padding: 8px;
 }
 
 .app-flow-item {
   width: 100%;
-  min-height: 54px;
-  gap: 11px;
-  padding: 8px 10px;
-  border-radius: 10px;
+  min-height: 46px;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 8px;
   text-align: left;
 }
 
@@ -637,7 +636,7 @@ a {
 }
 
 .app-flow-item__index {
-  width: 24px;
+  width: 16px;
   flex: 0 0 auto;
   color: #9aa1ad;
   font-size: 0.63rem;
@@ -662,27 +661,6 @@ a {
 .app-flow-item__copy small {
   color: #8a919e;
   font-size: 0.67rem;
-}
-
-.app-sidebar__status {
-  margin: auto 12px 12px;
-  padding: 13px;
-  border: 1px solid #eceef2;
-  border-radius: 12px;
-  background: #fafbfc;
-}
-
-.app-sidebar__status strong {
-  display: block;
-  margin-top: 5px;
-  font-size: 0.76rem;
-}
-
-.app-sidebar__status p {
-  margin: 7px 0 0;
-  color: #737b88;
-  font-size: 0.67rem;
-  line-height: 1.5;
 }
 
 .app-workspace {
@@ -886,10 +864,10 @@ a {
 }
 
 .app-inspector__header {
-  min-height: 62px;
+  min-height: 54px;
   justify-content: space-between;
-  gap: 12px;
-  padding: 0 14px;
+  gap: 10px;
+  padding: 0 12px;
   border-bottom: 1px solid #eceef2;
 }
 
@@ -912,13 +890,13 @@ a {
 }
 
 .app-inspector__section {
-  padding: 16px 14px;
+  padding: 12px;
   border-bottom: 1px solid #eceef2;
 }
 
 .app-empty-selection {
-  margin-top: 10px;
-  padding: 14px;
+  margin-top: 8px;
+  padding: 10px;
   border: 1px solid #e7e9ed;
   border-radius: 11px;
   background: #fafbfc;
@@ -926,13 +904,6 @@ a {
 
 .app-empty-selection strong {
   font-size: 0.77rem;
-}
-
-.app-empty-selection p {
-  margin: 6px 0 0;
-  color: #737b88;
-  font-size: 0.68rem;
-  line-height: 1.5;
 }
 
 .app-inspector__section--compact {
@@ -957,7 +928,7 @@ a {
 
 .app-inspector__footer {
   margin-top: auto;
-  padding: 12px 14px;
+  padding: 10px 12px;
   border-top: 1px solid #eceef2;
 }
 
@@ -987,7 +958,7 @@ a {
 
 @media (max-width: 1180px) {
   .clinical-app__body {
-    grid-template-columns: 196px minmax(0, 1fr) 260px;
+    grid-template-columns: 154px minmax(0, 1fr) 204px;
   }
 
   .app-tool-button,
@@ -1124,28 +1095,10 @@ a {
   color: #a53b3b;
 }
 
-.app-sidebar__status.is-ready {
-  border-color: #d2eadd;
-  background: #f7fcf9;
-}
-
-.app-sidebar__status.is-ready strong {
-  color: #19734a;
-}
-
-.app-sidebar__status.is-blocked {
-  border-color: #efcccc;
-  background: #fff8f8;
-}
-
-.app-sidebar__status.is-blocked strong {
-  color: #a53b3b;
-}
-
 .case-section {
   width: min(980px, 100%);
-  margin: 0 auto 14px;
-  padding: 18px;
+  margin: 0 auto 12px;
+  padding: 16px;
   border: 1px solid #e1e4e9;
   border-radius: 14px;
   background: #ffffff;
@@ -1155,9 +1108,9 @@ a {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 24px;
-  margin-bottom: 16px;
-  padding-bottom: 13px;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
   border-bottom: 1px solid #eceef2;
 }
 
@@ -1178,15 +1131,6 @@ a {
   font-size: 0.9rem;
   font-weight: 760;
   letter-spacing: -0.025em;
-}
-
-.case-section__heading p {
-  max-width: 360px;
-  margin: 0;
-  color: #89909b;
-  font-size: 0.67rem;
-  line-height: 1.45;
-  text-align: right;
 }
 
 .case-form-grid,
@@ -3771,7 +3715,7 @@ a {
 .plan-textarea {
   width: 100%;
   min-width: 0;
-  resize: vertical;
+  resize: none;
   padding: 11px 12px;
   border: 1px solid #dfe2e8;
   border-radius: 9px;
@@ -4347,11 +4291,6 @@ a {
   .case-section__heading {
     display: grid;
     gap: 7px;
-  }
-
-  .case-section__heading p {
-    max-width: none;
-    text-align: left;
   }
 
   .case-form-grid,
