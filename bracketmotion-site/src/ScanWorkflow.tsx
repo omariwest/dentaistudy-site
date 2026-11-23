@@ -26,6 +26,7 @@ import {
   removeBracketMotionScan,
   uploadBracketMotionScan,
 } from "./supabase";
+import UiSelect from "./UiSelect";
 
 type Jaw = "upper" | "lower" | "bite";
 type EditMode = "add" | "erase";
@@ -2965,16 +2966,12 @@ export default function ScanWorkflow({
 
               <label className="scan-tooth-label">
                 <span>FDI tooth</span>
-                <select
+                <UiSelect
                   value={toothLabel}
-                  onChange={(event) => setToothLabel(event.target.value)}
-                >
-                  {teethForJaw.map((tooth) => (
-                    <option value={tooth} key={tooth}>
-                      {tooth}
-                    </option>
-                  ))}
-                </select>
+                  onChange={setToothLabel}
+                  options={teethForJaw}
+                  ariaLabel="FDI tooth"
+                />
               </label>
 
               <div className="scan-selection-summary">
@@ -3435,35 +3432,31 @@ export default function ScanWorkflow({
                     <div className="mechanic-endpoints">
                       <label>
                         <span>From</span>
-                        <select
+                        <UiSelect
                           value={mechanicEndpoints.chainStart}
-                          onChange={(event) =>
+                          onChange={(value) =>
                             setMechanicEndpoints((current) => ({
                               ...current,
-                              chainStart: event.target.value,
+                              chainStart: value,
                             }))
                           }
-                        >
-                          {allSegmentLabels.map((label) => (
-                            <option value={label} key={label}>{label}</option>
-                          ))}
-                        </select>
+                          options={allSegmentLabels}
+                          ariaLabel="Power chain from"
+                        />
                       </label>
                       <label>
                         <span>To</span>
-                        <select
+                        <UiSelect
                           value={mechanicEndpoints.chainEnd}
-                          onChange={(event) =>
+                          onChange={(value) =>
                             setMechanicEndpoints((current) => ({
                               ...current,
-                              chainEnd: event.target.value,
+                              chainEnd: value,
                             }))
                           }
-                        >
-                          {sameArchLabels(mechanicEndpoints.chainStart).map((label) => (
-                            <option value={label} key={label}>{label}</option>
-                          ))}
-                        </select>
+                          options={sameArchLabels(mechanicEndpoints.chainStart)}
+                          ariaLabel="Power chain to"
+                        />
                       </label>
                     </div>
                   </div>
@@ -3475,35 +3468,31 @@ export default function ScanWorkflow({
                     <div className="mechanic-endpoints">
                       <label>
                         <span>From</span>
-                        <select
+                        <UiSelect
                           value={mechanicEndpoints.coilStart}
-                          onChange={(event) =>
+                          onChange={(value) =>
                             setMechanicEndpoints((current) => ({
                               ...current,
-                              coilStart: event.target.value,
+                              coilStart: value,
                             }))
                           }
-                        >
-                          {allSegmentLabels.map((label) => (
-                            <option value={label} key={label}>{label}</option>
-                          ))}
-                        </select>
+                          options={allSegmentLabels}
+                          ariaLabel="Closed-coil spring from"
+                        />
                       </label>
                       <label>
                         <span>To</span>
-                        <select
+                        <UiSelect
                           value={mechanicEndpoints.coilEnd}
-                          onChange={(event) =>
+                          onChange={(value) =>
                             setMechanicEndpoints((current) => ({
                               ...current,
-                              coilEnd: event.target.value,
+                              coilEnd: value,
                             }))
                           }
-                        >
-                          {sameArchLabels(mechanicEndpoints.coilStart).map((label) => (
-                            <option value={label} key={label}>{label}</option>
-                          ))}
-                        </select>
+                          options={sameArchLabels(mechanicEndpoints.coilStart)}
+                          ariaLabel="Closed-coil spring to"
+                        />
                       </label>
                     </div>
                   </div>
@@ -3515,35 +3504,31 @@ export default function ScanWorkflow({
                     <div className="mechanic-endpoints">
                       <label>
                         <span>Upper</span>
-                        <select
+                        <UiSelect
                           value={mechanicEndpoints.elasticUpper}
-                          onChange={(event) =>
+                          onChange={(value) =>
                             setMechanicEndpoints((current) => ({
                               ...current,
-                              elasticUpper: event.target.value,
+                              elasticUpper: value,
                             }))
                           }
-                        >
-                          {upperSegmentLabels.map((label) => (
-                            <option value={label} key={label}>{label}</option>
-                          ))}
-                        </select>
+                          options={upperSegmentLabels}
+                          ariaLabel="Interarch elastic upper"
+                        />
                       </label>
                       <label>
                         <span>Lower</span>
-                        <select
+                        <UiSelect
                           value={mechanicEndpoints.elasticLower}
-                          onChange={(event) =>
+                          onChange={(value) =>
                             setMechanicEndpoints((current) => ({
                               ...current,
-                              elasticLower: event.target.value,
+                              elasticLower: value,
                             }))
                           }
-                        >
-                          {lowerSegmentLabels.map((label) => (
-                            <option value={label} key={label}>{label}</option>
-                          ))}
-                        </select>
+                          options={lowerSegmentLabels}
+                          ariaLabel="Interarch elastic lower"
+                        />
                       </label>
                     </div>
                   </div>
@@ -3555,35 +3540,31 @@ export default function ScanWorkflow({
                     <div className="mechanic-endpoints">
                       <label>
                         <span>From</span>
-                        <select
+                        <UiSelect
                           value={mechanicEndpoints.loopStart}
-                          onChange={(event) =>
+                          onChange={(value) =>
                             setMechanicEndpoints((current) => ({
                               ...current,
-                              loopStart: event.target.value,
+                              loopStart: value,
                             }))
                           }
-                        >
-                          {allSegmentLabels.map((label) => (
-                            <option value={label} key={label}>{label}</option>
-                          ))}
-                        </select>
+                          options={allSegmentLabels}
+                          ariaLabel="Closing loop from"
+                        />
                       </label>
                       <label>
                         <span>To</span>
-                        <select
+                        <UiSelect
                           value={mechanicEndpoints.loopEnd}
-                          onChange={(event) =>
+                          onChange={(value) =>
                             setMechanicEndpoints((current) => ({
                               ...current,
-                              loopEnd: event.target.value,
+                              loopEnd: value,
                             }))
                           }
-                        >
-                          {sameArchLabels(mechanicEndpoints.loopStart).map((label) => (
-                            <option value={label} key={label}>{label}</option>
-                          ))}
-                        </select>
+                          options={sameArchLabels(mechanicEndpoints.loopStart)}
+                          ariaLabel="Closing loop to"
+                        />
                       </label>
                     </div>
                   </div>
