@@ -3,8 +3,10 @@ import fs from "node:fs";
 const read = (path) => fs.readFileSync(new URL(path, import.meta.url), "utf8");
 const app = read("../src/App.tsx");
 const scan = read("../src/ScanWorkflow.tsx");
+const index = read("../index.html");
 const manifest = JSON.parse(read("../public/manifest.webmanifest"));
 const serviceWorker = read("../public/sw.js");
+const finalBrandMark = read("../public/icons/bracketmotion-icon.svg");
 
 function requireText(source, token, label) {
   if (!source.includes(token)) {
@@ -141,6 +143,16 @@ if (manifest.start_url !== "/app" || manifest.display !== "standalone") {
 }
 if (manifest.id !== "/app") {
   throw new Error("V1 validation failed: PWA manifest ID regressed.");
+}
+if (manifest.theme_color !== "#000000") {
+  throw new Error("V1 validation failed: final BracketMotion PWA theme color regressed.");
+}
+requireText(index, "/favicon.ico", "final favicon ICO");
+requireText(index, "/icons/favicon-32.png", "final 32px favicon");
+requireText(index, "/icons/favicon-16.png", "final 16px favicon");
+requireText(finalBrandMark, "BracketMotion black standalone mark", "final BracketMotion brand mark");
+if (finalBrandMark.includes("#6d4cf5")) {
+  throw new Error("V1 validation failed: temporary purple favicon artwork is still active.");
 }
 requireText(app, "NavigatorWithInstall", "modern browser install API");
 requireText(app, "beforeinstallprompt", "legacy browser install fallback");
