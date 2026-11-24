@@ -47,6 +47,7 @@ type NavigatorWithInstall = Navigator & {
 type InstallContextValue = {
   installed: boolean;
   installing: boolean;
+  installAvailable: boolean;
   requestInstall: (platform: Platform) => Promise<void>;
 };
 
@@ -60,12 +61,17 @@ function isStandaloneMode() {
   );
 }
 
+function supportsWebInstall() {
+  return typeof (navigator as NavigatorWithInstall).install === "function";
+}
+
 function PwaInstallProvider({ children }: { children: React.ReactNode }) {
   const [installPrompt, setInstallPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
   const [installed, setInstalled] = useState(isStandaloneMode);
   const [installing, setInstalling] = useState(false);
   const [guidePlatform, setGuidePlatform] = useState<Platform | null>(null);
+  const installAvailable = supportsWebInstall() || installPrompt !== null;
 
   useEffect(() => {
     const displayMode = window.matchMedia("(display-mode: standalone)");
@@ -151,8 +157,8 @@ function PwaInstallProvider({ children }: { children: React.ReactNode }) {
   );
 
   const value = useMemo(
-    () => ({ installed, installing, requestInstall }),
-    [installed, installing, requestInstall],
+    () => ({ installed, installing, installAvailable, requestInstall }),
+    [installed, installing, installAvailable, requestInstall],
   );
 
   return (
@@ -213,6 +219,22 @@ function PwaInstallProvider({ children }: { children: React.ReactNode }) {
               )}
 
               <div className="install-dialog__actions">
+                <button
+                  className="app-primary-action"
+                  type="button"
+                  aria-disabled={!installAvailable || installing}
+                  onClick={() => {
+                    if (installAvailable && !installing) {
+                      void requestInstall(guidePlatform);
+                    }
+                  }}
+                >
+                  {installing
+                    ? "Installing…"
+                    : installAvailable
+                      ? "Install BracketMotion"
+                      : "Preparing install…"}
+                </button>
                 <button
                   className="app-quiet-button"
                   type="button"
@@ -279,7 +301,7 @@ function InstallButton({
   compact?: boolean;
   primary?: boolean;
 }) {
-  const { installed, installing, requestInstall } = usePwaInstall();
+  const { installed, installing, installAvailable, requestInstall } = usePwaInstall();
 
   return (
     <button
@@ -297,7 +319,9 @@ function InstallButton({
           ? "Open BracketMotion"
           : installing
             ? "Installing BracketMotion"
-            : `Install BracketMotion for ${platform}`
+            : installAvailable
+              ? `Install BracketMotion for ${platform}`
+              : `Show BracketMotion installation steps for ${platform}`
       }
       onClick={() => {
         if (!installing) void requestInstall(platform);
@@ -311,9 +335,13 @@ function InstallButton({
             : "Open BracketMotion"
           : installing
             ? "Installing…"
-            : compact
-              ? platform
-              : `Install for ${platform}`}
+            : installAvailable
+              ? compact
+                ? platform
+                : `Install for ${platform}`
+              : compact
+                ? platform
+                : `Install for ${platform}`}
       </span>
     </button>
   );
