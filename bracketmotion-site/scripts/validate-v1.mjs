@@ -156,6 +156,12 @@ if (finalBrandMark.includes("#6d4cf5")) {
 }
 requireText(app, "NavigatorWithInstall", "modern browser install API");
 requireText(app, "beforeinstallprompt", "legacy browser install fallback");
+requireText(app, "installAvailable", "live install readiness state");
+requireText(app, "Preparing install…", "install dialog pending action");
+requireText(app, "Install BracketMotion", "install dialog primary action");
+if (app.includes('<img src="/icons/bracketmotion-icon.svg"')) {
+  throw new Error("V1 validation failed: favicon artwork must not be inserted into visible BracketMotion wordmarks.");
+}
 if (app.includes("Open web app")) {
   throw new Error("V1 validation failed: install fallback must not imitate installation by navigating to the web app.");
 }
