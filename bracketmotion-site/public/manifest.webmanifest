@@ -7,7 +7,7 @@
   "scope": "/",
   "display": "standalone",
   "background_color": "#f4f5f7",
-  "theme_color": "#6d4cf5",
+  "theme_color": "#000000",
   "orientation": "any",
   "icons": [
     {
@@ -26,7 +26,7 @@
       "src": "/icons/bracketmotion-icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
-      "purpose": "maskable"
+      "purpose": "any"
     }
   ]
 }
