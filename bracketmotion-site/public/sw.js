@@ -1,8 +1,12 @@
-const CACHE_NAME = "bracketmotion-shell-v2";
+const CACHE_NAME = "bracketmotion-shell-v3";
 const STATIC_SHELL = [
   "/",
   "/manifest.webmanifest",
+  "/favicon.ico",
   "/icons/bracketmotion-icon.svg",
+  "/icons/favicon-16.png",
+  "/icons/favicon-32.png",
+  "/icons/favicon-48.png",
   "/icons/icon-180.png",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
