@@ -324,7 +324,8 @@ function Header() {
     <header className="site-header">
       <div className="container header-inner">
         <a className="wordmark" href="/" aria-label="BracketMotion home">
-          BracketMotion<span>.</span>
+          <img src="/icons/bracketmotion-icon.svg" alt="" aria-hidden="true" />
+          <span className="wordmark__text">BracketMotion</span>
         </a>
 
         <div className="header-actions" aria-label="Install BracketMotion">
@@ -342,7 +343,8 @@ function Footer() {
       <div className="container footer-inner">
         <div className="footer-brand">
           <a className="wordmark wordmark--footer" href="/" aria-label="BracketMotion home">
-            BracketMotion<span>.</span>
+            <img src="/icons/bracketmotion-icon.svg" alt="" aria-hidden="true" />
+          <span className="wordmark__text">BracketMotion</span>
           </a>
           <p>Plan the mechanics. See the movement.</p>
         </div>
@@ -2389,7 +2391,8 @@ function ClinicalAppPage() {
       <header className="app-topbar">
         <div className="app-topbar__brand">
           <a className="wordmark app-wordmark" href="/" aria-label="BracketMotion home">
-            BracketMotion<span>.</span>
+            <img src="/icons/bracketmotion-icon.svg" alt="" aria-hidden="true" />
+          <span className="wordmark__text">BracketMotion</span>
           </a>
           <span className="app-topbar__divider" aria-hidden="true" />
           <div className="app-case-title">
