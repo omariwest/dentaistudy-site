@@ -75,17 +75,27 @@ a {
 }
 
 .wordmark {
+  display: inline-flex;
   width: fit-content;
+  align-items: center;
+  gap: 8px;
   color: var(--ink);
   font-size: 1.38rem;
   font-weight: 800;
-  letter-spacing: -0.065em;
+  letter-spacing: -0.055em;
   line-height: 1;
   text-decoration: none;
 }
 
-.wordmark span {
-  color: var(--accent);
+.wordmark img {
+  display: block;
+  width: 27px;
+  height: auto;
+  flex: 0 0 auto;
+}
+
+.wordmark__text {
+  color: inherit;
 }
 
 .header-actions,
@@ -409,7 +419,7 @@ a {
 }
 
 .wordmark--footer {
-  display: inline-block;
+  display: inline-flex;
   font-size: 1.18rem;
 }
 
@@ -496,6 +506,10 @@ a {
 .app-wordmark {
   flex: 0 0 auto;
   font-size: 1.16rem;
+}
+
+.app-wordmark img {
+  width: 23px;
 }
 
 .app-topbar__divider {
