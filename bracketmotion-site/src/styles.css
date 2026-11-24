@@ -87,13 +87,6 @@ a {
   text-decoration: none;
 }
 
-.wordmark img {
-  display: block;
-  width: 27px;
-  height: auto;
-  flex: 0 0 auto;
-}
-
 .wordmark__text {
   color: inherit;
 }
@@ -506,10 +499,6 @@ a {
 .app-wordmark {
   flex: 0 0 auto;
   font-size: 1.16rem;
-}
-
-.app-wordmark img {
-  width: 23px;
 }
 
 .app-topbar__divider {
@@ -1734,6 +1723,11 @@ a {
 .install-dialog__actions .app-quiet-button {
   width: auto;
   min-height: 36px;
+}
+
+.install-dialog__actions .app-primary-action[aria-disabled="true"] {
+  cursor: progress;
+  opacity: 0.58;
 }
 
 .install-dialog__header > button:focus-visible,
