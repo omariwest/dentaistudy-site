@@ -604,24 +604,9 @@ const defaultFindings: FindingsState = {
   cephConcern: "None",
 };
 
-const emptyFindings: FindingsState = {
-  ...defaultFindings,
-  missingTeeth: "",
-  impactedTeeth: "",
-  unsuitableTeeth: "",
-  smileConcern: "",
-  overjet: "",
-  overbite: "",
-  maxillaryCrowding: "",
-  mandibularCrowding: "",
-  upperMidline: "",
-  lowerMidline: "",
-  midlineDiscrepancy: "",
-  crossbite: "",
-  scissorBite: "",
-  rotations: "",
-  cephConcern: "",
-};
+const emptyFindings: FindingsState = Object.fromEntries(
+  Object.keys(defaultFindings).map((key) => [key, ""]),
+) as FindingsState;
 
 const demoRecords: Record<RecordKey, boolean> = {
   history: true,
@@ -661,10 +646,25 @@ const emptyPlan: TreatmentPlanState = {
   alternativeStrategy: "",
 };
 
+type DiagnosisState = {
+  summary: string;
+  interpretation: string;
+  informationGaps: string;
+  approved: boolean;
+};
+
+const emptyDiagnosis: DiagnosisState = {
+  summary: "",
+  interpretation: "",
+  informationGaps: "",
+  approved: false,
+};
+
 type StoredRecordsState = {
   checklist?: Partial<Record<RecordKey, boolean>>;
   details?: Partial<CaseDetailsState>;
   findings?: Partial<FindingsState>;
+  diagnosis?: Partial<DiagnosisState>;
 };
 
 type ClinicalAiReviewResult = {
@@ -1096,19 +1096,19 @@ function FindingsView({
         <div className="finding-grid">
           <label>
             <span>Oral hygiene</span>
-            <UiSelect value={findings.oralHygiene} onChange={(value) => onFindingChange("oralHygiene", value)} options={["Acceptable","Concern"]} ariaLabel="Oral hygiene" />
+            <UiSelect value={findings.oralHygiene} onChange={(value) => onFindingChange("oralHygiene", value)} options={["Not assessed", "Acceptable","Concern"]} ariaLabel="Oral hygiene" />
           </label>
           <label>
             <span>Gingival / periodontal status</span>
-            <UiSelect value={findings.periodontalStatus} onChange={(value) => onFindingChange("periodontalStatus", value)} options={["Healthy","Concern"]} ariaLabel="Gingival / periodontal status" />
+            <UiSelect value={findings.periodontalStatus} onChange={(value) => onFindingChange("periodontalStatus", value)} options={["Not assessed", "Healthy","Concern"]} ariaLabel="Gingival / periodontal status" />
           </label>
           <label>
             <span>Active caries / untreated pathology</span>
-            <UiSelect value={findings.activeCaries} onChange={(value) => onFindingChange("activeCaries", value)} options={["No","Yes"]} ariaLabel="Active caries / untreated pathology" />
+            <UiSelect value={findings.activeCaries} onChange={(value) => onFindingChange("activeCaries", value)} options={["Not assessed", "No","Yes"]} ariaLabel="Active caries / untreated pathology" />
           </label>
           <label>
             <span>Restorative / prosthetic considerations</span>
-            <UiSelect value={findings.restorativeConsiderations} onChange={(value) => onFindingChange("restorativeConsiderations", value)} options={["None","Present"]} ariaLabel="Restorative / prosthetic considerations" />
+            <UiSelect value={findings.restorativeConsiderations} onChange={(value) => onFindingChange("restorativeConsiderations", value)} options={["Not assessed", "None","Present"]} ariaLabel="Restorative / prosthetic considerations" />
           </label>
           <label>
             <span>Missing permanent teeth</span>
@@ -1135,19 +1135,19 @@ function FindingsView({
         <div className="finding-grid">
           <label>
             <span>Profile</span>
-            <UiSelect value={findings.profile} onChange={(value) => onFindingChange("profile", value)} options={["Convex","Straight","Concave"]} ariaLabel="Profile" />
+            <UiSelect value={findings.profile} onChange={(value) => onFindingChange("profile", value)} options={["Not assessed", "Convex","Straight","Concave"]} ariaLabel="Profile" />
           </label>
           <label>
             <span>Lip competence</span>
-            <UiSelect value={findings.lipCompetence} onChange={(value) => onFindingChange("lipCompetence", value)} options={["Competent","Incompetent"]} ariaLabel="Lip competence" />
+            <UiSelect value={findings.lipCompetence} onChange={(value) => onFindingChange("lipCompetence", value)} options={["Not assessed", "Competent","Incompetent"]} ariaLabel="Lip competence" />
           </label>
           <label>
             <span>Facial vertical pattern</span>
-            <UiSelect value={findings.facialVerticalPattern} onChange={(value) => onFindingChange("facialVerticalPattern", value)} options={["Low","Average","High"]} ariaLabel="Facial vertical pattern" />
+            <UiSelect value={findings.facialVerticalPattern} onChange={(value) => onFindingChange("facialVerticalPattern", value)} options={["Not assessed", "Low","Average","High"]} ariaLabel="Facial vertical pattern" />
           </label>
           <label>
             <span>Facial asymmetry</span>
-            <UiSelect value={findings.facialAsymmetry} onChange={(value) => onFindingChange("facialAsymmetry", value)} options={["None","Present"]} ariaLabel="Facial asymmetry" />
+            <UiSelect value={findings.facialAsymmetry} onChange={(value) => onFindingChange("facialAsymmetry", value)} options={["Not assessed", "None","Present"]} ariaLabel="Facial asymmetry" />
           </label>
           <label className="finding-grid__wide">
             <span>Smile / incisor display concern</span>
@@ -1166,19 +1166,19 @@ function FindingsView({
         <div className="finding-grid">
           <label>
             <span>Molar relationship — right</span>
-            <UiSelect value={findings.molarRight} onChange={(value) => onFindingChange("molarRight", value)} options={["Class I","Class II","Class III"]} ariaLabel="Molar relationship — right" />
+            <UiSelect value={findings.molarRight} onChange={(value) => onFindingChange("molarRight", value)} options={["Not assessed", "Class I","Class II","Class III"]} ariaLabel="Molar relationship — right" />
           </label>
           <label>
             <span>Molar relationship — left</span>
-            <UiSelect value={findings.molarLeft} onChange={(value) => onFindingChange("molarLeft", value)} options={["Class I","Class II","Class III"]} ariaLabel="Molar relationship — left" />
+            <UiSelect value={findings.molarLeft} onChange={(value) => onFindingChange("molarLeft", value)} options={["Not assessed", "Class I","Class II","Class III"]} ariaLabel="Molar relationship — left" />
           </label>
           <label>
             <span>Canine relationship — right</span>
-            <UiSelect value={findings.canineRight} onChange={(value) => onFindingChange("canineRight", value)} options={["Class I","Class II","Class III"]} ariaLabel="Canine relationship — right" />
+            <UiSelect value={findings.canineRight} onChange={(value) => onFindingChange("canineRight", value)} options={["Not assessed", "Class I","Class II","Class III"]} ariaLabel="Canine relationship — right" />
           </label>
           <label>
             <span>Canine relationship — left</span>
-            <UiSelect value={findings.canineLeft} onChange={(value) => onFindingChange("canineLeft", value)} options={["Class I","Class II","Class III"]} ariaLabel="Canine relationship — left" />
+            <UiSelect value={findings.canineLeft} onChange={(value) => onFindingChange("canineLeft", value)} options={["Not assessed", "Class I","Class II","Class III"]} ariaLabel="Canine relationship — left" />
           </label>
           <label>
             <span>Overjet</span>
@@ -1210,7 +1210,7 @@ function FindingsView({
           </label>
           <label>
             <span>Curve of Spee</span>
-            <UiSelect value={findings.curveOfSpee} onChange={(value) => onFindingChange("curveOfSpee", value)} options={["Flat","Mild","Moderate","Deep"]} ariaLabel="Curve of Spee" />
+            <UiSelect value={findings.curveOfSpee} onChange={(value) => onFindingChange("curveOfSpee", value)} options={["Not assessed", "Flat","Mild","Moderate","Deep"]} ariaLabel="Curve of Spee" />
           </label>
           <label>
             <span>Anterior / posterior crossbite</span>
@@ -1237,19 +1237,19 @@ function FindingsView({
         <div className="finding-grid">
           <label>
             <span>Skeletal AP pattern</span>
-            <UiSelect value={findings.skeletalAp} onChange={(value) => onFindingChange("skeletalAp", value)} options={["Class I","Class II","Class III"]} ariaLabel="Skeletal AP pattern" />
+            <UiSelect value={findings.skeletalAp} onChange={(value) => onFindingChange("skeletalAp", value)} options={["Not assessed", "Class I","Class II","Class III"]} ariaLabel="Skeletal AP pattern" />
           </label>
           <label>
             <span>Vertical skeletal pattern</span>
-            <UiSelect value={findings.skeletalVertical} onChange={(value) => onFindingChange("skeletalVertical", value)} options={["Low","Average","High"]} ariaLabel="Vertical skeletal pattern" />
+            <UiSelect value={findings.skeletalVertical} onChange={(value) => onFindingChange("skeletalVertical", value)} options={["Not assessed", "Low","Average","High"]} ariaLabel="Vertical skeletal pattern" />
           </label>
           <label>
             <span>Maxillary incisors</span>
-            <UiSelect value={findings.maxillaryIncisors} onChange={(value) => onFindingChange("maxillaryIncisors", value)} options={["Retroclined","Normal","Proclined"]} ariaLabel="Maxillary incisors" />
+            <UiSelect value={findings.maxillaryIncisors} onChange={(value) => onFindingChange("maxillaryIncisors", value)} options={["Not assessed", "Retroclined","Normal","Proclined"]} ariaLabel="Maxillary incisors" />
           </label>
           <label>
             <span>Mandibular incisors</span>
-            <UiSelect value={findings.mandibularIncisors} onChange={(value) => onFindingChange("mandibularIncisors", value)} options={["Retroclined","Normal","Proclined"]} ariaLabel="Mandibular incisors" />
+            <UiSelect value={findings.mandibularIncisors} onChange={(value) => onFindingChange("mandibularIncisors", value)} options={["Not assessed", "Retroclined","Normal","Proclined"]} ariaLabel="Mandibular incisors" />
           </label>
           <label className="finding-grid__wide">
             <span>Important cephalometric concern</span>
