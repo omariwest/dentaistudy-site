@@ -1068,7 +1068,6 @@ function FindingsView({
   diagnosisError,
   planningReady,
   missingCount,
-  onBackToCase,
 }: {
   scopeIssue: string;
   onScopeIssue: (value: string) => void;
@@ -1085,7 +1084,6 @@ function FindingsView({
   diagnosisError: string;
   planningReady: boolean;
   missingCount: number;
-  onBackToCase: () => void;
 }) {
   return (
     <div className="case-workflow-page">
@@ -2935,7 +2933,6 @@ function ClinicalAppPage() {
               diagnosisError={diagnosisError}
               planningReady={planningReady}
               missingCount={missingCount}
-              onBackToCase={() => setActiveSection("Case")}
             />
           ) : activeSection === "Plan" ? (
             <TreatmentPlanView
