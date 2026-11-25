@@ -811,7 +811,6 @@ function CaseRecordsView({
     <div className="case-workflow-page">
       <div className="case-workflow-page__header">
         <div>
-          <span className="case-page-kicker">Case records</span>
           <h1>Case records</h1>
         </div>
         <button className="app-primary-action case-page-primary" type="button" onClick={onOpenFindings}>
@@ -946,7 +945,6 @@ function FindingsView({
     <div className="case-workflow-page">
       <div className="case-workflow-page__header">
         <div>
-          <span className="case-page-kicker">Clinician-confirmed findings</span>
           <h1>Clinical findings</h1>
         </div>
         <button className="app-quiet-button case-page-secondary" type="button" onClick={onBackToCase}>
@@ -1365,7 +1363,6 @@ function TreatmentPlanView({
     <div className="case-workflow-page">
       <div className="case-workflow-page__header">
         <div>
-          <span className="case-page-kicker">Treatment plan</span>
           <h1>Treatment plan</h1>
         </div>
       </div>
