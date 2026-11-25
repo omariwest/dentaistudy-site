@@ -807,6 +807,61 @@ function ReadinessCard({
   );
 }
 
+function CasePhotoSlot({
+  slot,
+  photo,
+  onPhotoChange,
+}: {
+  slot: { key: PhotoKey; title: string };
+  photo?: CasePhoto;
+  onPhotoChange: (key: PhotoKey, file: File | null) => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  return (
+    <div className="case-photo-slot">
+      <input
+        ref={inputRef}
+        type="file"
+        hidden
+        accept="image/jpeg,image/png,image/webp"
+        aria-label={slot.title}
+        onChange={(event) => {
+          const file = event.currentTarget.files?.[0];
+          if (file) onPhotoChange(slot.key, file);
+          event.currentTarget.value = "";
+        }}
+      />
+      <button
+        className="case-photo-slot__preview"
+        type="button"
+        aria-label={(photo ? "Replace " : "Add ") + slot.title}
+        onClick={() => inputRef.current?.click()}
+      >
+        {photo ? (
+          <img src={photo.previewUrl} alt={slot.title + " local preview"} />
+        ) : (
+          <span>Add image</span>
+        )}
+      </button>
+      <div className="case-photo-slot__caption">
+        <strong>{slot.title}</strong>
+        <span>{photo ? "In this tab" : "Not added"}</span>
+      </div>
+      {photo && (
+        <button
+          className="case-photo-slot__remove"
+          type="button"
+          onClick={() => onPhotoChange(slot.key, null)}
+          aria-label={"Remove " + slot.title}
+        >
+          Remove
+        </button>
+      )}
+    </div>
+  );
+}
+
 function CaseRecordsView({
   caseLabel,
   onCaseLabel,
@@ -814,6 +869,9 @@ function CaseRecordsView({
   onCaseDetail,
   records,
   onCompleteRecord,
+  photos,
+  onPhotoChange,
+  photoError,
   planningReady,
   missingCount,
   scopeIssue,
@@ -825,19 +883,24 @@ function CaseRecordsView({
   onCaseDetail: (field: keyof CaseDetailsState, value: string) => void;
   records: Record<RecordKey, boolean>;
   onCompleteRecord: (key: RecordKey) => void;
+  photos: Partial<Record<PhotoKey, CasePhoto>>;
+  onPhotoChange: (key: PhotoKey, file: File | null) => void;
+  photoError: string;
   planningReady: boolean;
   missingCount: number;
   scopeIssue: string;
   onOpenFindings: () => void;
 }) {
+  const intraoralCount = intraoralPhotoSlots.filter((slot) => Boolean(photos[slot.key])).length;
+
   return (
     <div className="case-workflow-page">
       <div className="case-workflow-page__header">
         <div>
-          <h1>Case records</h1>
+          <h1>Case Presentation</h1>
         </div>
         <button className="app-primary-action case-page-primary" type="button" onClick={onOpenFindings}>
-          Review findings
+          Continue to Diagnosis
         </button>
       </div>
 
@@ -849,14 +912,11 @@ function CaseRecordsView({
 
       <section className="case-section" aria-labelledby="case-details-title">
         <div className="case-section__heading">
-          <div>
-            <h2 id="case-details-title">Case details</h2>
-          </div>
+          <div><h2 id="case-details-title">Patient and clinical history</h2></div>
         </div>
-
         <div className="case-form-grid">
           <label>
-            <span>Case label</span>
+            <span>Patient label / case ID</span>
             <input value={caseLabel} onChange={(event) => onCaseLabel(event.target.value)} type="text" />
           </label>
           <label>
@@ -866,6 +926,15 @@ function CaseRecordsView({
               min="12"
               type="number"
               onChange={(event) => onCaseDetail("age", event.target.value)}
+            />
+          </label>
+          <label>
+            <span>Sex (optional)</span>
+            <UiSelect
+              value={caseDetails.sex}
+              onChange={(value) => onCaseDetail("sex", value)}
+              options={["Not specified", "Female", "Male"]}
+              ariaLabel="Sex (optional)"
             />
           </label>
           <label>
@@ -895,7 +964,7 @@ function CaseRecordsView({
             />
           </label>
           <label className="case-form-grid__wide">
-            <span>Relevant medical history</span>
+            <span>Medical history</span>
             <input
               value={caseDetails.medicalHistory}
               type="text"
@@ -903,7 +972,7 @@ function CaseRecordsView({
             />
           </label>
           <label className="case-form-grid__wide">
-            <span>Relevant dental / previous orthodontic history</span>
+            <span>Dental / orthodontic history</span>
             <input
               value={caseDetails.dentalHistory}
               type="text"
@@ -911,7 +980,7 @@ function CaseRecordsView({
             />
           </label>
           <label className="case-form-grid__wide">
-            <span>Allergies / material considerations / clinician notes</span>
+            <span>Allergies / habits / clinical notes</span>
             <input
               value={caseDetails.notes}
               type="text"
@@ -921,24 +990,60 @@ function CaseRecordsView({
         </div>
       </section>
 
+      <section className="case-section" aria-labelledby="intraoral-photos-title">
+        <div className="case-section__heading">
+          <div><h2 id="intraoral-photos-title">Five intraoral photographs</h2></div>
+          <span className="case-photo-count">{intraoralCount} of 5 added</span>
+        </div>
+        <div className="case-photo-grid">
+          {intraoralPhotoSlots.map((slot) => (
+            <CasePhotoSlot
+              key={slot.key}
+              slot={slot}
+              photo={photos[slot.key]}
+              onPhotoChange={onPhotoChange}
+            />
+          ))}
+        </div>
+        <p className="case-photo-note">JPG, PNG or WebP, up to 12 MB each. Images stay in this browser tab; they are not saved to your case yet.</p>
+        {photoError && <p className="case-photo-error" role="alert">{photoError}</p>}
+      </section>
+
+      <section className="case-section" aria-labelledby="facial-photos-title">
+        <div className="case-section__heading">
+          <div><h2 id="facial-photos-title">Facial photographs</h2></div>
+          <span className="case-photo-count">Additional records</span>
+        </div>
+        <div className="case-photo-grid case-photo-grid--additional">
+          {facialPhotoSlots.map((slot) => (
+            <CasePhotoSlot key={slot.key} slot={slot} photo={photos[slot.key]} onPhotoChange={onPhotoChange} />
+          ))}
+        </div>
+      </section>
+
+      <section className="case-section" aria-labelledby="radiographs-title">
+        <div className="case-section__heading">
+          <div><h2 id="radiographs-title">Radiographic records</h2></div>
+        </div>
+        <div className="case-photo-grid case-photo-grid--radiographs">
+          {radiographSlots.map((slot) => (
+            <CasePhotoSlot key={slot.key} slot={slot} photo={photos[slot.key]} onPhotoChange={onPhotoChange} />
+          ))}
+        </div>
+      </section>
+
       <section className="case-section" aria-labelledby="required-records-title">
         <div className="case-section__heading">
-          <div>
-            <h2 id="required-records-title">Required records</h2>
-          </div>
+          <div><h2 id="required-records-title">Other clinical records</h2></div>
         </div>
-
         <div className="record-list">
-          {requiredRecords.map((record) => (
+          {requiredRecords.filter((record) => !["photos", "pano", "ceph"].includes(record.key)).map((record) => (
             <div className="record-row" key={record.key}>
               <div className="record-row__copy">
                 <strong>{record.title}</strong>
                 <span>{record.detail}</span>
               </div>
-              <RecordStatus
-                complete={records[record.key]}
-                onAdd={() => onCompleteRecord(record.key)}
-              />
+              <RecordStatus complete={records[record.key]} onAdd={() => onCompleteRecord(record.key)} />
             </div>
           ))}
         </div>
