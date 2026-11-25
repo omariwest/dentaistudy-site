@@ -618,7 +618,7 @@ a {
 .app-flow-item {
   display: flex;
   min-height: 36px;
-  flex: 1 0 auto;
+  flex: 0 0 auto;
   align-items: center;
   justify-content: center;
   gap: 5px;
@@ -1258,30 +1258,19 @@ a {
   border-radius: 10px;
   background: #ffffff;
   box-shadow: 0 14px 30px rgba(15, 23, 42, 0.1);
-  opacity: 0;
   visibility: hidden;
-  transform: translateY(-3px);
-  transform-origin: top center;
   pointer-events: none;
-  transition:
-    opacity 0.13s ease,
-    transform 0.13s ease,
-    visibility 0s linear 0.13s;
 }
 
 .ui-select.is-dropup .ui-select-menu {
   top: auto;
   bottom: calc(100% + 6px);
-  transform: translateY(3px);
-  transform-origin: bottom center;
+
 }
 
 .ui-select.is-open .ui-select-menu {
-  opacity: 1;
   visibility: visible;
-  transform: translateY(0);
   pointer-events: auto;
-  transition-delay: 0s;
 }
 
 .ui-select-group {
