@@ -1400,7 +1400,7 @@ type TreatmentPlanState = {
   alternativeStrategy: string;
 };
 
-type AiReviewMode = "plan_review" | "stage_review";
+type AiReviewMode = "diagnosis_draft" | "plan_review" | "stage_review";
 
 function ClinicalAiReviewCard({
   mode,
@@ -2063,6 +2063,10 @@ function ClinicalAppPage() {
   const [caseLabel, setCaseLabel] = useState("Demo Case");
   const [caseDetails, setCaseDetails] = useState<CaseDetailsState>(defaultCaseDetails);
   const [findings, setFindings] = useState<FindingsState>(defaultFindings);
+  const [diagnosis, setDiagnosis] = useState<DiagnosisState>(emptyDiagnosis);
+  const [diagnosisLoading, setDiagnosisLoading] = useState(false);
+  const [diagnosisError, setDiagnosisError] = useState("");
+  const diagnosisRequestRef = useRef(0);
   const [scopeIssue, setScopeIssue] = useState("");
   const [planApproved, setPlanApproved] = useState(false);
   const [setupApproved, setSetupApproved] = useState(false);
@@ -2103,6 +2107,7 @@ function ClinicalAppPage() {
   ).toUpperCase();
 
   const clearLocalPhotos = useCallback(() => {
+    diagnosisRequestRef.current += 1;
     photoGenerationRef.current += 1;
     photoRequestRef.current = {};
     Object.values(photoUrlsRef.current).forEach((url) => {
@@ -2171,6 +2176,10 @@ function ClinicalAppPage() {
         setCaseLabel("Demo Case");
         setCaseDetails(defaultCaseDetails);
         setFindings(defaultFindings);
+        setDiagnosis(emptyDiagnosis);
+        diagnosisRequestRef.current += 1;
+        setDiagnosisLoading(false);
+        setDiagnosisError("");
         setRecords(demoRecords);
         setScopeIssue("");
         setPlan(demoPlan);
@@ -2241,6 +2250,8 @@ function ClinicalAppPage() {
       return next;
     });
     setPhotoError("");
+    setDiagnosis((current) => ({ ...current, approved: false }));
+    diagnosisRequestRef.current += 1;
     setPlanApproved(false);
     setSetupApproved(false);
     setAiReview(null);
@@ -2250,16 +2261,31 @@ function ClinicalAppPage() {
   const completeRecord = (key: RecordKey) => {
     if (key === "photos" || key === "pano" || key === "ceph") return;
     setRecords((current) => ({ ...current, [key]: true }));
+    setDiagnosis((current) => ({ ...current, approved: false }));
+    diagnosisRequestRef.current += 1;
+    setPlanApproved(false);
+    setSetupApproved(false);
   };
 
   const updateCaseDetail = (field: keyof CaseDetailsState, value: string) => {
     setCaseDetails((current) => ({ ...current, [field]: value }));
+    setDiagnosis((current) => ({ ...current, approved: false }));
+    diagnosisRequestRef.current += 1;
     setPlanApproved(false);
     setSetupApproved(false);
   };
 
   const updateFinding = (field: keyof FindingsState, value: string) => {
     setFindings((current) => ({ ...current, [field]: value }));
+    setDiagnosis((current) => ({ ...current, approved: false }));
+    diagnosisRequestRef.current += 1;
+    setPlanApproved(false);
+    setSetupApproved(false);
+  };
+
+  const updateDiagnosis = (field: "summary" | "interpretation" | "informationGaps", value: string) => {
+    setDiagnosis((current) => ({ ...current, [field]: value, approved: false }));
+    diagnosisRequestRef.current += 1;
     setPlanApproved(false);
     setSetupApproved(false);
   };
@@ -2273,6 +2299,11 @@ function ClinicalAppPage() {
 
   const openSection = (section: ClinicalSection) => {
     setShowCaseHub(false);
+
+    if ((section === "Plan" || section === "Setup" || section === "Stages") && !diagnosis.approved) {
+      setActiveSection("Findings");
+      return;
+    }
 
     if ((section === "Setup" || section === "Stages") && !planApproved) {
       setActiveSection("Plan");
@@ -2293,6 +2324,9 @@ function ClinicalAppPage() {
     setCaseLabel("Demo Case");
     setCaseDetails(defaultCaseDetails);
     setFindings(defaultFindings);
+    setDiagnosis(emptyDiagnosis);
+    setDiagnosisLoading(false);
+    setDiagnosisError("");
     setScopeIssue("");
     setPlanApproved(false);
     setSetupApproved(false);
@@ -2341,10 +2375,13 @@ function ClinicalAppPage() {
     setRecords({ ...emptyRecords, ...(storedRecords.checklist || {}) });
     setCaseDetails({ ...emptyCaseDetails, ...(storedRecords.details || {}) });
     setFindings({ ...emptyFindings, ...(storedRecords.findings || {}) });
+    setDiagnosis({ ...emptyDiagnosis, ...(storedRecords.diagnosis || {}), approved: false });
+    setDiagnosisLoading(false);
+    setDiagnosisError("");
     setScopeIssue(row.scope_issue || "");
     setPlan({ ...emptyPlan, ...storedPlan });
-    setPlanApproved(row.plan_approved === true);
-    setSetupApproved(row.setup_approved === true);
+    setPlanApproved(false);
+    setSetupApproved(false);
     setScanState(storedScan);
     setStageState(storedStages);
     setAiReview(null);
@@ -2420,6 +2457,7 @@ function ClinicalAppPage() {
           checklist: records,
           details: caseDetails,
           findings,
+          diagnosis,
         },
         scope_issue: scopeIssue,
         plan,
@@ -2459,6 +2497,7 @@ function ClinicalAppPage() {
     caseDetails,
     caseId,
     caseLabel,
+    diagnosis,
     findings,
     plan,
     planApproved,
