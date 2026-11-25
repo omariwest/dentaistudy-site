@@ -355,7 +355,7 @@ function Header() {
     <header className="site-header">
       <div className="container header-inner">
         <a className="wordmark" href="/" aria-label="BracketMotion home">
-          <span className="wordmark__text">BracketMotion</span>
+          <span className="wordmark__text">bracket<strong>motion</strong></span>
         </a>
 
         <div className="header-actions" aria-label="Install BracketMotion">
@@ -373,7 +373,7 @@ function Footer() {
       <div className="container footer-inner">
         <div className="footer-brand">
           <a className="wordmark wordmark--footer" href="/" aria-label="BracketMotion home">
-            <span className="wordmark__text">BracketMotion</span>
+            <span className="wordmark__text">bracket<strong>motion</strong></span>
           </a>
           <p>Plan the mechanics. See the movement.</p>
         </div>
@@ -3207,8 +3207,28 @@ function ClinicalAppPage() {
       <header className="app-topbar">
         <div className="app-topbar__brand">
           <a className="wordmark app-wordmark" href="/" aria-label="BracketMotion home">
-            <span className="wordmark__text">BracketMotion</span>
+            <span className="wordmark__text">bracket<strong>motion</strong></span>
           </a>
+          {!showCaseHub && !showSettings && (
+            <>
+              <span className="app-topbar__divider" aria-hidden="true" />
+              <div className="app-case-title">
+                <strong>{caseLabel}</strong>
+                <span>Permanent dentition · {planningReady ? "Planning ready" : "Draft"}</span>
+              </div>
+            </>
+          )}
+        </div>
+        <div className="app-topbar__actions">
+          {!showCaseHub && !showSettings && (
+            <span
+              className={`app-save-state${saveState === "error" || !online ? " is-error" : ""}`}
+              role="status"
+              aria-live="polite"
+            >
+              {saveLabel}
+            </span>
+          )}
           <button
             className={`app-quiet-button${showCaseHub ? " is-active" : ""}`}
             type="button"
@@ -3232,35 +3252,18 @@ function ClinicalAppPage() {
           >
             Settings
           </button>
-          {!showCaseHub && !showSettings && (
-            <>
-              <span className="app-topbar__divider" aria-hidden="true" />
-              <div className="app-case-title">
-                <strong>{caseLabel}</strong>
-                <span>Permanent dentition · {planningReady ? "Planning ready" : "Draft"}</span>
-              </div>
-            </>
-          )}
-        </div>
-        <div className="app-topbar__actions">
-          {!showCaseHub && !showSettings && (
-            <span
-              className={`app-save-state${saveState === "error" || !online ? " is-error" : ""}`}
-              role="status"
-              aria-live="polite"
-            >
-              {saveLabel}
-            </span>
-          )}
           <button
             className="app-account-button"
             type="button"
-            aria-label={session ? "Account" : "Sign in"}
+            aria-label={session ? `Account: ${accountName}` : "Sign in"}
             onClick={() => setAccountOpen(true)}
           >
-            {doctorAvatar && session
-              ? <img src={doctorAvatar} alt="" className="app-account-photo" />
-              : accountInitial}
+            <span className="app-account-avatar" aria-hidden="true">
+              {doctorAvatar && session
+                ? <img src={doctorAvatar} alt="" className="app-account-photo" />
+                : accountInitial}
+            </span>
+            <span className="app-account-name">{session ? accountName : "Sign in"}</span>
           </button>
         </div>
       </header>
