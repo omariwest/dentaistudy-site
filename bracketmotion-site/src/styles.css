@@ -4916,10 +4916,6 @@ a {
     flex-direction: column;
   }
 
-  .case-card {
-    min-height: 76px;
-  }
-
   .clinical-app {
     grid-template-rows: 52px 42px minmax(0, 1fr);
   }
