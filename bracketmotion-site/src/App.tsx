@@ -1230,7 +1230,7 @@ function ClinicalAiReviewCard({
       </div>
 
       <p className="ai-review-card__intro">
-        Proffit 2025-based draft guidance. Gemini cannot change tooth positions or approve treatment.
+        Structured case details go to Gemini for a Proffit-based draft. Tooth positions and approvals remain clinician-controlled.
       </p>
 
       <div className="ai-review-gate">
@@ -1343,7 +1343,6 @@ function TreatmentPlanView({
           <div>
             <span className="case-page-kicker">Treatment plan</span>
             <h1>Planning unavailable</h1>
-            <p>Complete the mandatory records and clear the V1 scope screen before a treatment plan can be reviewed.</p>
           </div>
         </div>
 
