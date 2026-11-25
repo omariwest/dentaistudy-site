@@ -1482,11 +1482,29 @@ function AuthDialog({
     if (!open) return;
     setMessage("");
     setPassword("");
-    const onEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
+    const onDialogKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const focusable = Array.from(
+        document.querySelectorAll<HTMLElement>(
+          ".auth-dialog button:not(:disabled), .auth-dialog input:not(:disabled)",
+        ),
+      );
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last?.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first?.focus();
+      }
     };
-    window.addEventListener("keydown", onEscape);
-    return () => window.removeEventListener("keydown", onEscape);
+    window.addEventListener("keydown", onDialogKeyDown);
+    return () => window.removeEventListener("keydown", onDialogKeyDown);
   }, [open, mode]);
 
   if (!open) return null;
@@ -1584,7 +1602,7 @@ function AuthDialog({
               {session ? "Account" : mode === "login" ? "Sign in to BracketMotion" : "Create your account"}
             </h2>
           </div>
-          <button type="button" aria-label="Close account dialog" onClick={onClose}>
+          <button type="button" autoFocus aria-label="Close account dialog" onClick={onClose}>
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M18 6 6 18" />
               <path d="m6 6 12 12" />
