@@ -666,6 +666,7 @@ a {
 
 .app-viewer-toolbar {
   min-width: 0;
+  overflow-x: auto;
   justify-content: space-between;
   gap: 14px;
   padding: 7px 10px;
@@ -3952,10 +3953,6 @@ a {
   }
 
   .app-inspector {
-    display: none;
-  }
-
-  .app-viewer-toolbar__views {
     display: none;
   }
 
