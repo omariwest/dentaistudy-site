@@ -1,11 +1,11 @@
 # BracketMotion — Product Identity & Direction
 
 > **Document role:** The stable source of truth for who we are, whom we serve, what we build, and how we want it to feel.  
-> **Status:** Approved direction; ongoing implementation.  
+> **Status:** Founder-proposed photo-first pivot — clinical/technical feasibility and final scope not yet approved; existing STL/PLY software remains unchanged.  
 > **Product:** BracketMotion  
-> **Tagline:** *Plan the mechanics. See the movement.*  
+> **Positioning (proposed):** *Five photos → photo-guided 3D case → illustrative orthodontic mechanics.* (Not an anatomical scan or outcome prediction.)  
 > **Task execution:** The highest-numbered `BracketMotion-Master-Project-Plan-v*.md` file on the `bracketmotion` branch; earlier versions remain as history.  
-> **Frozen detailed V1 clinical contract:** [Master Project Plan v35](BracketMotion-Master-Project-Plan-v35.md), Clinical V1 scope / Gate 4.
+> **Current built implementation and original scope:** [v35](BracketMotion-Master-Project-Plan-v35.md); unchanged until the photo-first pivot passes its decision gate. **Current planning/decision tracker:** highest-numbered master-plan file, beginning with v41.
 
 ## Why BracketMotion exists
 
@@ -15,62 +15,49 @@ The founder is an orthodontic resident interested in digital orthodontics and a 
 
 The goal is to create a genuine, useful product that demonstrates clinical insight and product execution. Financial revenue is **not a prerequisite for V1 success**. Real clinical users, a respected portfolio, research output, collaboration, sponsorship, employment opportunities, strategic partnerships, and eventual commercial interest are all valuable possible outcomes. None is guaranteed merely by building the software.
 
-We build for real-world usefulness first. If a feature does not help a clinician reach the intended outcome, it needs a strong reason to exist.
+We build for real-world usefulness first. The founder's new insight is that routine five-view intraoral photos can be the clinical starting point, without a scanner purchase, CAD/CAM manufacturing system, heavy STL/PLY import, or a long manual setup. That entry-friction reduction is the key product hypothesis, **not yet a validated market demand claim**.
 
 ## Who we serve — and whom we do not chase
 
-**Primary users:** independent, solo, small-practice, and everyday orthodontists worldwide who use conventional labial fixed appliances; qualified dentists within their competence and supervised orthodontic residents can also be appropriate users within the frozen clinical scope.
+**Primary audience (proposed):** orthodontists, supervised orthodontic residents, and qualified dental professionals who already take five standardized intraoral photographs but do not want scanning-dependent setup, proprietary CAD/CAM software, or a long 3D modelling session just to communicate and explore conventional fixed-appliance treatment options. Small independent and resource-constrained practices are a hypothesis to validate with clinicians, not a proven market share claim.
 
-They should not need proprietary brackets, scanner ecosystems, custom manufactured wires, a laboratory contract, or expensive planning licenses to examine a patient-specific digital setup and discuss mechanics.
+**Not our intended competitors:** manufacturing-based LightForce, enterprise SureSmile, 3Shape or aligner production systems. We admire LightForce's visual clarity first, SureSmile's second; their UI and clinical manufacturing features are not our deliverable.
 
-**Not our V1 target:** enterprise manufacturing workflows, high-volume aligner production centers, proprietary scanner ecosystems, laboratory/order-management customers, or customers whose main requirement is certified biological outcome prediction.
+## What BracketMotion is becoming — proposed, not implemented
 
-We do not need to displace SureSmile, LightForce, or 3Shape in their core markets. Their strength is useful reference material, not our feature backlog.
+**A browser-based, free-first, photo-first orthodontic visual planning and communication tool.** It transforms five ordinary **intraoral** photographs into a **clinician-verified approximation of visible dental arrangement**, built using reusable dental crown and gingiva assets. The goal is a recognizable, interactive representation, **not an exact patient-specific scan**.
 
-## What BracketMotion is
+**Photo input:** frontal, maxillary occlusal, mandibular occlusal, right buccal and left buccal. Ask for adequate retractors, visibility and photo quality; request retakes where the image is inadequate. Do not infer unseen roots, bone, periodontal support or hidden tooth surfaces.
 
-A **free-first, browser-native, installable PWA** for conventional fixed-appliance orthodontic planning.
+**New intended workflow:**
 
-**Core promise:** Bring an ordinary clinical case and STL/PLY scans; review findings and strategies; approve a patient-specific 3D target; see a stage-by-stage, mechanics-aware representation of the chosen plan.
+`Five photos → fit an approximate 3D arch → clinician confirms/corrects tooth positions → choose bracket placement → choose archwire → explore mechanics → compare illustrative treatment paths`
 
-**Working flow:**
+The first model can use generic tooth-type crown anatomy across patients. Only visible differences are fitted, such as spacing/crowding, arch form, rotations, missing teeth and apparent occlusal relationships. A clinician must have a fast way to correct a bad fit; automation must never silently invent or mislabel the patient. Selectable/movable individual teeth and gingival coverage remain important. No bare exposed roots or detached anatomy.
 
-`Case → Findings → Clinical Plan Approval → 3D Setup Approval → Stages → Mechanics → Planned Movement`
+**Progressive interaction (the Canva analogy):** A doctor should see a plausible arch without manually placing 28 teeth. After confirming the fit, show only the next relevant controls: bracket group and position, wire selection (for example 0.016 NiTi, 0.016×0.022 NiTi, or an appropriate clinician-chosen stainless-steel wire), then staged illustrative mechanics such as a power chain or coil spring. Make each option easy to apply, edit and compare. These are **clinician selections**, not autogenerated treatment prescriptions.
 
-The user remains the clinical decision-maker. BracketMotion organizes the work, reveals relevant choices, provides useful 3D geometry and mechanical context, and protects the required approval gates. It must not disguise a visualization as a validated prediction of what a patient's teeth will biologically do.
+**Reality boundary:** Photo-based 3D estimates cannot provide the exact occlusal/gingival geometry, hidden roots, craniofacial anatomy or biologic response. Do not call the generated mesh a digital impression, a scan, a precise patient clone or an exact treatment prediction. Display a direct label such as **Photo-guided approximation · clinician review required** and show assumptions when illustrating mechanics. No printing, indirect-bonding tray manufacture, appliance prescription, torque/force accuracy or unsupported treatment timing claims. Keep clinical interpretation with the orthodontist.
 
-### Frozen V1 support
+**Scope simplification, pending approval:** The earlier six-family, seven-record, scan-import and numerical mechanics contract in v35 remains the **legacy implementation**. The proposed photo-first MVP begins with common permanent-dentition fixed-appliance **visual demonstrations**, prioritizing recognizable alignment and simple spacing/space-closure scenarios. Do not delete clinical safety checks blindly or broaden to complex skeletal cases, impacted teeth, surgery, TADs or exact root/bone simulations. A separate founder decision must freeze the new MVP clinical claims and supported examples before implementation.
 
-Permanent dentition and conventional 0.022-inch labial fixed appliances. Six case families only:
-
-1. Class I non-extraction crowding
-2. Class I spacing
-3. Symmetric first-premolar extraction
-4. Selected Class II Division 1 cases
-5. Selected mild-to-moderate dental deep-bite cases
-6. Selected mild-to-moderate primarily dental anterior open-bite cases
-
-Basic generic brackets, NiTi/stainless-steel archwires, power chain, closed-coil springs, interarch elastics, and basic loops are visualized as appropriate to the plan.
-
-**Outside V1:** clear aligners; Class III, surgery-led, severe skeletal/asymmetric/craniofacial cases; impacted-tooth traction; TAD/miniscrew-supported mechanics; significant expansion; root-bone/CBCT prediction; manufacturer-specific appliance/manufacturing pipelines. The complete case and mechanics exclusions remain frozen in v35 and are not relaxed by this identity document.
-
-**Never claim:** exact clinical force, timing, periodontal response, root motion, bone remodeling, anchorage loss, stability, or guaranteed treatment outcome. Show **planned geometry and mechanics-aware tendencies**, label uncertainty, and keep explicit clinician approval.
+**STL/PLY decision:** Remove STL/PLY as a **mandatory first-user action**, not the working production code prematurely. Once photo-first modelling is proven useful, replace the scan-dependent user workflow cleanly in its original components; remove obsolete source instead of hiding old forms with CSS. An optional scan importer can be reassessed later but is **not** part of the proposed photo-first default.
 
 ## The Canva principle, translated to orthodontics
 
 The aspiration is **outcome-focused professional simplicity**, not a stripped-down toy.
 
-Canva is our product-thinking analogy: most customers want to finish an actual job, not master a complex collection of tools. For BracketMotion, the job is **reviewing a clinical case, making a defensible plan, and understanding the intended mechanics on the patient's 3D anatomy**.
+Canva is our product-thinking analogy: most customers want to finish an actual job, not master a complex collection of tools. For BracketMotion, the job is **turning familiar patient photos into a recognizable, clinician-reviewed 3D illustration of how alternative fixed-appliance steps could be presented**. Clarity and speed matter more than duplicating a manufacturing-grade scanner workflow.
 
 Apply this without copying Canva or automating away clinical judgment:
 
-- **Start from the case and desired outcome**, not a blank CAD scene with dozens of tools.
+- **Start from five photos and a suggested approximate arrangement**, not a blank CAD scene or a mandatory STL upload.
 - **Progressive disclosure:** show the controls relevant to the current clinical step; keep advanced adjustments available when genuinely needed.
-- **Short path through one workspace:** records, plan, scans, setup, mechanics, and stages must feel connected.
+- **One short workspace:** photos, visible tooth-fit confirmation, brackets, wire selection, illustrative mechanics, and optional scenario comparison belong together.
 - **No visual clutter:** avoid redundant helper paragraphs, repeated headings, decorative badges, useless cards, action duplication, and empty chrome.
-- **No fake clinical shortcuts:** clinical records, scope exclusions, appropriate confirmation, and both approval gates remain explicit.
+- **No fake clinical shortcuts:** visibly uncertain geometry requires clinician verification; any plan-relevant decision, warnings and appropriate approvals must remain explicit.
 
-A simpler interface is a competitive strength only if clinicians can still tell what has been measured, assumed, planned, and approved.
+A simpler interface is a competitive strength only if clinicians can still distinguish photographed observations from inferred geometry and illustrated mechanics.
 
 ## Visual identity and interface standard
 
@@ -81,11 +68,11 @@ A simpler interface is a competitive strength only if clinicians can still tell 
 - **Color:** white and subtle neutral gray dominate; nearly black text communicates hierarchy. Keep BracketMotion purple as a restrained brand/action/selected-state accent, not a background color on every box or a thick outline around every field.
 - **Scene priority:** the patient model is the hero. The available viewport must be spacious; reducing sidebars is not sufficient if the remaining panels are still padded, segmented, or repetitive.
 - **Panels:** compact workflow navigation, contextual inspector, stage timeline. Avoid excessive ruled dividers, separate page-like sections, and unrelated status boxes. Remove redundancy at the source rather than hiding it with CSS.
-- **Real anatomy:** preserve or clearly represent gingival tissue where source data permits; do not mistake exposed tooth roots or an isolated bare dentition for a complete patient scan. Hide irrelevant demo bone anatomy, **not** gingiva/mucosa. Any recreated gum surface must not be presented as patient-accurate anatomy.
-- **Demo honesty:** visibly distinguish nonpatient demo teeth from real patient scans. Clinical claims and approvals may never derive from the demo as if it were a patient.
+- **Visually credible but honest anatomy:** polished enamel and gingival/cast surfaces; no root tips protruding, no fake gingival anatomy passed off as observed patient tissue. The photo-fitted reference model is illustrative, never a replacement for intraoral scanning.
+- **Source honesty:** distinguish generic reference mesh, photo-fitted illustrative model and any genuine imported scan. Explain that unseen or obscured features were inferred and may be incorrect.
 - **Typography and controls:** restrained, professional, and consistent. The approved monochrome BracketMotion favicon/app icon remains for icons; **visible wordmarks are text-only**.
 
-We want less *visual noise*, **not** fewer clinically essential measurements.
+We want fewer controls and fewer claims, not less clinical transparency. Screen defaults should fit the new illustration role rather than preserve manufacturing-grade measurements just because the old engine had them.
 
 ## Reuse-first engineering and craftsmanship
 
@@ -108,10 +95,10 @@ Reuse is a product/implementation decision; do **not** blindly import DentAIstud
 - **App source:** `bracketmotion-site/` — React/TypeScript, Vite, Three.js / React Three Fiber, existing shared UI patterns.
 - **Deployment:** separate `bracketmotion-preview` Vercel project. **No BracketMotion domain has been purchased or assigned yet.** This is deliberate pre-launch development, not a missing feature.
 - **Official V1 clinical desktop target:** Windows and macOS in current Chrome/Edge; browser use or optional installed PWA. Phone UI must not break or overflow, but full mobile 3D planning is not a V1 requirement.
-- **Supabase:** temporarily and deliberately share the existing DentAIstudy Supabase project and authentication infrastructure, while isolating BracketMotion records in its owner-scoped `bracketmotion_cases` table and private `bracketmotion-cases` storage bucket. This is **not** permission to mix dental case data with DentAIstudy study data.
-- **Gemini:** `bracketmotion-clinical-reasoning` is a separately deployed Edge Function using the shared server-side `GEMINI_API_KEY`. **It does not invoke DentAIstudy's `ai-generate` function.** Gemini offers structured clinical review only; it cannot write geometry or approve plans.
+- **Supabase (current implementation):** temporarily shares DentAIstudy authentication and Supabase infrastructure while keeping case records owner-scoped. The proposed photos must not be ingested or stored as real patient data before consent, appropriate healthcare data handling, retention controls and actual upload security are assessed.
+- **Gemini (current implementation):** BracketMotion's dedicated `bracketmotion-clinical-reasoning` Edge Function uses a shared server-side key. Gemini should not be assumed capable of dependable tooth geometry reconstruction; the five-photo fitting method requires separate feasibility work. No patient photos sent to third-party AI by default.
 
-**Backend verification note (2026-11-25):** Authenticated POST is enforced inside the dedicated function; the two clinical gate booleans are currently checked from the request payload, **not independently reloaded from a saved case**. Do not describe this as server-verified persisted approval state. Before real clinical data or clinical beta, verify the necessary privacy and gate-integrity safeguards; use synthetic/de-identified cases during pre-alpha.
+**Backend verification note (2026-11-25):** Authenticated POST is enforced inside the dedicated function; the two clinical gate booleans are currently checked from the request payload, **not independently reloaded from a saved case**. Do not describe this as server-verified persisted approval state. Before any real clinical photo processing or patient-facing beta, verify appropriate privacy, consent, storage, clinical claims and gate integrity; begin with authorized synthetic/de-identified five-photo test sets.
 
 ## Clinical references and intellectual property
 
@@ -119,13 +106,17 @@ Reuse is a product/implementation decision; do **not** blindly import DentAIstud
 - Sandra Khong Tai, *Clear Aligner Technique*, 2nd ed.: understand aligner workflows and digital concepts; **not** an instruction to turn BracketMotion V1 into aligner software.
 - Sam Altman, *How to Start a Startup* materials: founder principles, narrow starting audience, user feedback, distribution, execution. This is business inspiration, not a clinical source.
 
-Use controlled paraphrased clinical knowledge, proper attribution and independent implementation. Do not copy textbook assets, competitor code, proprietary branding, layouts, or clinical claims.
+External technical leads: Chen et al. (2023) five-photo parametric reconstruction, MIT-licensed SJTUzhou source code; TeethDreamer (MICCAI 2024) for research only. Licenses for pretrained models, datasets, tooth shape assets and photos must be verified **separately** from source-code licenses. The BodyParts3D geometry is CC BY-SA, despite the clone repository's MIT **code** license. Two paid Sketchfab models supplied by the founder are appearance references only, not licensed application assets.
+
+Use controlled paraphrased clinical knowledge, proper attribution and independent implementation. Do not copy textbook assets, competitor code, proprietary branding, layouts, clinical claims or models without suitable rights.
 
 ## Build-to-opportunity approach
 
 A successful first release is a coherent, trusted clinical workflow that real orthodontists can use, discuss, and recommend. A small number of satisfied clinicians using one useful tool matters more than a large feature list or impressive simulated 3D footage.
 
-After the interface correction round: founder/clinician closed alpha → fix observed issues → small orthodontist beta → fix clinical/UX findings → validated free V1 release. Then measure repeat use and collect evidence of real professional value before deciding what to monetize or expand.
+**New proposed validation order:** founder approves narrow photo-first product contract → small five-photo reconstruction feasibility experiment (no real patient data without authorization) → test fast clinician correction and recognizable visual output → decide whether to replace the scanner-dependent workflow → implement the simplest closed loop → founder clinician alpha → small orthodontist beta → improve from observed errors → free V1. Monetization remains optional, not the development driver.
+
+The previously approved clinical interface and V1 engine remain deployed only as the existing prototype until this pivot is approved. No underlying code, source model, database, patient uploads or marketing claims are changed by this document.
 
 ---
 
