@@ -459,11 +459,15 @@ a {
   position: fixed;
   inset: 0;
   display: grid;
-  grid-template-rows: 58px minmax(0, 1fr);
+  grid-template-rows: 58px 48px minmax(0, 1fr);
   min-width: 320px;
   overflow: hidden;
   color: var(--ink);
   background: #eef0f4;
+}
+
+.clinical-app.is-offline {
+  grid-template-rows: 58px auto 48px minmax(0, 1fr);
 }
 
 .app-topbar {
@@ -545,7 +549,6 @@ a {
 .app-tool-button,
 .app-view-button,
 .app-flow-item,
-.app-mobile-flow__item,
 .app-icon-button,
 .app-primary-action {
   border: 0;
@@ -574,29 +577,25 @@ a {
   font-weight: 800;
 }
 
-.clinical-app__body.is-3d-workspace {
-  grid-template-columns: 128px minmax(0, 1fr);
-}
-
 .clinical-app__body {
   display: grid;
-  grid-template-columns: 144px minmax(0, 1fr) 196px;
+  grid-template-columns: minmax(0, 1fr) 196px;
   min-width: 0;
   min-height: 0;
 }
 
-.app-sidebar,
+.clinical-app__body.is-3d-workspace {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .app-inspector {
+  display: flex;
+  flex-direction: column;
   min-width: 0;
   min-height: 0;
   overflow-y: auto;
+  border-left: 1px solid #dfe2e8;
   background: #ffffff;
-}
-
-.app-sidebar {
-  display: flex;
-  flex-direction: column;
-  border-right: 1px solid #dfe2e8;
 }
 
 .app-inspector__header span {
@@ -609,37 +608,47 @@ a {
 }
 
 .app-flow-nav {
-  padding: 8px 6px;
+  display: flex;
+  min-width: 0;
+  overflow-x: auto;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-bottom: 1px solid #dfe2e8;
+  background: #ffffff;
 }
 
 .app-flow-item {
-  width: 100%;
-  min-height: 38px;
-  gap: 7px;
-  padding: 7px 9px;
-  border-radius: 7px;
-  text-align: left;
+  display: flex;
+  min-height: 36px;
+  flex: 1 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 7px 12px;
+  border-radius: 18px;
+  white-space: nowrap;
+  text-align: center;
 }
 
 .app-flow-item:hover {
-  background: #f6f7fa;
+  background: #f3f4f6;
 }
 
-.app-flow-item.is-active {
-  color: var(--accent);
-  background: var(--accent-soft);
+.app-flow-item.is-active,
+.app-flow-item.is-active:hover {
+  color: #ffffff;
+  background: var(--accent);
 }
 
 .app-flow-item__index {
-  width: 16px;
-  flex: 0 0 auto;
-  color: #9aa1ad;
-  font-size: 0.63rem;
-  font-weight: 800;
+  color: #8a919e;
+  font-size: 0.75rem;
+  font-weight: 750;
 }
 
 .app-flow-item.is-active .app-flow-item__index {
-  color: var(--accent);
+  color: #ffffff;
 }
 
 .app-flow-item__copy {
@@ -647,21 +656,17 @@ a {
 }
 
 .app-flow-item__copy strong {
-  font-size: 0.79rem;
-  font-weight: 740;
+  font-size: 0.77rem;
+  font-weight: 700;
 }
 
 .app-workspace {
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  grid-template-rows: minmax(0, 1fr);
   min-width: 0;
   min-height: 0;
   overflow: hidden;
   background: #c9cbd2;
-}
-
-.app-workspace.is-3d-workspace {
-  grid-template-rows: auto minmax(0, 1fr);
 }
 
 .app-viewer-toolbar {
@@ -705,10 +710,6 @@ a {
 
 .app-view-button {
   color: #747c89;
-}
-
-.app-mobile-flow {
-  display: none;
 }
 
 .app-viewport {
@@ -782,12 +783,6 @@ a {
   font-size: 0.67rem;
 }
 
-.app-inspector {
-  display: flex;
-  flex-direction: column;
-  border-left: 1px solid #dfe2e8;
-}
-
 .app-inspector__header {
   min-height: 48px;
   justify-content: space-between;
@@ -859,7 +854,6 @@ a {
 .app-tool-button:focus-visible,
 .app-view-button:focus-visible,
 .app-flow-item:focus-visible,
-.app-mobile-flow__item:focus-visible,
 .app-icon-button:focus-visible,
 .app-primary-action:focus-visible {
   outline: 3px solid rgba(109, 76, 245, 0.2);
@@ -868,7 +862,7 @@ a {
 
 @media (max-width: 1180px) {
   .clinical-app__body {
-    grid-template-columns: 136px minmax(0, 1fr) 188px;
+    grid-template-columns: minmax(0, 1fr) 188px;
   }
 
   .app-tool-button,
@@ -885,7 +879,7 @@ a {
 
 /* Case records + findings */
 .app-workspace.is-clinical-form {
-  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
   background: #f4f5f7;
 }
 
@@ -4297,7 +4291,11 @@ a {
   }
 
   .clinical-app {
-    grid-template-rows: 52px minmax(0, 1fr);
+    grid-template-rows: 52px 42px minmax(0, 1fr);
+  }
+
+  .clinical-app.is-offline {
+    grid-template-rows: 52px auto 42px minmax(0, 1fr);
   }
 
   .app-topbar {
@@ -4321,12 +4319,8 @@ a {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .app-sidebar {
-    display: none;
-  }
-
   .app-workspace {
-    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    grid-template-rows: minmax(0, 1fr);
   }
 
   .app-viewer-toolbar {
@@ -4342,29 +4336,18 @@ a {
     min-height: 30px;
   }
 
-  .app-mobile-flow {
-    display: flex;
-    min-width: 0;
-    gap: 5px;
-    overflow-x: auto;
-    padding: 6px 8px;
-    border-bottom: 1px solid #dfe2e8;
-    background: #ffffff;
+  .app-flow-nav {
+    gap: 6px;
+    padding: 4px 8px;
   }
 
-  .app-mobile-flow__item {
-    min-height: 30px;
-    flex: 0 0 auto;
-    padding: 0 9px;
-    border-radius: 7px;
-    color: #747c89;
-    font-size: 0.65rem;
-    font-weight: 700;
+  .app-flow-item {
+    min-height: 32px;
+    padding: 5px 10px;
   }
 
-  .app-mobile-flow__item.is-active {
-    color: var(--accent);
-    background: var(--accent-soft);
+  .app-flow-item__copy strong {
+    font-size: 0.68rem;
   }
 
   .app-viewport__empty p {
