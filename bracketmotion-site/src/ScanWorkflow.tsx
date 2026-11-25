@@ -1022,6 +1022,21 @@ type MechanicEndpoints = {
   loopEnd: string;
 };
 
+type MechanicsScenario = {
+  layers: ApplianceLayerState;
+  endpoints: MechanicEndpoints;
+};
+
+type MechanicsComparison = {
+  alternative: MechanicsScenario | null;
+  active: "A" | "B";
+};
+
+const emptyMechanicsComparison = (): MechanicsComparison => ({
+  alternative: null,
+  active: "A",
+});
+
 export type ScanPersistenceState = {
   version: 1;
   files: Partial<
@@ -1035,6 +1050,7 @@ export type ScanPersistenceState = {
   applianceLayers: ApplianceLayerState;
   mechanicEndpoints: MechanicEndpoints;
   appliancePreferences?: AppliancePreferences;
+  mechanicsComparison?: MechanicsComparison;
 };
 
 export type StagePersistenceState = {
@@ -2052,6 +2068,7 @@ export default function ScanWorkflow({
     elastics: false,
     closingLoop: false,
   });
+  const [mechanicsComparison, setMechanicsComparison] = useState<MechanicsComparison>(emptyMechanicsComparison);
   const [mechanicEndpoints, setMechanicEndpoints] = useState<MechanicEndpoints>({
     chainStart: "",
     chainEnd: "",
@@ -2080,6 +2097,7 @@ export default function ScanWorkflow({
     setWorkflowMode("segment");
     setApplianceStep("strap");
     setAppliancePreferences(defaultAppliancePreferences);
+    setMechanicsComparison(emptyMechanicsComparison());
 
     assetsRef.current.forEach((asset) => asset.geometry.dispose());
     setAssets([]);
@@ -2172,6 +2190,15 @@ export default function ScanWorkflow({
           bondedTeeth: Array.isArray(initialState.appliancePreferences?.bondedTeeth)
             ? initialState.appliancePreferences.bondedTeeth.filter((label) => typeof label === "string")
             : null,
+        });
+        const comparison = initialState.mechanicsComparison;
+        const alternative = comparison?.alternative;
+        setMechanicsComparison({
+          alternative: alternative ? {
+            layers: { ...alternative.layers },
+            endpoints: { ...alternative.endpoints },
+          } : null,
+          active: alternative && comparison.active === "B" ? "B" : "A",
         });
         setMechanicEndpoints(
           initialState.mechanicEndpoints || {
@@ -2394,6 +2421,7 @@ export default function ScanWorkflow({
       applianceLayers,
       mechanicEndpoints,
       appliancePreferences,
+      mechanicsComparison,
     });
 
     const stages = deriveStages({
@@ -2411,6 +2439,7 @@ export default function ScanWorkflow({
   }, [
     applianceLayers,
     appliancePreferences,
+    mechanicsComparison,
     assets,
     jawTransforms,
     mechanicEndpoints,
