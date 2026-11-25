@@ -892,7 +892,7 @@ function CaseRecordsView({
   const intraoralCount = intraoralPhotoSlots.filter((slot) => Boolean(photos[slot.key])).length;
 
   return (
-    <div className="case-workflow-page">
+    <div className="case-workflow-page case-workflow-page--split">
       <div className="case-workflow-page__header">
         <div>
           <h1>Case Presentation</h1>
@@ -908,6 +908,8 @@ function CaseRecordsView({
         scopeIssue={scopeIssue}
       />
 
+      <div className="case-content-grid">
+        <div className="case-content-column">
       <section className="case-section" aria-labelledby="case-details-title">
         <div className="case-section__heading">
           <div><h2 id="case-details-title">Patient and clinical history</h2></div>
@@ -987,7 +989,24 @@ function CaseRecordsView({
           </label>
         </div>
       </section>
-
+      <section className="case-section" aria-labelledby="required-records-title">
+        <div className="case-section__heading">
+          <div><h2 id="required-records-title">Other clinical records</h2></div>
+        </div>
+        <div className="record-list">
+          {requiredRecords.filter((record) => !["photos", "pano", "ceph"].includes(record.key)).map((record) => (
+            <div className="record-row" key={record.key}>
+              <div className="record-row__copy">
+                <strong>{record.title}</strong>
+                <span>{record.detail}</span>
+              </div>
+              <RecordStatus complete={records[record.key]} onAdd={() => onCompleteRecord(record.key)} />
+            </div>
+          ))}
+        </div>
+      </section>
+        </div>
+        <div className="case-content-column">
       <section className="case-section" aria-labelledby="intraoral-photos-title">
         <div className="case-section__heading">
           <div><h2 id="intraoral-photos-title">Five intraoral photographs</h2></div>
@@ -1006,7 +1025,6 @@ function CaseRecordsView({
         <p className="case-photo-note">JPG, PNG or WebP, up to 12 MB each. Images stay in this browser tab; they are not saved to your case yet.</p>
         {photoError && <p className="case-photo-error" role="alert">{photoError}</p>}
       </section>
-
       <section className="case-section" aria-labelledby="facial-photos-title">
         <div className="case-section__heading">
           <div><h2 id="facial-photos-title">Facial photographs</h2></div>
@@ -1018,7 +1036,6 @@ function CaseRecordsView({
           ))}
         </div>
       </section>
-
       <section className="case-section" aria-labelledby="radiographs-title">
         <div className="case-section__heading">
           <div><h2 id="radiographs-title">Radiographic records</h2></div>
@@ -1029,26 +1046,12 @@ function CaseRecordsView({
           ))}
         </div>
       </section>
-
-      <section className="case-section" aria-labelledby="required-records-title">
-        <div className="case-section__heading">
-          <div><h2 id="required-records-title">Other clinical records</h2></div>
         </div>
-        <div className="record-list">
-          {requiredRecords.filter((record) => !["photos", "pano", "ceph"].includes(record.key)).map((record) => (
-            <div className="record-row" key={record.key}>
-              <div className="record-row__copy">
-                <strong>{record.title}</strong>
-                <span>{record.detail}</span>
-              </div>
-              <RecordStatus complete={records[record.key]} onAdd={() => onCompleteRecord(record.key)} />
-            </div>
-          ))}
-        </div>
-      </section>
+      </div>
     </div>
   );
 }
+
 
 function FindingsView({
   scopeIssue,
@@ -1084,7 +1087,7 @@ function FindingsView({
   missingCount: number;
 }) {
   return (
-    <div className="case-workflow-page">
+    <div className="case-workflow-page case-workflow-page--split">
       <div className="case-workflow-page__header">
         <div>
           <h1>Diagnosis</h1>
@@ -1105,6 +1108,8 @@ function FindingsView({
         scopeIssue={scopeIssue}
       />
 
+      <div className="case-content-grid">
+        <div className="case-content-column">
       <section className="case-section" aria-labelledby="diagnosis-draft-title">
         <div className="case-section__heading">
           <div>
@@ -1178,7 +1183,6 @@ function FindingsView({
           </button>
         </div>
       </section>
-
       <section className="case-section" aria-labelledby="oral-title">
         <div className="case-section__heading">
           <div>
@@ -1217,7 +1221,6 @@ function FindingsView({
           </label>
         </div>
       </section>
-
       <section className="case-section" aria-labelledby="facial-title">
         <div className="case-section__heading">
           <div>
@@ -1248,7 +1251,41 @@ function FindingsView({
           </label>
         </div>
       </section>
+      <section className="case-section" aria-labelledby="scope-screen-title">
+        <div className="case-section__heading">
+          <div>
+            <h2 id="scope-screen-title">V1 scope screen</h2>
+          </div>
+        </div>
 
+        <label className="scope-select">
+          <span>Primary unsupported treatment need</span>
+          <UiSelect
+            value={scopeIssue}
+            onChange={onScopeIssue}
+            ariaLabel="Primary unsupported treatment need"
+            options={[
+              { value: "", label: "None — within current V1 scope" },
+              ...outOfScopeGroups.flatMap((group) =>
+                group.options.map((option) => ({
+                  value: option,
+                  label: option,
+                  group: group.label,
+                })),
+              ),
+            ]}
+          />
+        </label>
+
+        {scopeIssue && (
+          <div className="scope-warning" role="alert">
+            <strong>Planning blocked</strong>
+            <p>{scopeIssue} is not supported in BracketMotion V1. The clinician can keep the case as a record, but treatment-plan generation stays unavailable.</p>
+          </div>
+        )}
+      </section>
+        </div>
+        <div className="case-content-column">
       <section className="case-section" aria-labelledby="occlusion-title">
         <div className="case-section__heading">
           <div>
@@ -1319,7 +1356,6 @@ function FindingsView({
           </label>
         </div>
       </section>
-
       <section className="case-section" aria-labelledby="ceph-title">
         <div className="case-section__heading">
           <div>
@@ -1350,40 +1386,8 @@ function FindingsView({
           </label>
         </div>
       </section>
-
-      <section className="case-section" aria-labelledby="scope-screen-title">
-        <div className="case-section__heading">
-          <div>
-            <h2 id="scope-screen-title">V1 scope screen</h2>
-          </div>
         </div>
-
-        <label className="scope-select">
-          <span>Primary unsupported treatment need</span>
-          <UiSelect
-            value={scopeIssue}
-            onChange={onScopeIssue}
-            ariaLabel="Primary unsupported treatment need"
-            options={[
-              { value: "", label: "None — within current V1 scope" },
-              ...outOfScopeGroups.flatMap((group) =>
-                group.options.map((option) => ({
-                  value: option,
-                  label: option,
-                  group: group.label,
-                })),
-              ),
-            ]}
-          />
-        </label>
-
-        {scopeIssue && (
-          <div className="scope-warning" role="alert">
-            <strong>Planning blocked</strong>
-            <p>{scopeIssue} is not supported in BracketMotion V1. The clinician can keep the case as a record, but treatment-plan generation stays unavailable.</p>
-          </div>
-        )}
-      </section>
+      </div>
     </div>
   );
 }
