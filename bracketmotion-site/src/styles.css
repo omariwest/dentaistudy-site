@@ -1524,6 +1524,7 @@ a {
 }
 
 .field-with-unit {
+  position: relative;
   display: flex;
   min-width: 0;
   align-items: center;
@@ -1543,7 +1544,12 @@ a {
 }
 
 .field-with-unit .number-input {
+  position: static;
   flex: 1 1 auto;
+}
+
+.field-with-unit .number-input input[type="number"] {
+  padding-right: 6px;
 }
 
 .number-input {
@@ -1617,7 +1623,7 @@ a {
 }
 
 .field-with-unit small {
-  padding-right: 10px;
+  padding-right: 34px;
   color: #8a919e;
   font-size: 0.62rem;
   font-weight: 700;
@@ -2388,17 +2394,17 @@ a {
   z-index: 50;
   display: grid;
   place-items: center;
-  padding: 18px;
+  padding: 12px;
   background: rgba(30, 35, 45, 0.34);
   backdrop-filter: blur(4px);
 }
 
 .auth-dialog {
   width: min(430px, 100%);
-  max-height: calc(100dvh - 36px);
+  max-height: calc(100dvh - 24px);
   overflow-y: auto;
   border: 1px solid #e4e7ee;
-  border-radius: 24px;
+  border-radius: 20px;
   background: #ffffff;
   box-shadow: 0 22px 60px rgba(15, 23, 42, 0.16);
 }
@@ -2407,7 +2413,7 @@ a {
   position: relative;
   display: grid;
   justify-items: center;
-  padding: 30px 28px 14px;
+  padding: 17px 24px 9px;
   text-align: center;
 }
 
@@ -2440,52 +2446,42 @@ a {
 }
 
 .auth-dialog__logo {
-  display: grid;
-  width: 64px;
-  height: 64px;
-  place-items: center;
-  margin: 0 0 18px;
-  border-radius: 50%;
-  background: #111827;
-}
-
-.auth-dialog__logo img {
-  width: 34px;
-  height: 34px;
-  object-fit: contain;
-  filter: invert(1);
+  width: 49px;
+  height: 42px;
+  margin: 0 0 8px;
+  background: url("/icons/bracketmotion-icon.svg") center / contain no-repeat;
 }
 
 .auth-dialog__header h2 {
   margin: 0;
   color: #111827;
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   font-weight: 750;
-  line-height: 1.25;
+  line-height: 1.2;
   letter-spacing: -0.03em;
 }
 
 .auth-dialog__header p {
-  margin: 8px 0 0;
+  margin: 5px 0 0;
   color: #7a8392;
-  font-size: 0.74rem;
-  line-height: 1.45;
+  font-size: 0.71rem;
+  line-height: 1.35;
 }
 
 .auth-dialog__form,
 .auth-dialog__account {
   display: grid;
-  gap: 12px;
-  padding: 0 32px 26px;
+  gap: 8px;
+  padding: 0 28px 17px;
 }
 
 .auth-dialog__google {
   display: grid;
-  width: 54px;
-  height: 54px;
+  width: 43px;
+  height: 43px;
   place-items: center;
   justify-self: center;
-  margin: 4px 0 0;
+  margin: 1px 0 0;
   border: 1px solid #e0e4eb;
   border-radius: 50%;
   color: #111827;
@@ -2500,8 +2496,8 @@ a {
 }
 
 .auth-dialog__google img {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   object-fit: contain;
 }
 
@@ -2509,7 +2505,7 @@ a {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin: 1px 0 4px;
+  margin: 0 0 1px;
   color: #949baa;
   font-size: 0.61rem;
   letter-spacing: 0.1em;
@@ -2528,7 +2524,7 @@ a {
 .auth-dialog__form label,
 .auth-dialog__password-field {
   display: grid;
-  gap: 6px;
+  gap: 4px;
 }
 
 .auth-dialog__form label > span,
@@ -2541,10 +2537,10 @@ a {
 .auth-dialog__form input {
   width: 100%;
   min-width: 0;
-  min-height: 42px;
+  min-height: 37px;
   padding: 0 12px;
   border: 1px solid #cbd2dc;
-  border-radius: 10px;
+  border-radius: 9px;
   color: #303845;
   background: #f8f9fb;
   font: inherit;
@@ -2609,7 +2605,7 @@ a {
 
 .auth-dialog__form .app-primary-action,
 .auth-dialog__account .app-primary-action {
-  min-height: 39px;
+  min-height: 37px;
   border-color: #111827;
   border-radius: 999px;
   background: #111827;
@@ -2625,7 +2621,7 @@ a {
 }
 
 .auth-dialog__terms {
-  margin-top: 2px;
+  margin-top: 0;
   color: #939baa;
   font-size: 0.63rem;
 }
@@ -2636,7 +2632,7 @@ a {
 }
 
 .auth-dialog__switch {
-  margin-top: 3px;
+  margin-top: 1px;
 }
 
 .auth-dialog__switch button {
@@ -2692,12 +2688,12 @@ a {
 
 @media (max-width: 640px) {
   .auth-dialog__header {
-    padding: 26px 20px 14px;
+    padding: 15px 18px 9px;
   }
 
   .auth-dialog__form,
   .auth-dialog__account {
-    padding-inline: 22px;
+    padding-inline: 19px;
   }
 }
 

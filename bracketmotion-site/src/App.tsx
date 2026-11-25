@@ -1826,9 +1826,7 @@ function AuthDialog({
               <path d="m6 6 12 12" />
             </svg>
           </button>
-          <div className="auth-dialog__logo" aria-hidden="true">
-            <img src="/icons/icon-180.png" alt="" />
-          </div>
+          <div className="auth-dialog__logo" aria-hidden="true" />
           <h2 id="auth-dialog-title">
             {session ? "Your account" : mode === "login" ? "Log in to BracketMotion" : "Create your account"}
           </h2>
