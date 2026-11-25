@@ -76,7 +76,7 @@ A simpler interface is a competitive strength only if clinicians can still tell 
 
 **Aim:** calm, precise, clinical software — a focused instrument rather than a multipurpose website.
 
-**Reference direction:** the restrained white / warm-gray / dark-text treatment workspace shown in the supplied SureSmile/DS Core reference screenshots. Strong 3D model visibility, compact surrounding controls, minimal decoration. Other useful references: LightForce/LightPlan, 3Shape, OnyxCeph, Maestro 3D. Borrow hierarchy and interaction principles, never their proprietary marks or layouts.
+**Reference priority:** **LightForce / LightPlan first**, **SureSmile / DS Core second**. Borrow the professional 3D-first hierarchy, compact toolbar, contextual inspector, restrained white/gray surfaces, enamel/gingiva materials and minimal decoration—not their protected branding, copied screen layouts, clinical claims or manufacturing features. 3Shape, OnyxCeph and Maestro 3D remain secondary category references.
 
 - **Color:** white and subtle neutral gray dominate; nearly black text communicates hierarchy. Keep BracketMotion purple as a restrained brand/action/selected-state accent, not a background color on every box or a thick outline around every field.
 - **Scene priority:** the patient model is the hero. The available viewport must be spacious; reducing sidebars is not sufficient if the remaining panels are still padded, segmented, or repetitive.
