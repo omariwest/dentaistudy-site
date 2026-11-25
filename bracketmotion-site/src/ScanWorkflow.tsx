@@ -3420,27 +3420,18 @@ export default function ScanWorkflow({
       ) : (
         <div className="appliance-workspace">
           <div className="appliance-workspace__toolbar">
-            <div className="appliance-layer-buttons" aria-label="Appliance layers">
-              {(
-                [
-                  ["brackets", "Brackets"],
-                  ["archwire", "Archwire"],
-                  ["powerChain", "Power chain"],
-                  ["coilSpring", "Closed coil"],
-                  ["elastics", "Elastics"],
-                  ["closingLoop", "Closing loop"],
-                ] as Array<[keyof ApplianceLayerState, string]>
-              ).map(([key, label]) => (
+            <div className="appliance-layer-buttons" aria-label="Appliance setup steps">
+              {([
+                ["strap", "1. Strap-Up"],
+                ["wire", "2. Archwire"],
+                ["ties", "3. O-Ties & Aux"],
+              ] as Array<[ApplianceStep, string]>).map(([step, label]) => (
                 <button
-                  className={applianceLayers[key] ? "is-active" : ""}
+                  key={step}
                   type="button"
-                  onClick={() =>
-                    setApplianceLayers((current) => ({
-                      ...current,
-                      [key]: !current[key],
-                    }))
-                  }
-                  key={key}
+                  className={applianceStep === step ? "is-active" : ""}
+                  aria-pressed={applianceStep === step}
+                  onClick={() => setApplianceStep(step)}
                 >
                   {label}
                 </button>
@@ -3485,35 +3476,217 @@ export default function ScanWorkflow({
 
             <aside className="appliance-panel">
               <div className="appliance-panel__status">
-                <span>Fixed appliance</span>
-                <strong>Generic 0.022 visual model</strong>
+                <span>Appliance setup</span>
+                <strong>
+                  {applianceStep === "strap" ? "Strap-Up" : applianceStep === "wire" ? "Archwire" : "O-Ties & Auxiliaries"}
+                </strong>
                 <small>
-                  Brand-neutral brackets and mechanics. This layer visualizes placement and direction, not exact delivered force.
+                  {bondedLabels.length} bonded teeth · {appliancePreferences.prescription} · {appliancePreferences.size} {appliancePreferences.material}
                 </small>
               </div>
 
-              <section className="appliance-panel__section">
-                <div className="appliance-panel__heading">
-                  <span>Base appliance</span>
-                  <strong>Full fixed appliance</strong>
-                </div>
-                <div className="appliance-summary-grid">
-                  <div>
-                    <span>Brackets</span>
-                    <strong>{applianceLayers.brackets ? "Shown" : "Hidden"}</strong>
-                  </div>
-                  <div>
-                    <span>Archwire</span>
-                    <strong>{applianceLayers.archwire ? "Shown" : "Hidden"}</strong>
-                  </div>
-                </div>
-              </section>
+              {applianceStep === "strap" && (
+                <>
+                  <section className="appliance-panel__section">
+                    <div className="appliance-panel__heading">
+                      <span>Bracket prescription</span>
+                      <strong>0.022 slot</strong>
+                    </div>
+                    <div className="appliance-layer-buttons appliance-layer-buttons--panel" aria-label="Bracket prescription">
+                      {(["Roth", "MBT"] as BracketPrescription[]).map((prescription) => (
+                        <button
+                          key={prescription}
+                          type="button"
+                          className={appliancePreferences.prescription === prescription ? "is-active" : ""}
+                          aria-pressed={appliancePreferences.prescription === prescription}
+                          onClick={() => setAppliancePreferences((current) => ({ ...current, prescription }))}
+                        >
+                          {prescription}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="appliance-panel__empty">
+                      Prescription label only; generic bracket geometry is unchanged.
+                    </p>
+                  </section>
 
-              <section className="appliance-panel__section">
-                <div className="appliance-panel__heading">
-                  <span>Active mechanics</span>
-                  <strong>Visualization endpoints</strong>
-                </div>
+                  <section className="appliance-panel__section">
+                    <div className="appliance-panel__heading">
+                      <span>Bonded teeth</span>
+                      <strong>{bondedLabels.length} / {allSegmentLabels.length}</strong>
+                    </div>
+                    <div className="appliance-action-buttons">
+                      <button
+                        type="button"
+                        onClick={() => setAppliancePreferences((current) => ({ ...current, bondedTeeth: null }))}
+                        disabled={allSegmentLabels.length === 0}
+                      >
+                        Bond all
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setAppliancePreferences((current) => ({ ...current, bondedTeeth: [] }))}
+                        disabled={bondedLabels.length === 0}
+                      >
+                        Remove all
+                      </button>
+                    </div>
+                    {([
+                      ["Upper right", upperTeeth.slice(0, 8)],
+                      ["Upper left", upperTeeth.slice(8)],
+                      ["Lower right", lowerTeeth.slice(0, 8)],
+                      ["Lower left", lowerTeeth.slice(8)],
+                    ] as Array<[string, string[]]>).map(([label, teeth]) => (
+                      <div className="appliance-jaw-group" key={label}>
+                        <span>{label}</span>
+                        <div className="appliance-tooth-grid">
+                          {teeth.map((tooth) => (
+                            <button
+                              type="button"
+                              key={tooth}
+                              aria-label={"Bracket FDI " + tooth}
+                              aria-pressed={bondedLabels.includes(tooth)}
+                              className={bondedLabels.includes(tooth) ? "is-active" : ""}
+                              disabled={!allSegmentLabels.includes(tooth)}
+                              onClick={() => setBondedFor(tooth)}
+                            >
+                              {tooth}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                    <div className="appliance-layer-buttons appliance-layer-buttons--panel">
+                      <button
+                        type="button"
+                        className={applianceLayers.brackets ? "is-active" : ""}
+                        aria-pressed={applianceLayers.brackets}
+                        onClick={() => setApplianceLayers((current) => ({ ...current, brackets: !current.brackets }))}
+                      >
+                        {applianceLayers.brackets ? "Brackets shown" : "Show brackets"}
+                      </button>
+                    </div>
+                  </section>
+                </>
+              )}
+
+              {applianceStep === "wire" && (
+                <>
+                  <section className="appliance-panel__section">
+                    <div className="appliance-panel__heading">
+                      <span>Wire material</span>
+                      <strong>{appliancePreferences.material}</strong>
+                    </div>
+                    <div className="appliance-layer-buttons appliance-layer-buttons--panel" aria-label="Wire material">
+                      {(["NiTi", "SS", "TMA"] as WireMaterial[]).map((material) => (
+                        <button
+                          type="button"
+                          key={material}
+                          className={appliancePreferences.material === material ? "is-active" : ""}
+                          aria-pressed={appliancePreferences.material === material}
+                          onClick={() => setAppliancePreferences((current) => ({ ...current, material }))}
+                        >
+                          {material}
+                        </button>
+                      ))}
+                    </div>
+                  </section>
+                  <section className="appliance-panel__section">
+                    <div className="appliance-panel__heading">
+                      <span>Wire dimension</span>
+                      <strong>Inches</strong>
+                    </div>
+                    <div className="appliance-wire-sizes" aria-label="Wire dimension">
+                      {([
+                        ["0.014", '.014"'],
+                        ["0.016", '.016"'],
+                        ["0.016x0.022", '.016" × .022"'],
+                        ["0.017x0.025", '.017" × .025"'],
+                        ["0.019x0.025", '.019" × .025"'],
+                      ] as Array<[WireSize, string]>).map(([size, label]) => (
+                        <button
+                          type="button"
+                          key={size}
+                          className={appliancePreferences.size === size ? "is-active" : ""}
+                          aria-pressed={appliancePreferences.size === size}
+                          onClick={() => setAppliancePreferences((current) => ({ ...current, size }))}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="appliance-panel__empty">
+                      Wire type and size are recorded separately from bracket prescription. Cross-section is illustrative.
+                    </p>
+                    <div className="appliance-layer-buttons appliance-layer-buttons--panel">
+                      <button
+                        type="button"
+                        className={applianceLayers.archwire ? "is-active" : ""}
+                        aria-pressed={applianceLayers.archwire}
+                        onClick={() => setApplianceLayers((current) => ({ ...current, archwire: !current.archwire }))}
+                      >
+                        {applianceLayers.archwire ? "Wire shown" : "Show wire"}
+                      </button>
+                    </div>
+                  </section>
+                </>
+              )}
+
+              {applianceStep === "ties" && (
+                <section className="appliance-panel__section">
+                  <div className="appliance-panel__heading">
+                    <span>O-Tie ligature</span>
+                    <strong>{appliancePreferences.ligature}</strong>
+                  </div>
+                  <div className="appliance-wire-sizes" aria-label="O-Tie selection">
+                    {(["None", "Clear", "Silver", "Purple"] as LigatureColor[]).map((ligature) => (
+                      <button
+                        type="button"
+                        key={ligature}
+                        className={appliancePreferences.ligature === ligature ? "is-active" : ""}
+                        aria-pressed={appliancePreferences.ligature === ligature}
+                        onClick={() => setAppliancePreferences((current) => ({ ...current, ligature }))}
+                      >
+                        {ligature}
+                      </button>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {applianceStep === "ties" && (
+                <section className="appliance-panel__section">
+                  <div className="appliance-panel__heading">
+                    <span>Auxiliaries</span>
+                    <strong>Visual overlay</strong>
+                  </div>
+                  <div className="appliance-layer-buttons appliance-layer-buttons--panel" aria-label="Auxiliary mechanics">
+                    {([
+                      ["powerChain", "Power chain"],
+                      ["coilSpring", "Closed coil"],
+                      ["elastics", "Elastics"],
+                      ["closingLoop", "Closing loop"],
+                    ] as Array<[keyof ApplianceLayerState, string]>).map(([key, label]) => (
+                      <button
+                        key={key}
+                        type="button"
+                        className={applianceLayers[key] ? "is-active" : ""}
+                        aria-pressed={applianceLayers[key]}
+                        onClick={() => setApplianceLayers((current) => ({ ...current, [key]: !current[key] }))}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {applianceStep === "ties" && (
+                <section className="appliance-panel__section">
+                  <div className="appliance-panel__heading">
+                    <span>Active mechanics</span>
+                    <strong>Endpoints</strong>
+                  </div>
 
                 {applianceLayers.powerChain && (
                   <div className="mechanic-editor">
@@ -3667,7 +3840,8 @@ export default function ScanWorkflow({
                       Turn on a supported active mechanic from the toolbar to place and inspect it.
                     </p>
                   )}
-              </section>
+                </section>
+              )}
 
               <div className="appliance-boundary-note">
                 <strong>Visualization boundary</strong>
