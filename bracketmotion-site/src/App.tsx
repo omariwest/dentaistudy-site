@@ -2000,6 +2000,11 @@ function ClinicalAppPage() {
   const [savedCases, setSavedCases] = useState<BracketMotionCaseSummary[]>([]);
   const [casesLoading, setCasesLoading] = useState(false);
   const [caseError, setCaseError] = useState("");
+  const [patientSearch, setPatientSearch] = useState("");
+  const [patientStatusFilter, setPatientStatusFilter] = useState("All statuses");
+  const [patientSort, setPatientSort] = useState("Last active");
+  const [patientPage, setPatientPage] = useState(1);
+  const casesRequestRef = useRef(0);
   const [caseId, setCaseId] = useState<string | null>(null);
   const [caseLabel, setCaseLabel] = useState("Demo Case");
   const [caseDetails, setCaseDetails] = useState<CaseDetailsState>(defaultCaseDetails);
@@ -2048,6 +2053,67 @@ function ClinicalAppPage() {
       .charAt(0) || "A"
   ).toUpperCase();
 
+  const patientCases = useMemo(() => savedCases.map((savedCase) => {
+    const stored = savedCase.records && typeof savedCase.records === "object"
+      ? (savedCase.records as StoredRecordsState)
+      : {};
+    const diagnosisText = stored.diagnosis?.summary?.trim() ||
+      stored.diagnosis?.interpretation?.trim();
+    const status = savedCase.scope_issue
+      ? "Planning blocked"
+      : savedCase.setup_approved
+        ? "3D setup approved"
+        : savedCase.plan_approved
+          ? "Plan approved"
+          : diagnosisText
+            ? "Diagnosis drafted"
+            : "Case presentation";
+    const savedAge = stored.details?.age;
+    const age = typeof savedAge === "string" && /^\\d{1,3}$/.test(savedAge.trim())
+      ? savedAge.trim() : "—";
+    const updated = Date.parse(savedCase.updated_at);
+    const opened = Date.parse(savedCase.last_opened_at);
+    const lastActive = Math.max(
+      Number.isFinite(updated) ? updated : 0,
+      Number.isFinite(opened) ? opened : 0,
+    );
+    return { ...savedCase, status, age, lastActive };
+  }), [savedCases]);
+
+  const patientStatuses = [
+    "Case presentation",
+    "Diagnosis drafted",
+    "Plan approved",
+    "3D setup approved",
+    "Planning blocked",
+  ];
+  const filteredPatients = useMemo(() => {
+    const query = patientSearch.trim().toLocaleLowerCase();
+    return patientCases.filter((item) =>
+      (patientStatusFilter === "All statuses" || item.status === patientStatusFilter) &&
+      (!query || [item.label, item.id, item.status, item.age].some((value) =>
+        value.toLocaleLowerCase().includes(query),
+      )),
+    ).sort((a, b) =>
+      patientSort === "Name A–Z"
+        ? a.label.localeCompare(b.label)
+        : patientSort === "Recently updated"
+          ? Date.parse(b.updated_at) - Date.parse(a.updated_at)
+          : b.lastActive - a.lastActive,
+    );
+  }, [patientCases, patientSearch, patientSort, patientStatusFilter]);
+  const patientsPerPage = 8;
+  const patientPageCount = Math.max(1, Math.ceil(filteredPatients.length / patientsPerPage));
+  const visiblePatientPage = Math.min(patientPage, patientPageCount);
+  const visiblePatients = filteredPatients.slice(
+    (visiblePatientPage - 1) * patientsPerPage,
+    visiblePatientPage * patientsPerPage,
+  );
+
+  useEffect(() => {
+    setPatientPage(1);
+  }, [patientSearch, patientSort, patientStatusFilter]);
+
   const cancelSuggestions = useCallback(() => {
     suggestionRequestRef.current += 1;
     setSuggestionsLoading(false);
@@ -2078,8 +2144,10 @@ function ClinicalAppPage() {
   }, [cancelSuggestions]);
 
   const refreshCases = useCallback(async () => {
+    const request = ++casesRequestRef.current;
     if (!userId) {
       setSavedCases([]);
+      setCasesLoading(false);
       return;
     }
 
@@ -2092,11 +2160,14 @@ function ClinicalAppPage() {
     setCaseError("");
 
     try {
-      setSavedCases(await listBracketMotionCases());
+      const cases = await listBracketMotionCases(userId);
+      if (casesRequestRef.current === request) setSavedCases(cases);
     } catch {
-      setCaseError("Saved cases could not be loaded.");
+      if (casesRequestRef.current === request) {
+        setCaseError("Saved cases could not be loaded.");
+      }
     } finally {
-      setCasesLoading(false);
+      if (casesRequestRef.current === request) setCasesLoading(false);
     }
   }, [online, userId]);
 
@@ -2126,6 +2197,12 @@ function ClinicalAppPage() {
   useEffect(() => {
     const previousUserId = previousUserIdRef.current;
     previousUserIdRef.current = userId;
+
+    if (previousUserId !== userId) {
+      casesRequestRef.current += 1;
+      setSavedCases([]);
+      setPatientPage(1);
+    }
 
     if (!userId) {
       setSavedCases([]);
@@ -2422,7 +2499,13 @@ function ClinicalAppPage() {
     setCaseError("");
 
     try {
-      applySavedCase(await loadBracketMotionCase(savedCaseId));
+      const row = await loadBracketMotionCase(savedCaseId);
+      applySavedCase(row);
+      setSavedCases((current) => current.map((item) =>
+        item.id === savedCaseId
+          ? { ...item, last_opened_at: new Date().toISOString() }
+          : item,
+      ));
     } catch {
       setCaseError("This case could not be opened.");
     } finally {
@@ -2497,6 +2580,13 @@ function ClinicalAppPage() {
                       plan_approved: planApproved,
                       setup_approved: setupApproved,
                       updated_at: now,
+                      scope_issue: scopeIssue,
+                      records: {
+                        checklist: records,
+                        details: caseDetails,
+                        findings,
+                        diagnosis,
+                      },
                     }
                   : item,
               )
