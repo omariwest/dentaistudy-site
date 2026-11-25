@@ -2822,7 +2822,7 @@ export default function ScanWorkflow({
 
   return (
     <div className={`scan-workflow${scanReady ? " is-ready" : ""}`}>
-      <div className="scan-workflow__top">
+      {workflowMode !== "appliance" && (\n        <>\n      <div className="scan-workflow__top">
         <div>
           <h2>
             {workflowMode === "segment"
@@ -2865,7 +2865,7 @@ export default function ScanWorkflow({
         ))}
       </div>
 
-      {scanReady && (
+        </>\n      )}\n\n      {scanReady && (
         <div className="scan-phase-tabs" aria-label="Scan and setup workflow">
           <button
             className={workflowMode === "segment" ? "is-active" : ""}
