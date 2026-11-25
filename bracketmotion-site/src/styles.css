@@ -2099,18 +2099,6 @@ a {
   line-height: 1.55;
 }
 
-.settings-sign-in p {
-  margin: 0;
-  color: #727d8a;
-  font-size: 0.73rem;
-}
-
-.settings-sign-in .app-primary-action {
-  width: auto;
-  justify-self: start;
-  padding-inline: 22px;
-}
-
 .case-hub__message {
   margin: 12px;
   padding: 12px;
