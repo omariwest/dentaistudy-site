@@ -2108,6 +2108,7 @@ function ClinicalAppPage() {
 
   const clearLocalPhotos = useCallback(() => {
     diagnosisRequestRef.current += 1;
+    setDiagnosisLoading(false);
     photoGenerationRef.current += 1;
     photoRequestRef.current = {};
     Object.values(photoUrlsRef.current).forEach((url) => {
@@ -2252,6 +2253,7 @@ function ClinicalAppPage() {
     setPhotoError("");
     setDiagnosis((current) => ({ ...current, approved: false }));
     diagnosisRequestRef.current += 1;
+    setDiagnosisLoading(false);
     setPlanApproved(false);
     setSetupApproved(false);
     setAiReview(null);
@@ -2263,6 +2265,7 @@ function ClinicalAppPage() {
     setRecords((current) => ({ ...current, [key]: true }));
     setDiagnosis((current) => ({ ...current, approved: false }));
     diagnosisRequestRef.current += 1;
+    setDiagnosisLoading(false);
     setPlanApproved(false);
     setSetupApproved(false);
   };
@@ -2271,6 +2274,7 @@ function ClinicalAppPage() {
     setCaseDetails((current) => ({ ...current, [field]: value }));
     setDiagnosis((current) => ({ ...current, approved: false }));
     diagnosisRequestRef.current += 1;
+    setDiagnosisLoading(false);
     setPlanApproved(false);
     setSetupApproved(false);
   };
@@ -2279,6 +2283,7 @@ function ClinicalAppPage() {
     setFindings((current) => ({ ...current, [field]: value }));
     setDiagnosis((current) => ({ ...current, approved: false }));
     diagnosisRequestRef.current += 1;
+    setDiagnosisLoading(false);
     setPlanApproved(false);
     setSetupApproved(false);
   };
@@ -2286,6 +2291,7 @@ function ClinicalAppPage() {
   const updateDiagnosis = (field: "summary" | "interpretation" | "informationGaps", value: string) => {
     setDiagnosis((current) => ({ ...current, [field]: value, approved: false }));
     diagnosisRequestRef.current += 1;
+    setDiagnosisLoading(false);
     setPlanApproved(false);
     setSetupApproved(false);
   };
@@ -2633,9 +2639,12 @@ function ClinicalAppPage() {
     setDiagnosisError("");
 
     try {
-      const result = await invokeBracketMotionClinicalReview(
-        buildAiPayload("diagnosis_draft"),
-      );
+      const result = await invokeBracketMotionClinicalReview({
+        ...buildAiPayload("diagnosis_draft"),
+        plan: {},
+        setup: {},
+        mechanics: {},
+      });
       if (request !== diagnosisRequestRef.current) return;
       const review = result?.review as ClinicalAiReviewResult | undefined;
       const summary = typeof review?.case_summary === "string" ? review.case_summary.trim() : "";
@@ -2909,6 +2918,7 @@ function ClinicalAppPage() {
                 setScopeIssue(value);
                 setDiagnosis((current) => ({ ...current, approved: false }));
                 diagnosisRequestRef.current += 1;
+                setDiagnosisLoading(false);
                 setPlanApproved(false);
                 setSetupApproved(false);
               }}
