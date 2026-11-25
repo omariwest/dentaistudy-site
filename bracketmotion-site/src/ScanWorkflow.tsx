@@ -1370,10 +1370,12 @@ function GenericBracket({
   anchor,
   orientation,
   scale,
+  ligature,
 }: {
   anchor: Vector3;
   orientation: Quaternion;
   scale: number;
+  ligature: LigatureColor;
 }) {
   const width = scale * 1.35;
   const height = scale;
@@ -1393,6 +1395,17 @@ function GenericBracket({
         <boxGeometry args={[width * 1.14, height * 0.22, depth * 0.48]} />
         <meshStandardMaterial color="#edf0f3" metalness={0.72} roughness={0.22} />
       </mesh>
+      {ligature !== "None" && (
+        <mesh position={[0, 0, depth * 0.66]}>
+          <torusGeometry args={[scale * 0.52, scale * 0.075, 8, 22]} />
+          <meshStandardMaterial
+            color={ligature === "Purple" ? "#7050cb" : ligature === "Clear" ? "#f3efe7" : "#a3aab4"}
+            transparent={ligature === "Clear"}
+            opacity={ligature === "Clear" ? 0.75 : 1}
+            roughness={0.45}
+          />
+        </mesh>
+      )}
     </group>
   );
 }
@@ -1466,6 +1479,8 @@ function ApplianceLayer({
   targetTransforms,
   layers,
   endpoints,
+  bondedTeeth,
+  preferences,
 }: {
   assets: ScanAsset[];
   segments: ToothSegment[];
@@ -1473,6 +1488,8 @@ function ApplianceLayer({
   targetTransforms: Record<string, RigidTransform>;
   layers: ApplianceLayerState;
   endpoints: MechanicEndpoints;
+  bondedTeeth: string[];
+  preferences: AppliancePreferences;
 }) {
   const anchors = useMemo(() => {
     const map = new Map<
@@ -1486,6 +1503,7 @@ function ApplianceLayer({
     const combined = new Box3();
 
     segments.forEach((segment) => {
+      if (!bondedTeeth.includes(segment.label)) return;
       const asset = assets.find((item) => item.jaw === segment.jaw);
       if (!asset) return;
 
@@ -1522,7 +1540,7 @@ function ApplianceLayer({
       map,
       scale: Math.max(0.75, Math.min(2.2, diagonal * 0.018)),
     };
-  }, [assets, jawTransforms, segments, targetTransforms]);
+  }, [assets, bondedTeeth, jawTransforms, segments, targetTransforms]);
 
   const sequenceFor = (jaw: Exclude<Jaw, "bite">) =>
     (jaw === "upper" ? upperTeeth : lowerTeeth)
@@ -1578,6 +1596,7 @@ function ApplianceLayer({
             anchor={anchor.point}
             orientation={anchor.orientation}
             scale={anchors.scale}
+            ligature={preferences.ligature}
             key={`bracket-${label}`}
           />
         ))}
@@ -1588,7 +1607,7 @@ function ApplianceLayer({
             <TubePath
               points={points}
               radius={anchors.scale * 0.09}
-              color="#aeb5bd"
+              color={preferences.material === "NiTi" ? "#b7bec7" : preferences.material === "SS" ? "#929ba7" : "#a7a1ad"}
               key={index}
             />
           ) : null,
