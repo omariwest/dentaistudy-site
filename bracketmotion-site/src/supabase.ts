@@ -22,6 +22,8 @@ export type BracketMotionCaseSummary = {
   setup_approved: boolean;
   updated_at: string;
   last_opened_at: string;
+  records?: unknown;
+  scope_issue?: string;
 };
 
 export type BracketMotionCaseRow = BracketMotionCaseSummary & {
@@ -34,12 +36,13 @@ export type BracketMotionCaseRow = BracketMotionCaseSummary & {
   created_at: string;
 };
 
-export async function listBracketMotionCases() {
+export async function listBracketMotionCases(userId: string) {
   const { data, error } = await supabase
     .from("bracketmotion_cases")
     .select(
-      "id,label,plan_approved,setup_approved,updated_at,last_opened_at",
+      "id,label,plan_approved,setup_approved,updated_at,last_opened_at,records,scope_issue",
     )
+    .eq("user_id", userId)
     .order("updated_at", { ascending: false });
 
   if (error) throw error;
