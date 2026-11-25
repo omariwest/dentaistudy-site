@@ -466,10 +466,6 @@ a {
   background: #eef0f4;
 }
 
-.clinical-app.is-offline {
-  grid-template-rows: 58px auto 48px minmax(0, 1fr);
-}
-
 .app-topbar {
   display: flex;
   min-width: 0;
@@ -4293,10 +4289,6 @@ a {
 
   .clinical-app {
     grid-template-rows: 52px 42px minmax(0, 1fr);
-  }
-
-  .clinical-app.is-offline {
-    grid-template-rows: 52px auto 42px minmax(0, 1fr);
   }
 
   .app-topbar {
