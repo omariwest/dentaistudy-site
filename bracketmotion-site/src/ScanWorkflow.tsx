@@ -2424,12 +2424,15 @@ export default function ScanWorkflow({
       mechanicsComparison,
     });
 
+    const preview = mechanicsComparison.active === "B" && mechanicsComparison.alternative
+      ? mechanicsComparison.alternative
+      : { layers: applianceLayers, endpoints: mechanicEndpoints };
     const stages = deriveStages({
       segments,
       targetTransforms,
       plannedExtractions,
-      applianceLayers,
-      endpoints: mechanicEndpoints,
+      applianceLayers: preview.layers,
+      endpoints: preview.endpoints,
     }).map(({ layers: _layers, ...stage }) => stage);
 
     onStageStateChange?.({
@@ -2822,6 +2825,67 @@ export default function ScanWorkflow({
     setSetupApproved(false);
   };
 
+  const updateScenarioLayer = (key: "powerChain" | "coilSpring" | "elastics" | "closingLoop") => {
+    if (mechanicsComparison.active === "B" && mechanicsComparison.alternative) {
+      setMechanicsComparison((current) => current.alternative ? {
+        ...current,
+        alternative: {
+          ...current.alternative,
+          layers: {
+            ...current.alternative.layers,
+            [key]: !current.alternative.layers[key],
+          },
+        },
+      } : current);
+    } else {
+      setApplianceLayers((current) => ({ ...current, [key]: !current[key] }));
+    }
+  };
+
+  const updateScenarioEndpoint = (key: keyof MechanicEndpoints, value: string) => {
+    const apply = (endpoints: MechanicEndpoints) => {
+      const next = { ...endpoints, [key]: value };
+      const dependent: Partial<Record<keyof MechanicEndpoints, keyof MechanicEndpoints>> = {
+        chainStart: "chainEnd",
+        coilStart: "coilEnd",
+        loopStart: "loopEnd",
+      };
+      const endKey = dependent[key];
+      if (endKey) {
+        const sameArch = sameArchLabels(value);
+        if (!sameArch.includes(next[endKey])) {
+          next[endKey] = sameArch.at(-1) || value;
+        }
+      }
+      return next;
+    };
+    if (mechanicsComparison.active === "B" && mechanicsComparison.alternative) {
+      setMechanicsComparison((current) => current.alternative ? {
+        ...current,
+        alternative: {
+          ...current.alternative,
+          endpoints: apply(current.alternative.endpoints),
+        },
+      } : current);
+    } else {
+      setMechanicEndpoints((current) => apply(current));
+    }
+  };
+
+  const createMechanicsComparison = () => {
+    setMechanicsComparison({
+      alternative: {
+        layers: { ...applianceLayers },
+        endpoints: { ...mechanicEndpoints },
+      },
+      active: "B",
+    });
+  };
+
+  const removeMechanicsComparison = () => {
+    setMechanicsComparison(emptyMechanicsComparison());
+  };
+
   if (clinicalView === "stages") {
     return setupApproved ? (
       <StageWorkspace
@@ -2830,8 +2894,15 @@ export default function ScanWorkflow({
         jawTransforms={jawTransforms}
         targetTransforms={targetTransforms}
         plannedExtractions={plannedExtractions}
-        applianceLayers={applianceLayers}
-        endpoints={mechanicEndpoints}
+        baseScenario={{ layers: applianceLayers, endpoints: mechanicEndpoints }}
+        comparison={mechanicsComparison}
+        onSelectScenario={(active) => setMechanicsComparison((current) =>
+          active === "A" || current.alternative ? { ...current, active } : current
+        )}
+        onCreateComparison={createMechanicsComparison}
+        onRemoveComparison={removeMechanicsComparison}
+        onToggleLayer={updateScenarioLayer}
+        onUpdateEndpoint={updateScenarioEndpoint}
         preferences={appliancePreferences}
         bondedTeeth={bondedLabels}
         sessionActive={sessionActive}
