@@ -11,6 +11,7 @@ import {
 } from "react";
 import type { ClinicalViewerHandle } from "./ClinicalViewer";
 import UiSelect from "./UiSelect";
+import NumberInput from "./NumberInput";
 import type {
   ScanPersistenceState,
   StageAiReviewResult,
@@ -475,7 +476,7 @@ function HomePage() {
 
 const clinicalFlow = [
   {
-    label: "Case", title: "Case Presentation", detail: "Clinical records",
+    label: "Case", title: "Clinical Records", detail: "Clinical records",
     icon: <path d="M9 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-3M9 2h6v4H9zM8 11h8M8 15h8" />,
   },
   {
@@ -937,15 +938,16 @@ function CaseRecordsView({
             <span>Patient label / case ID</span>
             <input value={caseLabel} onChange={(event) => onCaseLabel(event.target.value)} type="text" />
           </label>
-          <label>
-            <span>Age at records</span>
-            <input
+          <div className="number-field">
+            <label htmlFor="case-record-age">Age at records</label>
+            <NumberInput
+              id="case-record-age"
+              label="age at records"
               value={caseDetails.age}
               min="12"
-              type="number"
-              onChange={(event) => onCaseDetail("age", event.target.value)}
+              onChange={(value) => onCaseDetail("age", value)}
             />
-          </label>
+          </div>
           <label>
             <span>Sex (optional)</span>
             <UiSelect
@@ -1298,19 +1300,19 @@ function FindingsView({
           </label>
           <label>
             <span>Overjet</span>
-            <div className="field-with-unit"><input value={findings.overjet} onChange={(event) => onFindingChange("overjet", event.target.value)} type="number" /><small>mm</small></div>
+            <div className="field-with-unit"><NumberInput id="finding-overjet" label="overjet" value={findings.overjet} onChange={(value) => onFindingChange("overjet", value)} /><small>mm</small></div>
           </label>
           <label>
             <span>Overbite</span>
-            <div className="field-with-unit"><input value={findings.overbite} onChange={(event) => onFindingChange("overbite", event.target.value)} type="number" /><small>%</small></div>
+            <div className="field-with-unit"><NumberInput id="finding-overbite" label="overbite" value={findings.overbite} onChange={(value) => onFindingChange("overbite", value)} /><small>%</small></div>
           </label>
           <label>
             <span>Maxillary crowding / spacing</span>
-            <div className="field-with-unit"><input value={findings.maxillaryCrowding} onChange={(event) => onFindingChange("maxillaryCrowding", event.target.value)} type="number" /><small>mm</small></div>
+            <div className="field-with-unit"><NumberInput id="finding-maxillaryCrowding" label="maxillaryCrowding" value={findings.maxillaryCrowding} onChange={(value) => onFindingChange("maxillaryCrowding", value)} /><small>mm</small></div>
           </label>
           <label>
             <span>Mandibular crowding / spacing</span>
-            <div className="field-with-unit"><input value={findings.mandibularCrowding} onChange={(event) => onFindingChange("mandibularCrowding", event.target.value)} type="number" /><small>mm</small></div>
+            <div className="field-with-unit"><NumberInput id="finding-mandibularCrowding" label="mandibularCrowding" value={findings.mandibularCrowding} onChange={(value) => onFindingChange("mandibularCrowding", value)} /><small>mm</small></div>
           </label>
           <label>
             <span>Upper dental midline to face</span>
@@ -1322,7 +1324,7 @@ function FindingsView({
           </label>
           <label>
             <span>Upper-to-lower midline discrepancy</span>
-            <div className="field-with-unit"><input value={findings.midlineDiscrepancy} onChange={(event) => onFindingChange("midlineDiscrepancy", event.target.value)} type="number" /><small>mm</small></div>
+            <div className="field-with-unit"><NumberInput id="finding-midlineDiscrepancy" label="midlineDiscrepancy" value={findings.midlineDiscrepancy} onChange={(value) => onFindingChange("midlineDiscrepancy", value)} /><small>mm</small></div>
           </label>
           <label>
             <span>Curve of Spee</span>
@@ -1662,11 +1664,13 @@ function AuthDialog({
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (!open) return;
     setMessage("");
     setPassword("");
+    setShowPassword(false);
     const onDialogKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         onClose();
@@ -1756,6 +1760,41 @@ function AuthDialog({
     }
   };
 
+  const signInWithGoogle = async () => {
+    setMessage("");
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: new URL("/app", window.location.origin).toString() },
+      });
+      if (error) throw error;
+    } catch {
+      setMessage("Could not start Google sign-in. Please try again.");
+      setLoading(false);
+    }
+  };
+
+  const resetPassword = async () => {
+    if (!email.trim()) {
+      setMessage("Enter your email first to receive a reset link.");
+      return;
+    }
+    setMessage("");
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: "https://dentaistudy.com/settings.html",
+      });
+      if (error) throw error;
+      setMessage("Check your inbox for the password reset link. Passwords are shared with DentAIstudy during preview.");
+    } catch {
+      setMessage("Could not send the password reset email. Try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const signOut = async () => {
     setLoading(true);
     setMessage("");
@@ -1781,27 +1820,30 @@ function AuthDialog({
         onMouseDown={(event) => event.stopPropagation()}
       >
         <div className="auth-dialog__header">
-          <div>
-            <span>DentAIstudy account</span>
-            <h2 id="auth-dialog-title">
-              {session ? "Account" : mode === "login" ? "Sign in to BracketMotion" : "Create your account"}
-            </h2>
-          </div>
           <button type="button" autoFocus aria-label="Close account dialog" onClick={onClose}>
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M18 6 6 18" />
               <path d="m6 6 12 12" />
             </svg>
           </button>
+          <div className="auth-dialog__logo" aria-hidden="true">
+            <img src="/icons/bracketmotion-icon.svg" alt="" />
+          </div>
+          <h2 id="auth-dialog-title">
+            {session ? "Your account" : mode === "login" ? "Log in to BracketMotion" : "Create your account"}
+          </h2>
+          <p>
+            {session ? "Signed in to BracketMotion" : "Use your DentAIstudy sign-in during preview."}
+          </p>
         </div>
 
         {session ? (
           <div className="auth-dialog__account">
             <div>
               <span>Signed in as</span>
-              <strong>{session.user.email || "DentAIstudy user"}</strong>
+              <strong>{session.user.email || "Account"}</strong>
             </div>
-            <p>Your saved BracketMotion cases are private to this Supabase account.</p>
+            <p>Your BracketMotion cases remain private to your signed-in account.</p>
             {message && <div className="auth-dialog__message is-error">{message}</div>}
             <button
               className="app-primary-action"
@@ -1814,10 +1856,16 @@ function AuthDialog({
           </div>
         ) : (
           <form className="auth-dialog__form" onSubmit={submit}>
-            <p>
-              Use the same account as DentAIstudy. Saved cases and clinical AI calls
-              stay tied to your authenticated user ID.
-            </p>
+            <button
+              className="auth-dialog__google"
+              type="button"
+              aria-label="Continue with Google"
+              disabled={loading}
+              onClick={() => void signInWithGoogle()}
+            >
+              <img src="/icons/google-icon.svg" alt="" />
+            </button>
+            <div className="auth-dialog__divider"><span>Or continue with email</span></div>
 
             {mode === "signup" && (
               <label>
@@ -1826,6 +1874,7 @@ function AuthDialog({
                   value={fullName}
                   onChange={(event) => setFullName(event.target.value)}
                   autoComplete="name"
+                  placeholder="Your name"
                   required
                   type="text"
                 />
@@ -1838,44 +1887,80 @@ function AuthDialog({
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 autoComplete="email"
+                placeholder="you@example.com"
                 required
                 type="email"
               />
             </label>
 
-            <label>
-              <span>Password</span>
-              <input
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                autoComplete={mode === "login" ? "current-password" : "new-password"}
-                minLength={6}
-                required
-                type="password"
-              />
-            </label>
+            <div className="auth-dialog__password-field">
+              <label htmlFor="bracketmotion-auth-password">Password</label>
+              <span className="auth-dialog__password">
+                <input
+                  id="bracketmotion-auth-password"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  autoComplete={mode === "login" ? "current-password" : "new-password"}
+                  placeholder="••••••••"
+                  minLength={6}
+                  required
+                  type={showPassword ? "text" : "password"}
+                />
+                <button
+                  type="button"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-pressed={showPassword}
+                  onClick={() => setShowPassword((current) => !current)}
+                >
+                  {showPassword ? (
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                  ) : (
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M3 3l18 18M10.58 10.58a2 2 0 0 0 2.84 2.84M9.88 5.08A10.89 10.89 0 0 1 12 5c5 0 9 5 9 7a11.74 11.74 0 0 1-3.23 3.94M6.61 6.61C4.42 8.04 3 10.14 3 12c0 2 4 7 9 7a10.7 10.7 0 0 0 4.37-.93" />
+                    </svg>
+                  )}
+                </button>
+              </span>
+            </div>
 
-            {message && <div className="auth-dialog__message">{message}</div>}
+            {mode === "login" && (
+              <button
+                className="auth-dialog__forgot"
+                type="button"
+                onClick={() => void resetPassword()}
+                disabled={loading}
+              >
+                Forgot your password?
+              </button>
+            )}
 
             <button className="app-primary-action" type="submit" disabled={loading}>
               {loading
-                ? mode === "login"
-                  ? "Signing in…"
-                  : "Creating account…"
-                : mode === "login"
-                  ? "Sign in"
-                  : "Create account"}
+                ? mode === "login" ? "Logging in…" : "Creating account…"
+                : mode === "login" ? "Log in" : "Create account"}
             </button>
-
-            <button
-              className="auth-dialog__switch"
-              type="button"
-              onClick={() => setMode((current) => current === "login" ? "signup" : "login")}
-            >
-              {mode === "login"
-                ? "Need an account? Create one"
-                : "Already have an account? Sign in"}
-            </button>
+            {message && <div className="auth-dialog__message" role="status">{message}</div>}
+            {mode === "signup" && (
+              <p className="auth-dialog__terms">
+                By creating an account, you agree to our{" "}
+                <a href="/terms" target="_blank" rel="noreferrer">Terms &amp; Conditions</a>
+                {" "}and{" "}
+                <a href="/privacy" target="_blank" rel="noreferrer">Privacy Policy</a>.
+              </p>
+            )}
+            <p className="auth-dialog__switch">
+              {mode === "login" ? "Don’t have an account yet?" : "Already have an account?"}{" "}
+              <button type="button" onClick={() => {
+                setMode((current) => current === "login" ? "signup" : "login");
+                setMessage("");
+                setShowPassword(false);
+              }}>
+                {mode === "login" ? "Sign up" : "Log in"}
+              </button>
+            </p>
           </form>
         )}
       </section>
@@ -3327,7 +3412,7 @@ function ClinicalAppPage() {
             <div className="case-hub">
               <header className="patients-header">
                 <div>
-                  <h1>Patients <span>/ My patients</span></h1>
+                  <h1>Patients</h1>
                   <p>Saved cases in your authenticated account</p>
                 </div>
                 <button

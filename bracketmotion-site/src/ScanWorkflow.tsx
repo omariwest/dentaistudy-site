@@ -27,6 +27,7 @@ import {
   uploadBracketMotionScan,
 } from "./supabase";
 import UiSelect from "./UiSelect";
+import NumberInput from "./NumberInput";
 
 type Jaw = "upper" | "lower" | "bite";
 type EditMode = "add" | "erase";
@@ -3562,44 +3563,46 @@ export default function ScanWorkflow({
                       <>
                         <div className="target-value-grid">
                           {(["X", "Y", "Z"] as const).map((axis, index) => (
-                            <label key={axis}>
-                              <span>{axis} mm</span>
-                              <input
-                                type="number"
+                            <div className="number-field" key={axis}>
+                              <label htmlFor={`target-position-${axis}`}>{axis} mm</label>
+                              <NumberInput
+                                id={`target-position-${axis}`}
+                                label={`${axis} position`}
                                 step="0.1"
                                 value={selectedTransform.position[index].toFixed(2)}
-                                onChange={(event) =>
+                                onChange={(value) =>
                                   updateSelectedTarget(
                                     "position",
                                     index as 0 | 1 | 2,
-                                    Number(event.target.value),
+                                    Number(value),
                                   )
                                 }
                               />
-                            </label>
+                            </div>
                           ))}
                         </div>
 
                         <div className="target-value-grid">
                           {(["Rx", "Ry", "Rz"] as const).map((axis, index) => (
-                            <label key={axis}>
-                              <span>{axis} °</span>
-                              <input
-                                type="number"
+                            <div className="number-field" key={axis}>
+                              <label htmlFor={`target-rotation-${axis}`}>{axis} °</label>
+                              <NumberInput
+                                id={`target-rotation-${axis}`}
+                                label={`${axis} rotation`}
                                 step="1"
                                 value={(
                                   (selectedTransform.rotation[index] * 180) /
                                   Math.PI
                                 ).toFixed(1)}
-                                onChange={(event) =>
+                                onChange={(value) =>
                                   updateSelectedTarget(
                                     "rotation",
                                     index as 0 | 1 | 2,
-                                    Number(event.target.value),
+                                    Number(value),
                                   )
                                 }
                               />
-                            </label>
+                            </div>
                           ))}
                         </div>
                       </>
