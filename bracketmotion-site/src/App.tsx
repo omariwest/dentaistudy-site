@@ -1419,148 +1419,19 @@ type TreatmentPlanState = {
 
 type AiReviewMode = "diagnosis_draft" | "plan_review" | "stage_review";
 
-function ClinicalAiReviewCard({
-  mode,
-  planningReady,
-  planApproved,
-  setupApproved,
-  sessionActive,
-  review,
-  loading,
-  error,
-  onRun,
-  onSignIn,
-}: {
-  mode: AiReviewMode;
-  planningReady: boolean;
-  planApproved: boolean;
-  setupApproved: boolean;
-  sessionActive: boolean;
-  review: ClinicalAiReviewResult | null;
-  loading: boolean;
-  error: string;
-  onRun: () => void;
-  onSignIn: () => void;
-}) {
-  const stageMode = mode === "stage_review";
-  const gateReady = stageMode
-    ? planningReady && planApproved && setupApproved
-    : planningReady;
-
-  return (
-    <section className="ai-review-card" aria-labelledby={`ai-review-${mode}`}>
-      <div className="ai-review-card__header">
-        <div>
-          <span>Gemini clinical reasoning</span>
-          <h2 id={`ai-review-${mode}`}>
-            {stageMode ? "Mechanics review" : "Clinical plan review"}
-          </h2>
-        </div>
-        <span
-          className={`ai-review-status${sessionActive && gateReady ? " is-ready" : ""}${error ? " is-error" : ""}`}
-        >
-          {loading
-            ? "Reviewing…"
-            : error
-              ? "Review unavailable"
-              : sessionActive
-                ? gateReady
-                  ? "Ready"
-                  : "Gate locked"
-                : "Sign in required"}
-        </span>
-      </div>
-
-      <p className="ai-review-card__intro">
-        Structured case details go to Gemini for a Proffit-based draft. Tooth positions and approvals remain clinician-controlled.
-      </p>
-
-      <div className="ai-review-gate">
-        <div>
-          <strong>{gateReady ? "Ready for clinician review" : "Complete required approvals first"}</strong>
-          {!gateReady && (
-            <p>
-              {stageMode
-                ? "Planning, clinical plan and 3D setup approvals are required."
-                : "Complete the required records and scope screen."}
-            </p>
-          )}
-        </div>
-        <button
-          className="ai-review-button"
-          type="button"
-          disabled={loading || (sessionActive && !gateReady)}
-          onClick={sessionActive ? onRun : onSignIn}
-        >
-          {!sessionActive
-            ? "Sign in to review"
-            : loading
-              ? "Reviewing…"
-              : review
-                ? "Refresh review"
-                : "Run AI review"}
-        </button>
-      </div>
-
-      {error && <div className="ai-review-error" role="alert">{error}</div>}
-
-      {review && (
-        <div className="ai-review-output">
-          <div className="ai-review-output__summary">
-            <span>Draft assessment</span>
-            <strong>{review.case_summary || "Clinical review"}</strong>
-            <p>{review.clinical_assessment || "No assessment returned."}</p>
-          </div>
-
-          {!!review.concerns?.length && (
-            <div className="ai-review-output__section">
-              <span>Concerns to review</span>
-              {review.concerns.slice(0, 4).map((concern, index) => (
-                <div className="ai-review-output__item" key={`${concern.issue}-${index}`}>
-                  <strong>{concern.issue || "Clinical concern"}</strong>
-                  <p>{concern.why_it_matters}</p>
-                  {!!concern.source_ids?.length && (
-                    <small>{concern.source_ids.join(" · ")}</small>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-
-          {!!review.missing_information?.length && (
-            <div className="ai-review-output__section">
-              <span>Missing information</span>
-              <ul>
-                {review.missing_information.slice(0, 5).map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          <div className="ai-review-output__boundary">
-            {review.boundary ||
-              "Draft clinical decision support only. Clinician review is required."}
-          </div>
-        </div>
-      )}
-
-    </section>
-  );
-}
-
 function TreatmentPlanView({
   planningReady,
   scopeIssue,
   plan,
   planApproved,
   sessionActive,
-  aiReview,
-  aiReviewLoading,
-  aiReviewError,
-  onRunAiReview,
+  suggestionsLoading,
+  suggestionsError,
+  onGenerate,
   onSignIn,
   onPlanChange,
+  onOptionChange,
+  onSelectOption,
   onApprove,
 }: {
   planningReady: boolean;
@@ -1568,32 +1439,36 @@ function TreatmentPlanView({
   plan: TreatmentPlanState;
   planApproved: boolean;
   sessionActive: boolean;
-  aiReview: ClinicalAiReviewResult | null;
-  aiReviewLoading: boolean;
-  aiReviewError: string;
-  onRunAiReview: () => void;
+  suggestionsLoading: boolean;
+  suggestionsError: string;
+  onGenerate: () => void;
   onSignIn: () => void;
-  onPlanChange: (field: keyof TreatmentPlanState, value: string) => void;
+  onPlanChange: (field: "problemList" | "goals" | "informationGaps", value: string) => void;
+  onOptionChange: (index: number, field: keyof TreatmentOption, value: string) => void;
+  onSelectOption: (index: number) => void;
   onApprove: () => void;
 }) {
-  const planComplete = Object.values(plan).every((value) => value.trim().length > 0);
+  const selected = plan.selectedOption === null ? null : plan.options[plan.selectedOption];
+  const canApprove = Boolean(
+    planningReady && plan.problemList.trim() && plan.goals.trim() &&
+    selected && Object.values(selected).every((value) => value.trim()),
+  );
 
   if (!planningReady) {
     return (
       <div className="case-workflow-page">
         <div className="case-workflow-page__header">
           <div>
-            <span className="case-page-kicker">Treatment plan</span>
+            <span className="case-page-kicker">Treatment Plans</span>
             <h1>Planning unavailable</h1>
           </div>
         </div>
-
         <div className="plan-blocked-card" role="status">
           <strong>{scopeIssue ? "Out of V1 scope" : "Case not planning-ready"}</strong>
           <p>
             {scopeIssue
-              ? `${scopeIssue} is outside the frozen BracketMotion V1 boundary.`
-              : "Return to Case and Findings to complete the missing requirements."}
+              ? scopeIssue + " is outside the frozen BracketMotion V1 boundary."
+              : "Complete the required clinical records in Case Presentation and Diagnosis."}
           </p>
         </div>
       </div>
@@ -1603,101 +1478,164 @@ function TreatmentPlanView({
   return (
     <div className="case-workflow-page">
       <div className="case-workflow-page__header">
-        <div>
-          <h1>Treatment plan</h1>
-        </div>
+        <div><h1>Treatment Plans</h1></div>
       </div>
+
+      <section className="ai-review-card" aria-labelledby="ai-treatment-suggestions">
+        <div className="ai-review-card__header">
+          <div>
+            <span>Clinical planning</span>
+            <h2 id="ai-treatment-suggestions">Three editable treatment suggestions</h2>
+          </div>
+          <span className={"ai-review-status" + (planApproved ? " is-ready" : "")}>
+            {planApproved ? "Approved" : "Draft"}
+          </span>
+        </div>
+        <div className="ai-review-gate">
+          <div>
+            <strong>{suggestionsLoading ? "Generating suggestions…" : "Prepare treatment options"}</strong>
+            <p>Uses entered clinical findings and approved diagnosis, not the uploaded images.</p>
+          </div>
+          <button
+            type="button"
+            className="ai-review-button"
+            disabled={suggestionsLoading}
+            onClick={sessionActive ? onGenerate : onSignIn}
+          >
+            {!sessionActive ? "Sign in to generate" : suggestionsLoading ? "Generating…" : "Generate AI suggestions"}
+          </button>
+        </div>
+        {suggestionsError && <div className="ai-review-error" role="alert">{suggestionsError}</div>}
+      </section>
 
       <section className="case-section" aria-labelledby="problem-list-title">
-        <div className="case-section__heading">
-          <div>
-            <h2 id="problem-list-title">Problem list</h2>
-          </div>
+        <div className="case-section__heading"><div><h2 id="problem-list-title">Problem list and treatment goals</h2></div></div>
+        <div className="plan-objectives-grid">
+          <label>
+            <span>Clinical problem list</span>
+            <textarea
+              className="plan-textarea"
+              aria-label="Clinical problem list"
+              rows={3}
+              value={plan.problemList}
+              onChange={(event) => onPlanChange("problemList", event.target.value)}
+            />
+          </label>
+          <label>
+            <span>Treatment objectives</span>
+            <textarea
+              className="plan-textarea"
+              aria-label="Treatment objectives"
+              rows={3}
+              value={plan.goals}
+              onChange={(event) => onPlanChange("goals", event.target.value)}
+            />
+          </label>
         </div>
-        <textarea
-          className="plan-textarea"
-          value={plan.problemList}
-          onChange={(event) => onPlanChange("problemList", event.target.value)}
-          rows={4}
-        />
       </section>
 
-      <section className="case-section" aria-labelledby="goals-title">
-        <div className="case-section__heading">
-          <div>
-            <h2 id="goals-title">Treatment goals</h2>
-          </div>
-        </div>
-        <textarea
-          className="plan-textarea"
-          value={plan.goals}
-          onChange={(event) => onPlanChange("goals", event.target.value)}
-          rows={4}
-        />
-      </section>
+      <div className="plan-strategy-grid" aria-label="Treatment suggestion options">
+        {plan.options.map((option, index) => {
+          const isSelected = plan.selectedOption === index;
+          const label = String.fromCharCode(65 + index);
+          return (
+            <section
+              className={"case-section plan-strategy-card" + (isSelected ? " is-primary" : "")}
+              aria-label={"Plan " + label}
+              key={index}
+            >
+              <div className="case-section__heading">
+                <div><h2>{"Plan " + label}</h2></div>
+                <button
+                  className="app-quiet-button"
+                  type="button"
+                  aria-pressed={isSelected}
+                  onClick={() => onSelectOption(index)}
+                >
+                  {isSelected ? "Selected" : "Select"}
+                </button>
+              </div>
 
-      <div className="plan-strategy-grid">
-        <section className="case-section plan-strategy-card is-primary" aria-labelledby="primary-strategy-title">
-          <div className="case-section__heading">
-            <div>
-              <h2 id="primary-strategy-title">Primary strategy</h2>
-            </div>
-          </div>
-          <textarea
-            className="plan-textarea"
-            value={plan.primaryStrategy}
-            onChange={(event) => onPlanChange("primaryStrategy", event.target.value)}
-            rows={7}
-          />
-        </section>
-
-        <section className="case-section plan-strategy-card" aria-labelledby="alternative-strategy-title">
-          <div className="case-section__heading">
-            <div>
-              <h2 id="alternative-strategy-title">Alternative strategy</h2>
-            </div>
-          </div>
-          <textarea
-            className="plan-textarea"
-            value={plan.alternativeStrategy}
-            onChange={(event) => onPlanChange("alternativeStrategy", event.target.value)}
-            rows={7}
-          />
-        </section>
+              <label className="plan-option-field">
+                <span>Approach</span>
+                <input
+                  type="text"
+                  value={option.title}
+                  aria-label={"Plan " + label + " approach"}
+                  placeholder="Enter approach"
+                  onChange={(event) => onOptionChange(index, "title", event.target.value)}
+                />
+              </label>
+              <label className="plan-option-field">
+                <span>Primary aims</span>
+                <textarea
+                  className="plan-textarea"
+                  rows={3}
+                  value={option.aims}
+                  aria-label={"Plan " + label + " aims"}
+                  onChange={(event) => onOptionChange(index, "aims", event.target.value)}
+                />
+              </label>
+              <label className="plan-option-field">
+                <span>Proposed mechanics</span>
+                <textarea
+                  className="plan-textarea"
+                  rows={4}
+                  value={option.mechanics}
+                  aria-label={"Plan " + label + " mechanics"}
+                  onChange={(event) => onOptionChange(index, "mechanics", event.target.value)}
+                />
+              </label>
+              <label className="plan-option-field">
+                <span>Considerations and checks</span>
+                <textarea
+                  className="plan-textarea"
+                  rows={3}
+                  value={option.checks}
+                  aria-label={"Plan " + label + " considerations"}
+                  onChange={(event) => onOptionChange(index, "checks", event.target.value)}
+                />
+              </label>
+            </section>
+          );
+        })}
       </div>
 
-      <ClinicalAiReviewCard
-        mode="plan_review"
-        planningReady={planningReady}
-        planApproved={planApproved}
-        setupApproved={false}
-        sessionActive={sessionActive}
-        review={aiReview}
-        loading={aiReviewLoading}
-        error={aiReviewError}
-        onRun={onRunAiReview}
-        onSignIn={onSignIn}
-      />
+      {plan.informationGaps && (
+        <section className="case-section" aria-labelledby="treatment-evidence-title">
+          <div className="case-section__heading"><div><h2 id="treatment-evidence-title">Information to confirm</h2></div></div>
+          <textarea
+            className="plan-textarea"
+            rows={3}
+            value={plan.informationGaps}
+            aria-label="Treatment information to confirm"
+            onChange={(event) => onPlanChange("informationGaps", event.target.value)}
+          />
+        </section>
+      )}
 
-      <section className={`plan-approval-panel${planApproved ? " is-approved" : ""}`}>
+      <section className={"plan-approval-panel" + (planApproved ? " is-approved" : "")}>
         <div>
           <span>Clinical Plan Approval</span>
-          <strong>{planApproved ? "Plan approved" : "Approve before 3D setup"}</strong>
+          <strong>{planApproved
+            ? "Plan " + String.fromCharCode(65 + (plan.selectedOption ?? 0)) + " approved"
+            : plan.selectedOption === null
+              ? "Select a treatment option"
+              : "Review Plan " + String.fromCharCode(65 + plan.selectedOption) + " before approval"}
+          </strong>
           <p>
             {planApproved
-              ? "The setup workspace is unlocked. Any later plan edit will revoke this approval."
-              : planComplete
-                ? "BracketMotion does not generate or approve final tooth positions until the clinician approves this strategy."
-                : "Complete the problem list, goals, primary strategy and alternative before approval."}
+              ? "The selected mechanics strategy is ready for the 3D workspace."
+              : "The clinician can edit all options. Only the selected completed plan can be approved."}
           </p>
         </div>
         <button
           className="app-primary-action plan-approve-button"
           type="button"
+          disabled={planApproved || !canApprove}
           onClick={onApprove}
-          disabled={planApproved || !planComplete}
         >
-          {planApproved ? "Approved" : planComplete ? "Approve clinical plan" : "Complete plan first"}
+          {planApproved ? "Approved" : "Approve selected plan"}
         </button>
       </section>
     </div>
