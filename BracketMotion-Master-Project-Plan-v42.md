@@ -6,7 +6,7 @@
 > **Previous tracker / existing working prototype:** [v41](BracketMotion-Master-Project-Plan-v41.md)
 > **Legacy technical/clinical scope:** [v35](BracketMotion-Master-Project-Plan-v35.md); retained for historical reference, not silently deleted
 > **Clinical tester:** founder, orthodontic resident
-> **Current gate:** Task 1 — guided workflow navigation UI
+> **Current gate:** Task 1 implemented and passed browser/build checks; founder preview approval pending
 
 ## Locked direction
 
@@ -25,7 +25,7 @@
 
 | Gate | Work | Status |
 | --- | --- | --- |
-| **Task 1** | Build the **five-phase guided workflow navigation shell** from existing JSX/CSS; preserve working underlying clinical screens, disable no existing gates; accurately label legacy 3D setup until actual photo fitting exists | **In progress** |
+| **Task 1** | Unified responsive five-phase navigation shell, real internal clinical gates retained | **Implemented; founder approval pending** |
 | **Task 2** | Case Presentation screen: demographics/history and five-photo + facial/radiographic intake, image review/correction, user-friendly record progress; no fake upload persistence | Pending |
 | **Task 3** | Diagnosis UI: editable structured AI-generated draft, approval and revision; correct use of existing Gemini backend without fabricated imaging findings | Pending |
 | **Task 4** | Three editable AI treatment suggestions and clinician choice/approval, visual summary and suitable illustration placeholders generated from real data (not false predicted outcomes) | Pending |
@@ -38,12 +38,16 @@ Task 8 may require **subgates** for research and performance feasibility before 
 
 ## Task 1 — scope / engineering rules
 
-- [ ] Give desktop and mobile a clear, **single** five-phase flow across the workspace; preserve true internal states and plan/setup approval gates.
-- [ ] Map existing Case → Case Presentation; Findings → Diagnosis; Plan → Treatment Plans; Setup → 3D Setup (legacy until photo fit); Stages → Mechanics. Do **not** label a scanner screen `5-Photo Match` before it exists.
-- [ ] No duplicated desktop/mobile navigation, no new style system, existing rules edited in place; purple only for current phase and actions, neutral remaining surfaces.
-- [ ] Check 320, 390, 1024 and desktop viewports, no horizontal window overflow or clipped primary actions.
-- [ ] `npm run build` includes frozen legacy V1 guard, TypeScript, Vite; deploy READY and verify.
-- [ ] Founder approves Task 1 before Task 2.
+- [x] Use **one** five-phase horizontal stepper across all devices, replacing the old desktop sidebar + separate mobile bar at their source.
+- [x] Map internal Case → **Case Presentation**, Findings → **Diagnosis**, Plan → **Treatment Plans**, Setup → **3D Setup** (truthful while STL importer still operates), Stages → **Mechanics**. Existing guard conditions, save, and clinician approval remain unchanged.
+- [x] Purple selected state, neutral other phases, compact horizontally scrollable narrow-screen stepper. No new stylesheet, inline CSS, appended overrides, `!important`, or duplicate hidden navigation.
+- [x] Fix original responsive **1024px** breakpoint reserving a 136px sidebar (removed real source). Fix vertical stepper scrollbar in original CSS.
+- [x] Correct initially introduced offline grid-row regression after recognizing offline banner is **position: fixed**; remove needless offline row overrides rather than masking them.
+- [x] Headless Chromium regression at **1440, 1024, 390, and 320 px**: five buttons, zero window horizontal overflow, zero JS exceptions, correct page widths; plan approval still unlocks 3D Setup; Mechanics remains subject to setup approval.
+- [x] Offline banner testing at 320 and 1024: normal content height remains (606/594px in 700px viewport); no overflow.
+- [x] Run `npm run build` (six V1 cases, seven required records, 34 exclusions, TypeScript and Vite all PASS).
+- [x] Exact tested source commit: `b4e102658dd7d0534c33940c79eefa19d627b015`. Vercel preview: `https://bracketmotion-preview-a63yrnfmb-amarsaaliomer-6121.vercel.app/app`.
+- [ ] Founder visually approves Task 1 before Task 2.
 
 ## Ceph licensing lead (not yet adopted)
 
@@ -60,4 +64,4 @@ Task 8 may require **subgates** for research and performance feasibility before 
 
 ## Handoff
 
-Task 4 of the prior correction round is **founder approved**. New photo-first identity approved; Task 1 starts with the navigation shell. All new features above remain **unimplemented** until their respective gates pass.
+Task 4 of prior correction round is founder-approved. **Task 1 implemented and browser/build-verified; founder visual approval pending.** Next Task 2 is Case Presentation and five-photo intake. All later AI/ceph/photo matching features remain unimplemented until their respective gates pass.
