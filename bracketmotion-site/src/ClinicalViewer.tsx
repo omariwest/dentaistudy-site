@@ -53,6 +53,11 @@ function isTooth(object: Object3D) {
   );
 }
 
+function isReferenceGingiva(object: Object3D) {
+  const id = String(object.userData.structureId || object.name || "");
+  return id === "upper-gum" || id === "lower-gum";
+}
+
 function labelFor(object: Object3D | null) {
   if (!object) return null;
   const id = String(object.userData.structureId || object.name || "");
@@ -69,10 +74,13 @@ function cloneModel(source: Group) {
   copy.traverse((object) => {
     if (!(object instanceof Mesh)) return;
 
-    if (!isTooth(object)) {
+    if (!isTooth(object) && !isReferenceGingiva(object)) {
       object.visible = false;
       return;
     }
+
+    // The original gingiva stays visible, but only teeth are selectable.
+    if (isReferenceGingiva(object)) object.raycast = () => {};
 
     if (Array.isArray(object.material)) {
       object.material = object.material.map((material) => material.clone());
@@ -116,7 +124,7 @@ function SceneModel({
 }) {
   useEffect(() => {
     model.traverse((object) => {
-      if (!(object instanceof Mesh)) return;
+      if (!(object instanceof Mesh) || !isTooth(object)) return;
 
       const materials = Array.isArray(object.material)
         ? object.material
@@ -138,12 +146,9 @@ function SceneModel({
     <primitive
       object={model}
       onClick={(event: ThreeEvent<MouseEvent>) => {
+        if (event.delta > 5 || !isTooth(event.object)) return;
         event.stopPropagation();
-        if (event.delta > 5) return;
-
-        const object = event.object;
-        if (!isTooth(object)) return;
-        onSelect(object);
+        onSelect(event.object);
       }}
     />
   );
