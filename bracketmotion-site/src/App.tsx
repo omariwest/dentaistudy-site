@@ -1974,6 +1974,8 @@ function ClinicalAppPage() {
   const [photos, setPhotos] = useState<Partial<Record<PhotoKey, CasePhoto>>>({});
   const [photoError, setPhotoError] = useState("");
   const photoUrlsRef = useRef<Partial<Record<PhotoKey, string>>>({});
+  const photoGenerationRef = useRef(0);
+  const photoRequestRef = useRef<Partial<Record<PhotoKey, number>>>({});
   const [scanState, setScanState] = useState<ScanPersistenceState | null>(null);
   const [stageState, setStageState] = useState<StagePersistenceState | null>(null);
   const [saveState, setSaveState] =
@@ -2004,6 +2006,8 @@ function ClinicalAppPage() {
   ).toUpperCase();
 
   const clearLocalPhotos = useCallback(() => {
+    photoGenerationRef.current += 1;
+    photoRequestRef.current = {};
     Object.values(photoUrlsRef.current).forEach((url) => {
       if (url) URL.revokeObjectURL(url);
     });
@@ -2103,6 +2107,11 @@ function ClinicalAppPage() {
   }, []);
 
   const changePhoto = async (key: PhotoKey, file: File | null) => {
+    const generation = photoGenerationRef.current;
+    const request = (photoRequestRef.current[key] || 0) + 1;
+    photoRequestRef.current[key] = request;
+    const isCurrent = () => generation === photoGenerationRef.current && request === photoRequestRef.current[key];
+
     if (file && !["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
       setPhotoError("Choose a JPG, PNG or WebP image.");
       return;
@@ -2116,10 +2125,11 @@ function ClinicalAppPage() {
         const decoded = await createImageBitmap(file);
         decoded.close();
       } catch {
-        setPhotoError("This image cannot be opened. Choose another JPG, PNG or WebP.");
+        if (isCurrent()) setPhotoError("This image cannot be opened. Choose another JPG, PNG or WebP.");
         return;
       }
     }
+    if (!isCurrent()) return;
 
     const previousUrl = photoUrlsRef.current[key];
     if (previousUrl) URL.revokeObjectURL(previousUrl);
