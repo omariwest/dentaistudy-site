@@ -3943,7 +3943,7 @@ a {
   }
 
   .clinical-app__body {
-    grid-template-columns: 136px minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .app-inspector {
