@@ -2412,6 +2412,9 @@ function ClinicalAppPage() {
             ? "Save failed"
             : "Saved";
 
+  const has3dWorkspace =
+    !showCaseHub && (activeSection === "Setup" || activeSection === "Stages");
+
   return (
     <main className="clinical-app">
       <header className="app-topbar">
@@ -2462,25 +2465,20 @@ function ClinicalAppPage() {
         </div>
       )}
 
-      <div className="clinical-app__body">
+      <div className={`clinical-app__body${has3dWorkspace ? " is-3d-workspace" : ""}`}>
         <aside className="app-sidebar" aria-label="Case workflow">
-          <div className="app-sidebar__heading">
-            <span>Clinical flow</span>
-            <strong>{caseLabel}</strong>
-          </div>
-
           <nav className="app-flow-nav">
             {clinicalFlow.map((item, index) => (
               <button
                 className={`app-flow-item${activeSection === item.label && !showCaseHub ? " is-active" : ""}`}
                 type="button"
                 key={item.label}
+                title={item.detail}
                 onClick={() => openSection(item.label)}
               >
                 <span className="app-flow-item__index">{String(index + 1)}</span>
                 <span className="app-flow-item__copy">
                   <strong>{item.label}</strong>
-                  <small>{item.detail}</small>
                 </span>
               </button>
             ))}
@@ -2488,7 +2486,7 @@ function ClinicalAppPage() {
 
         </aside>
 
-        <section className={`app-workspace${activeSection === "Case" || activeSection === "Findings" || showCaseHub ? " is-clinical-form" : ""}`}>
+        <section className={`app-workspace${has3dWorkspace ? " is-3d-workspace" : ""}${activeSection === "Case" || activeSection === "Findings" || showCaseHub ? " is-clinical-form" : ""}`}>
           <div className="app-mobile-flow" aria-label="Case workflow">
             {clinicalFlow.map((item) => (
               <button
@@ -2650,17 +2648,11 @@ function ClinicalAppPage() {
           )}
         </section>
 
-        <aside className="app-inspector" aria-label="Case inspector">
+        {!has3dWorkspace && (
+          <aside className="app-inspector" aria-label="Case inspector">
           <div className="app-inspector__header">
             <div>
-              <span>Inspector</span>
-              <strong>{showCaseHub ? "Cases" : activeSection}</strong>
-            </div>
-          </div>
-
-          <div className="app-inspector__section">
-            <span className="app-inspector__label">Readiness</span>
-            <div className="app-empty-selection">
+              <span>{showCaseHub ? "Cases" : activeSection} status</span>
               <strong>{scopeIssue ? "Planning blocked" : planningReady ? "Planning ready" : "Draft case"}</strong>
             </div>
           </div>
@@ -2700,7 +2692,8 @@ function ClinicalAppPage() {
                     : "Continue to 3D setup"}
             </button>
           </div>
-        </aside>
+          </aside>
+        )}
       </div>
 
       <AuthDialog
