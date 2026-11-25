@@ -152,6 +152,40 @@ export async function removeBracketMotionScan(path: string) {
   if (error) throw error;
 }
 
+const CLINICIAN_AVATAR_BUCKET = "bracketmotion-profiles";
+
+export async function downloadBracketMotionAvatar(userId: string): Promise<Blob | null> {
+  const { data, error } = await supabase.storage
+    .from(CLINICIAN_AVATAR_BUCKET)
+    .download(`${userId}/avatar`);
+
+  if (error) {
+    if (/not found|does not exist/i.test(error.message)) return null;
+    throw error;
+  }
+  return data;
+}
+
+export async function uploadBracketMotionAvatar(userId: string, file: File) {
+  const { error } = await supabase.storage
+    .from(CLINICIAN_AVATAR_BUCKET)
+    .upload(`${userId}/avatar`, file, {
+      upsert: true,
+      cacheControl: "0",
+      contentType: file.type,
+    });
+
+  if (error) throw error;
+}
+
+export async function removeBracketMotionAvatar(userId: string) {
+  const { error } = await supabase.storage
+    .from(CLINICIAN_AVATAR_BUCKET)
+    .remove([`${userId}/avatar`]);
+
+  if (error) throw error;
+}
+
 export async function invokeBracketMotionClinicalReview(
   payload: Record<string, unknown>,
 ) {
