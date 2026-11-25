@@ -984,6 +984,28 @@ type ApplianceLayerState = {
   closingLoop: boolean;
 };
 
+type BracketPrescription = "Roth" | "MBT";
+type WireMaterial = "NiTi" | "SS" | "TMA";
+type WireSize = "0.014" | "0.016" | "0.016x0.022" | "0.017x0.025" | "0.019x0.025";
+type LigatureColor = "None" | "Clear" | "Silver" | "Purple";
+type ApplianceStep = "strap" | "wire" | "ties";
+
+type AppliancePreferences = {
+  prescription: BracketPrescription;
+  material: WireMaterial;
+  size: WireSize;
+  ligature: LigatureColor;
+  bondedTeeth: string[] | null;
+};
+
+const defaultAppliancePreferences: AppliancePreferences = {
+  prescription: "Roth",
+  material: "NiTi",
+  size: "0.014",
+  ligature: "Silver",
+  bondedTeeth: null,
+};
+
 type MechanicEndpoints = {
   chainStart: string;
   chainEnd: string;
@@ -1007,6 +1029,7 @@ export type ScanPersistenceState = {
   setupApproved: boolean;
   applianceLayers: ApplianceLayerState;
   mechanicEndpoints: MechanicEndpoints;
+  appliancePreferences?: AppliancePreferences;
 };
 
 export type StagePersistenceState = {
@@ -1989,6 +2012,8 @@ export default function ScanWorkflow({
   const [targetMode, setTargetMode] = useState<SetupMode>("translate");
   const [displayTarget, setDisplayTarget] = useState(true);
   const [setupApproved, setSetupApproved] = useState(false);
+  const [applianceStep, setApplianceStep] = useState<ApplianceStep>("strap");
+  const [appliancePreferences, setAppliancePreferences] = useState<AppliancePreferences>(defaultAppliancePreferences);
   const [applianceLayers, setApplianceLayers] = useState<ApplianceLayerState>({
     brackets: true,
     archwire: true,
@@ -2023,6 +2048,8 @@ export default function ScanWorkflow({
     setAlignJaw(null);
     setInteractionMode("orbit");
     setWorkflowMode("segment");
+    setApplianceStep("strap");
+    setAppliancePreferences(defaultAppliancePreferences);
 
     assetsRef.current.forEach((asset) => asset.geometry.dispose());
     setAssets([]);
@@ -2109,6 +2136,13 @@ export default function ScanWorkflow({
             closingLoop: false,
           },
         );
+        setAppliancePreferences({
+          ...defaultAppliancePreferences,
+          ...(initialState.appliancePreferences || {}),
+          bondedTeeth: Array.isArray(initialState.appliancePreferences?.bondedTeeth)
+            ? initialState.appliancePreferences.bondedTeeth.filter((label) => typeof label === "string")
+            : null,
+        });
         setMechanicEndpoints(
           initialState.mechanicEndpoints || {
             chainStart: "",
@@ -2310,6 +2344,7 @@ export default function ScanWorkflow({
       setupApproved,
       applianceLayers,
       mechanicEndpoints,
+      appliancePreferences,
     });
 
     const stages = deriveStages({
@@ -2326,6 +2361,7 @@ export default function ScanWorkflow({
     });
   }, [
     applianceLayers,
+    appliancePreferences,
     assets,
     jawTransforms,
     mechanicEndpoints,
