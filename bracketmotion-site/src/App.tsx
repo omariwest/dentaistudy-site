@@ -2261,6 +2261,9 @@ function SettingsView({
 function ClinicalAppPage() {
   const [activeSection, setActiveSection] = useState<ClinicalSection>("Case");
   const [showCaseHub, setShowCaseHub] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [doctorAvatar, setDoctorAvatar] = useState<string | null>(null);
+  const [avatarRevision, setAvatarRevision] = useState(0);
   const [session, setSession] = useState<BracketMotionSession | null>(null);
   const [authReady, setAuthReady] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
@@ -2314,11 +2317,36 @@ function ClinicalAppPage() {
   const missingCount = requiredRecords.filter((record) => !visibleRecords[record.key]).length;
   const planningReady = missingCount === 0 && !scopeIssue;
   const userId = session?.user.id ?? null;
-  const accountInitial = (
-    String(session?.user.user_metadata?.full_name || session?.user.email || "A")
-      .trim()
-      .charAt(0) || "A"
-  ).toUpperCase();
+  const doctorProfile = session?.user.user_metadata?.bracketmotion_profile as
+    | BracketMotionDoctorProfile | undefined;
+  const accountName = [doctorProfile?.firstName, doctorProfile?.lastName]
+    .filter(Boolean).join(" ").trim() ||
+    String(session?.user.user_metadata?.full_name || session?.user.email || "A");
+  const accountInitial = (accountName.trim().charAt(0) || "A").toUpperCase();
+
+  useEffect(() => {
+    let active = true;
+    let photoUrl: string | null = null;
+    setDoctorAvatar(null);
+    if (userId && online) {
+      void downloadBracketMotionAvatar(userId).then((blob) => {
+        if (!blob) return;
+        const url = URL.createObjectURL(blob);
+        if (!active) {
+          URL.revokeObjectURL(url);
+          return;
+        }
+        photoUrl = url;
+        setDoctorAvatar(url);
+      }).catch(() => {
+        if (active) setDoctorAvatar(null);
+      });
+    }
+    return () => {
+      active = false;
+      if (photoUrl) URL.revokeObjectURL(photoUrl);
+    };
+  }, [userId, avatarRevision, online]);
 
   const patientCases = useMemo(() => savedCases.map((savedCase) => {
     const stored = savedCase.records && typeof savedCase.records === "object"
@@ -2497,6 +2525,7 @@ function ClinicalAppPage() {
         clearLocalPhotos();
         setSaveState("local");
         setShowCaseHub(false);
+        setShowSettings(false);
         setActiveSection("Case");
       }
 
@@ -2648,6 +2677,7 @@ function ClinicalAppPage() {
 
   const openSection = (section: ClinicalSection) => {
     setShowCaseHub(false);
+    setShowSettings(false);
 
     if ((section === "Plan" || section === "Setup" || section === "Stages") && !diagnosis.approved) {
       setActiveSection("Findings");
@@ -2689,6 +2719,7 @@ function ClinicalAppPage() {
     setStageAiReviewError("");
     setSaveState("local");
     setShowCaseHub(false);
+    setShowSettings(false);
     setActiveSection("Case");
   };
 
@@ -2752,6 +2783,7 @@ function ClinicalAppPage() {
     setStageAiReviewError("");
     setSaveState("saved");
     setShowCaseHub(false);
+    setShowSettings(false);
     setActiveSection("Case");
   }, [clearLocalPhotos]);
 
@@ -3173,10 +3205,10 @@ function ClinicalAppPage() {
             : "Saved";
 
   const has3dWorkspace =
-    !showCaseHub && (activeSection === "Setup" || activeSection === "Stages");
+    !showCaseHub && !showSettings && (activeSection === "Setup" || activeSection === "Stages");
 
   return (
-    <main className={`clinical-app${showCaseHub ? " is-patients" : ""}`}>
+    <main className={`clinical-app${showCaseHub || showSettings ? " is-patients" : ""}`}>
       <header className="app-topbar">
         <div className="app-topbar__brand">
           <a className="wordmark app-wordmark" href="/" aria-label="BracketMotion home">
@@ -3187,13 +3219,25 @@ function ClinicalAppPage() {
             type="button"
             aria-current={showCaseHub ? "page" : undefined}
             onClick={() => {
+              setShowSettings(false);
               setShowCaseHub(true);
               if (session) void refreshCases();
             }}
           >
             Patients
           </button>
-          {!showCaseHub && (
+          <button
+            className={`app-quiet-button${showSettings ? " is-active" : ""}`}
+            type="button"
+            aria-current={showSettings ? "page" : undefined}
+            onClick={() => {
+              setShowCaseHub(false);
+              setShowSettings(true);
+            }}
+          >
+            Settings
+          </button>
+          {!showCaseHub && !showSettings && (
             <>
               <span className="app-topbar__divider" aria-hidden="true" />
               <div className="app-case-title">
@@ -3204,7 +3248,7 @@ function ClinicalAppPage() {
           )}
         </div>
         <div className="app-topbar__actions">
-          {!showCaseHub && (
+          {!showCaseHub && !showSettings && (
             <span
               className={`app-save-state${saveState === "error" || !online ? " is-error" : ""}`}
               role="status"
@@ -3219,7 +3263,9 @@ function ClinicalAppPage() {
             aria-label={session ? "Account" : "Sign in"}
             onClick={() => setAccountOpen(true)}
           >
-            {session ? accountInitial : "A"}
+            {doctorAvatar && session
+              ? <img src={doctorAvatar} alt="" className="app-account-photo" />
+              : accountInitial}
           </button>
         </div>
       </header>
@@ -3231,7 +3277,7 @@ function ClinicalAppPage() {
         </div>
       )}
 
-      {!showCaseHub && <nav className="app-flow-nav" aria-label="Case workflow">
+      {!showCaseHub && !showSettings && <nav className="app-flow-nav" aria-label="Case workflow">
         {clinicalFlow.map((item, index) => (
           <button
             className={`app-flow-item${activeSection === item.label && !showCaseHub ? " is-active" : ""}`}
@@ -3249,10 +3295,17 @@ function ClinicalAppPage() {
         ))}
       </nav>}
 
-      <div className={`clinical-app__body${has3dWorkspace ? " is-3d-workspace" : showCaseHub ? " is-patients" : ""}`}>
-        <section className={`app-workspace${has3dWorkspace ? " is-3d-workspace" : ""}${activeSection === "Case" || activeSection === "Findings" || showCaseHub ? " is-clinical-form" : ""}`}>
+      <div className={`clinical-app__body${has3dWorkspace ? " is-3d-workspace" : showCaseHub || showSettings ? " is-patients" : ""}`}>
+        <section className={`app-workspace${has3dWorkspace ? " is-3d-workspace" : ""}${activeSection === "Case" || activeSection === "Findings" || showCaseHub || showSettings ? " is-clinical-form" : ""}`}>
 
-          {showCaseHub ? (
+          {showSettings ? (
+            <SettingsView
+              session={session}
+              avatarUrl={doctorAvatar}
+              onAvatarChanged={() => setAvatarRevision((value) => value + 1)}
+              onSignIn={() => setAccountOpen(true)}
+            />
+          ) : showCaseHub ? (
             <div className="case-hub">
               <header className="patients-header">
                 <div>
@@ -3524,7 +3577,7 @@ function ClinicalAppPage() {
           )}
         </section>
 
-        {!has3dWorkspace && !showCaseHub && (
+        {!has3dWorkspace && !showCaseHub && !showSettings && (
           <aside className="app-inspector" aria-label="Case inspector">
             <div className="app-inspector__header">
               <div>
