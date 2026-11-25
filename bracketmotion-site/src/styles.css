@@ -4433,8 +4433,8 @@ a {
 }
 
 .plan-textarea:focus {
-  border-color: rgba(109, 76, 245, 0.55);
-  box-shadow: 0 0 0 2px rgba(109, 76, 245, 0.055);
+  border-color: rgba(109, 76, 245, 0.32);
+  box-shadow: 0 0 0 1px rgba(109, 76, 245, 0.05);
 }
 
 .plan-objectives-grid {
@@ -4563,8 +4563,8 @@ a {
 }
 
 .plan-textarea:focus-visible {
-  outline: 2px solid rgba(109, 76, 245, 0.15);
-  outline-offset: 2px;
+  outline: 1px solid rgba(109, 76, 245, 0.13);
+  outline-offset: 0;
 }
 
 /* Legal pages */
@@ -5150,8 +5150,8 @@ a {
     gap: 5px;
   }
 
-  .app-wordmark {
-    font-size: 0.98rem;
+  .app-topbar .app-wordmark {
+    font-size: 0.95rem;
   }
 
   .app-quiet-button {
