@@ -481,8 +481,29 @@ const clinicalFlow = [
 type ClinicalSection = (typeof clinicalFlow)[number]["label"];
 type RecordKey = "history" | "exam" | "scans" | "photos" | "pano" | "ceph" | "cephSummary";
 
+type PhotoKey = "frontal" | "upperOcclusal" | "lowerOcclusal" | "rightBuccal" | "leftBuccal" | "faceFront" | "smile" | "profile" | "pano" | "ceph";
+type CasePhoto = { name: string; previewUrl: string };
+
+const intraoralPhotoSlots: Array<{ key: PhotoKey; title: string }> = [
+  { key: "frontal", title: "Frontal" },
+  { key: "upperOcclusal", title: "Upper occlusal" },
+  { key: "lowerOcclusal", title: "Lower occlusal" },
+  { key: "rightBuccal", title: "Right buccal" },
+  { key: "leftBuccal", title: "Left buccal" },
+];
+const facialPhotoSlots: Array<{ key: PhotoKey; title: string }> = [
+  { key: "faceFront", title: "Frontal face" },
+  { key: "smile", title: "Smile" },
+  { key: "profile", title: "Right profile" },
+];
+const radiographSlots: Array<{ key: PhotoKey; title: string }> = [
+  { key: "pano", title: "Panoramic radiograph" },
+  { key: "ceph", title: "Lateral cephalogram" },
+];
+
 type CaseDetailsState = {
   age: string;
+  sex: string;
   patientStage: string;
   growthStatus: string;
   chiefComplaint: string;
@@ -528,6 +549,7 @@ type FindingsState = {
 
 const defaultCaseDetails: CaseDetailsState = {
   age: "24",
+  sex: "Not specified",
   patientStage: "Adult",
   growthStatus: "Adult",
   chiefComplaint: "Improve alignment and bite.",
@@ -538,6 +560,7 @@ const defaultCaseDetails: CaseDetailsState = {
 
 const emptyCaseDetails: CaseDetailsState = {
   age: "",
+  sex: "Not specified",
   patientStage: "Adult",
   growthStatus: "Uncertain",
   chiefComplaint: "",
@@ -674,7 +697,7 @@ const requiredRecords: Array<{ key: RecordKey; title: string; detail: string }> 
   { key: "history", title: "History + chief complaint", detail: "Medical, dental and treatment history" },
   { key: "exam", title: "Clinical examination", detail: "Periodontal, facial and occlusal findings" },
   { key: "scans", title: "Upper + lower scans", detail: "STL/PLY with correct bite relationship" },
-  { key: "photos", title: "Clinical photographs", detail: "3 facial + 5 intraoral minimum" },
+  { key: "photos", title: "Clinical photographs", detail: "Five intraoral photographs" },
   { key: "pano", title: "Panoramic radiograph", detail: "Required for planning-ready status" },
   { key: "ceph", title: "Lateral cephalogram", detail: "Required for planning-ready status" },
   { key: "cephSummary", title: "Cephalometric summary", detail: "Clinician-entered categorical summary" },
