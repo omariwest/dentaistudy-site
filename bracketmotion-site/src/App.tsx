@@ -2233,11 +2233,48 @@ function ClinicalAppPage() {
     setSetupApproved(false);
   };
 
-  const updatePlan = (field: keyof TreatmentPlanState, value: string) => {
+  const updatePlan = (field: "problemList" | "goals" | "informationGaps", value: string) => {
     setPlan((current) => ({ ...current, [field]: value }));
     setPlanApproved(false);
     setSetupApproved(false);
     cancelSuggestions();
+  };
+
+  const updateTreatmentOption = (index: number, field: keyof TreatmentOption, value: string) => {
+    setPlan((current) => ({
+      ...current,
+      options: current.options.map((option, position) =>
+        position === index ? { ...option, [field]: value } : option,
+      ),
+    }));
+    setPlanApproved(false);
+    setSetupApproved(false);
+    cancelSuggestions();
+  };
+
+  const selectTreatmentOption = (index: number) => {
+    if (!plan.options[index]) return;
+    setPlan((current) => ({ ...current, selectedOption: index }));
+    setPlanApproved(false);
+    setSetupApproved(false);
+    cancelSuggestions();
+  };
+
+  const approveTreatmentPlan = () => {
+    if (!diagnosis.approved || !planningReady || !plan.problemList.trim() || !plan.goals.trim()) return;
+    const option = plan.selectedOption === null ? null : plan.options[plan.selectedOption];
+    if (!option || !Object.values(option).every((value) => value.trim())) return;
+    setPlan((current) => ({
+      ...current,
+      primaryStrategy: option.title + ": " + option.mechanics,
+      alternativeStrategy: current.options
+        .filter((_, index) => index !== current.selectedOption)
+        .filter((candidate) => candidate.title.trim() && candidate.mechanics.trim())
+        .map((candidate) => candidate.title + ": " + candidate.mechanics)
+        .join("\n"),
+    }));
+    setPlanApproved(true);
+    setSetupApproved(false);
   };
 
   const openSection = (section: ClinicalSection) => {
@@ -2322,7 +2359,20 @@ function ClinicalAppPage() {
     setDiagnosisLoading(false);
     setDiagnosisError("");
     setScopeIssue(row.scope_issue || "");
-    setPlan({ ...emptyPlan, ...storedPlan });
+    setPlan({
+      ...emptyPlan,
+      ...storedPlan,
+      options: Array.from({ length: 3 }, (_, index) => {
+        const old = Array.isArray(storedPlan.options) ? storedPlan.options[index] : null;
+        return {
+          title: typeof old?.title === "string" ? old.title : "",
+          aims: typeof old?.aims === "string" ? old.aims : "",
+          mechanics: typeof old?.mechanics === "string" ? old.mechanics : "",
+          checks: typeof old?.checks === "string" ? old.checks : "",
+        };
+      }),
+      selectedOption: null,
+    });
     setPlanApproved(false);
     setSetupApproved(false);
     setScanState(storedScan);
@@ -2607,31 +2657,79 @@ function ClinicalAppPage() {
     }
   };
 
-  const runPlanAiReview = async () => {
+  const generateTreatmentSuggestions = async () => {
     if (!session) {
       setAccountOpen(true);
       return;
     }
-
     if (!online) {
-      setAiReviewError("Reconnect to run the clinical review.");
+      setSuggestionsError("Reconnect to generate treatment suggestions.");
+      return;
+    }
+    if (!planningReady || !diagnosis.approved) {
+      setSuggestionsError("Complete and approve the clinical diagnosis first.");
       return;
     }
 
-    setAiReviewLoading(true);
+    const request = ++suggestionRequestRef.current;
+    setSuggestionsLoading(true);
     setSuggestionsError("");
 
     try {
-      const data = await invokeBracketMotionClinicalReview(
-        buildAiPayload("plan_review"),
-      );
-      setAiReview((data?.review || null) as ClinicalAiReviewResult | null);
+      const payload = buildAiPayload("treatment_suggestions");
+      const result = await invokeBracketMotionClinicalReview({
+        ...payload,
+        diagnosis: {
+          summary: diagnosis.summary,
+          interpretation: diagnosis.interpretation,
+          information_gaps: diagnosis.informationGaps,
+        },
+        gates: { ...payload.gates, diagnosis_approved: diagnosis.approved },
+        plan: {},
+        setup: {},
+        mechanics: {},
+      });
+      if (request !== suggestionRequestRef.current) return;
+
+      const draft = result?.suggestions;
+      if (!draft || !Array.isArray(draft.options)) throw new Error("INVALID_SUGGESTIONS");
+      const options = Array.from({ length: 3 }, (_, index) => {
+        const item = draft.options[index] || {};
+        return {
+          title: typeof item.title === "string" ? item.title.trim() : "",
+          aims: typeof item.aims === "string" ? item.aims.trim() : "",
+          mechanics: typeof item.mechanics === "string" ? item.mechanics.trim() : "",
+          checks: typeof item.checks === "string" ? item.checks.trim() : "",
+        };
+      });
+      const informationGaps = Array.isArray(draft.missing_information)
+        ? draft.missing_information.filter((item: unknown): item is string => typeof item === "string").join("\n")
+        : "";
+      setPlan((current) => ({
+        ...current,
+        problemList: typeof draft.problem_list === "string" && draft.problem_list.trim()
+          ? draft.problem_list.trim()
+          : current.problemList,
+        goals: typeof draft.goals === "string" && draft.goals.trim()
+          ? draft.goals.trim()
+          : current.goals,
+        options,
+        selectedOption: null,
+        informationGaps,
+        primaryStrategy: "",
+        alternativeStrategy: "",
+      }));
+      setPlanApproved(false);
+      setSetupApproved(false);
+      if (!options.some((option) => option.title && option.aims && option.mechanics && option.checks)) {
+        setSuggestionsError("The available case data did not support a complete suggestion. Review missing information or enter a plan manually.");
+      }
     } catch {
-      setAiReviewError(
-        "The clinical review could not be generated. Your case and approvals were not changed.",
-      );
+      if (request === suggestionRequestRef.current) {
+        setSuggestionsError("Could not generate suggestions. Your existing plan remains unchanged.");
+      }
     } finally {
-      setAiReviewLoading(false);
+      if (request === suggestionRequestRef.current) setSuggestionsLoading(false);
     }
   };
 
@@ -2880,16 +2978,14 @@ function ClinicalAppPage() {
               plan={plan}
               planApproved={planApproved}
               sessionActive={Boolean(session)}
-              aiReview={aiReview}
-              aiReviewLoading={aiReviewLoading}
-              aiReviewError={aiReviewError}
-              onRunAiReview={() => void runPlanAiReview()}
+              suggestionsLoading={suggestionsLoading}
+              suggestionsError={suggestionsError}
+              onGenerate={() => void generateTreatmentSuggestions()}
               onSignIn={() => setAccountOpen(true)}
               onPlanChange={updatePlan}
-              onApprove={() => {
-                setPlanApproved(true);
-                setSetupApproved(false);
-              }}
+              onOptionChange={updateTreatmentOption}
+              onSelectOption={selectTreatmentOption}
+              onApprove={approveTreatmentPlan}
             />
           ) : (
             <SetupWorkspace
