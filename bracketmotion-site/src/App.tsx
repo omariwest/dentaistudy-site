@@ -1057,6 +1057,15 @@ function FindingsView({
   onScopeIssue,
   findings,
   onFindingChange,
+  diagnosis,
+  onDiagnosisChange,
+  onApproveDiagnosis,
+  onGenerateDiagnosis,
+  onSignIn,
+  onOpenPlan,
+  sessionActive,
+  diagnosisLoading,
+  diagnosisError,
   planningReady,
   missingCount,
   onBackToCase,
@@ -1065,6 +1074,15 @@ function FindingsView({
   onScopeIssue: (value: string) => void;
   findings: FindingsState;
   onFindingChange: (field: keyof FindingsState, value: string) => void;
+  diagnosis: DiagnosisState;
+  onDiagnosisChange: (field: "summary" | "interpretation" | "informationGaps", value: string) => void;
+  onApproveDiagnosis: () => void;
+  onGenerateDiagnosis: () => void;
+  onSignIn: () => void;
+  onOpenPlan: () => void;
+  sessionActive: boolean;
+  diagnosisLoading: boolean;
+  diagnosisError: string;
   planningReady: boolean;
   missingCount: number;
   onBackToCase: () => void;
@@ -1073,10 +1091,15 @@ function FindingsView({
     <div className="case-workflow-page">
       <div className="case-workflow-page__header">
         <div>
-          <h1>Clinical findings</h1>
+          <h1>Diagnosis</h1>
         </div>
-        <button className="app-quiet-button case-page-secondary" type="button" onClick={onBackToCase}>
-          Back to records
+        <button
+          className="app-primary-action case-page-primary"
+          type="button"
+          disabled={!diagnosis.approved}
+          onClick={onOpenPlan}
+        >
+          Continue to Treatment Plans
         </button>
       </div>
 
@@ -1085,6 +1108,80 @@ function FindingsView({
         missingCount={missingCount}
         scopeIssue={scopeIssue}
       />
+
+      <section className="case-section" aria-labelledby="diagnosis-draft-title">
+        <div className="case-section__heading">
+          <div>
+            <h2 id="diagnosis-draft-title">Clinical diagnosis</h2>
+          </div>
+          <span className={diagnosis.approved ? "ai-review-status is-ready" : "ai-review-status"}>
+            {diagnosis.approved ? "Approved" : "Draft"}
+          </span>
+        </div>
+
+        <div className="finding-grid">
+          <label className="finding-grid__wide">
+            <span>Diagnostic summary</span>
+            <textarea
+              className="plan-textarea"
+              rows={4}
+              value={diagnosis.summary}
+              onChange={(event) => onDiagnosisChange("summary", event.target.value)}
+              aria-label="Diagnostic summary"
+            />
+          </label>
+          <label className="finding-grid__wide">
+            <span>Clinical interpretation</span>
+            <textarea
+              className="plan-textarea"
+              rows={4}
+              value={diagnosis.interpretation}
+              onChange={(event) => onDiagnosisChange("interpretation", event.target.value)}
+              aria-label="Clinical interpretation"
+            />
+          </label>
+          <label className="finding-grid__wide">
+            <span>Information to confirm</span>
+            <textarea
+              className="plan-textarea"
+              rows={3}
+              value={diagnosis.informationGaps}
+              onChange={(event) => onDiagnosisChange("informationGaps", event.target.value)}
+              aria-label="Information to confirm"
+            />
+          </label>
+        </div>
+
+        <div className="ai-review-gate">
+          <div>
+            <strong>AI-assisted draft</strong>
+            <p>Generate from entered case details and findings; images are not sent.</p>
+          </div>
+          <button
+            className="ai-review-button"
+            type="button"
+            disabled={diagnosisLoading || (sessionActive && !planningReady)}
+            onClick={sessionActive ? onGenerateDiagnosis : onSignIn}
+          >
+            {!sessionActive ? "Sign in to generate" : diagnosisLoading ? "Generating…" : "Generate AI draft"}
+          </button>
+        </div>
+        {diagnosisError && <div className="ai-review-error" role="alert">{diagnosisError}</div>}
+
+        <div className={`plan-approval-panel${diagnosis.approved ? " is-approved" : ""}`}>
+          <div>
+            <strong>{diagnosis.approved ? "Diagnosis approved" : "Clinician confirmation"}</strong>
+          </div>
+          <button
+            className="app-primary-action plan-approve-button"
+            type="button"
+            disabled={diagnosis.approved || !planningReady || !diagnosis.summary.trim() || !diagnosis.interpretation.trim()}
+            onClick={onApproveDiagnosis}
+          >
+            {diagnosis.approved ? "Approved" : "Approve diagnosis"}
+          </button>
+        </div>
+      </section>
 
       <section className="case-section" aria-labelledby="oral-title">
         <div className="case-section__heading">
