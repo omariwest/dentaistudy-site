@@ -628,6 +628,16 @@ const emptyRecords: Record<RecordKey, boolean> = {
   cephSummary: false,
 };
 
+type TreatmentOption = {
+  title: string;
+  aims: string;
+  mechanics: string;
+  checks: string;
+};
+
+const emptyTreatmentOptions = (): TreatmentOption[] =>
+  Array.from({ length: 3 }, () => ({ title: "", aims: "", mechanics: "", checks: "" }));
+
 const demoPlan: TreatmentPlanState = {
   problemList:
     "Mild maxillary crowding; moderate mandibular crowding; mild lower anterior rotations; 4 mm overjet; 45% overbite.",
@@ -637,6 +647,9 @@ const demoPlan: TreatmentPlanState = {
     "Non-extraction fixed-appliance treatment. Align and level both arches with progressive NiTi wires, coordinate arch form, then finish on stainless steel with controlled settling as needed.",
   alternativeStrategy:
     "Consider limited space creation if alignment cannot be achieved within the approved arch-form and incisor-position goals. Reassess space requirements before progressing beyond alignment.",
+  options: emptyTreatmentOptions(),
+  selectedOption: null,
+  informationGaps: "",
 };
 
 const emptyPlan: TreatmentPlanState = {
@@ -644,6 +657,9 @@ const emptyPlan: TreatmentPlanState = {
   goals: "",
   primaryStrategy: "",
   alternativeStrategy: "",
+  options: emptyTreatmentOptions(),
+  selectedOption: null,
+  informationGaps: "",
 };
 
 type DiagnosisState = {
@@ -1396,6 +1412,9 @@ type TreatmentPlanState = {
   goals: string;
   primaryStrategy: string;
   alternativeStrategy: string;
+  options: TreatmentOption[];
+  selectedOption: number | null;
+  informationGaps: string;
 };
 
 type AiReviewMode = "diagnosis_draft" | "plan_review" | "stage_review";
