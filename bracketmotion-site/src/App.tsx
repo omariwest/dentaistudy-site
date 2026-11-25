@@ -2024,6 +2024,7 @@ function ClinicalAppPage() {
   const [stageAiReview, setStageAiReview] = useState<StageAiReviewResult | null>(null);
   const [stageAiReviewLoading, setStageAiReviewLoading] = useState(false);
   const [stageAiReviewError, setStageAiReviewError] = useState("");
+  const stageAiRequestRef = useRef(0);
   const skipNextAutosaveRef = useRef(false);
   const previousUserIdRef = useRef<string | null>(null);
   const online = useOnlineStatus();
@@ -2524,6 +2525,10 @@ function ClinicalAppPage() {
   ]);
 
   const buildAiPayload = (mode: AiReviewMode) => {
+    const activeMechanics = scanState?.mechanicsComparison?.active === "B" &&
+      scanState.mechanicsComparison.alternative
+      ? scanState.mechanicsComparison.alternative.layers
+      : scanState?.applianceLayers;
     const movedTeeth = scanState
       ? Object.entries(scanState.targetTransforms)
           .filter(([, transform]) => {
@@ -2611,10 +2616,10 @@ function ClinicalAppPage() {
         collision_warning: false,
       },
       mechanics: {
-        power_chain: scanState?.applianceLayers.powerChain === true,
-        closed_coil: scanState?.applianceLayers.coilSpring === true,
-        interarch_elastics: scanState?.applianceLayers.elastics === true,
-        closing_loop: scanState?.applianceLayers.closingLoop === true,
+        power_chain: activeMechanics?.powerChain === true,
+        closed_coil: activeMechanics?.coilSpring === true,
+        interarch_elastics: activeMechanics?.elastics === true,
+        closing_loop: activeMechanics?.closingLoop === true,
         stage_summaries:
           stageState?.stages.map((stage) => ({
             title: stage.title,
@@ -2754,6 +2759,13 @@ function ClinicalAppPage() {
     }
   };
 
+  useEffect(() => {
+    stageAiRequestRef.current += 1;
+    setStageAiReview(null);
+    setStageAiReviewError("");
+    setStageAiReviewLoading(false);
+  }, [stageState]);
+
   const runStageAiReview = async () => {
     if (!session) {
       setAccountOpen(true);
@@ -2765,6 +2777,7 @@ function ClinicalAppPage() {
       return;
     }
 
+    const request = ++stageAiRequestRef.current;
     setStageAiReviewLoading(true);
     setStageAiReviewError("");
 
@@ -2772,13 +2785,17 @@ function ClinicalAppPage() {
       const data = await invokeBracketMotionClinicalReview(
         buildAiPayload("stage_review"),
       );
-      setStageAiReview((data?.review || null) as StageAiReviewResult | null);
+      if (request === stageAiRequestRef.current) {
+        setStageAiReview((data?.review || null) as StageAiReviewResult | null);
+      }
     } catch {
-      setStageAiReviewError(
-        "The mechanics review could not be generated. Your stages and approvals were not changed.",
-      );
+      if (request === stageAiRequestRef.current) {
+        setStageAiReviewError(
+          "The mechanics review could not be generated. Your stages and approvals were not changed.",
+        );
+      }
     } finally {
-      setStageAiReviewLoading(false);
+      if (request === stageAiRequestRef.current) setStageAiReviewLoading(false);
     }
   };
 
