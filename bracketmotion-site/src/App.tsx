@@ -561,7 +561,7 @@ const defaultCaseDetails: CaseDetailsState = {
 const emptyCaseDetails: CaseDetailsState = {
   age: "",
   sex: "Not specified",
-  patientStage: "Adult",
+  patientStage: "Not specified",
   growthStatus: "Uncertain",
   chiefComplaint: "",
   medicalHistory: "",
@@ -942,7 +942,7 @@ function CaseRecordsView({
             <UiSelect
               value={caseDetails.patientStage}
               onChange={(value) => onCaseDetail("patientStage", value)}
-              options={["Adult", "Adolescent"]}
+              options={["Not specified", "Adult", "Adolescent"]}
               ariaLabel="Patient stage"
             />
           </label>
