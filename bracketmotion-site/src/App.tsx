@@ -914,7 +914,7 @@ function CaseRecordsView({
     <div className="case-workflow-page case-workflow-page--split">
       <div className="case-workflow-page__header">
         <div>
-          <h1>Case Presentation</h1>
+          <h1>Clinical Records</h1>
         </div>
         <button className="app-primary-action case-page-primary" type="button" onClick={onOpenFindings}>
           Continue to Diagnosis
@@ -1475,7 +1475,7 @@ function TreatmentPlanView({
           <p>
             {scopeIssue
               ? scopeIssue + " is outside the frozen BracketMotion V1 boundary."
-              : "Complete the required clinical records in Case Presentation and Diagnosis."}
+              : "Complete the required clinical records in Clinical Records and Diagnosis."}
           </p>
         </div>
       </div>

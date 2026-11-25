@@ -2446,8 +2446,8 @@ a {
 }
 
 .auth-dialog__logo {
-  width: 49px;
-  height: 42px;
+  width: 26px;
+  height: 24px;
   margin: 0 0 8px;
   background: url("/icons/bracketmotion-icon.svg") center / contain no-repeat;
 }
