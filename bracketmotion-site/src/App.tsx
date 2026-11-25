@@ -471,11 +471,11 @@ function HomePage() {
 
 
 const clinicalFlow = [
-  { label: "Case", detail: "Records" },
-  { label: "Findings", detail: "Review" },
-  { label: "Plan", detail: "Strategies" },
-  { label: "Setup", detail: "3D target" },
-  { label: "Stages", detail: "Mechanics" },
+  { label: "Case", title: "Case Presentation", detail: "Clinical records" },
+  { label: "Findings", title: "Diagnosis", detail: "Clinical findings" },
+  { label: "Plan", title: "Treatment Plans", detail: "Clinical strategy" },
+  { label: "Setup", title: "3D Setup", detail: "Current scan-based workspace" },
+  { label: "Stages", title: "Mechanics", detail: "Approved setup and stages" },
 ] as const;
 
 type ClinicalSection = (typeof clinicalFlow)[number]["label"];
@@ -2334,7 +2334,7 @@ function ClinicalAppPage() {
     !showCaseHub && (activeSection === "Setup" || activeSection === "Stages");
 
   return (
-    <main className="clinical-app">
+    <main className={`clinical-app${online ? "" : " is-offline"}`}>
       <header className="app-topbar">
         <div className="app-topbar__brand">
           <a className="wordmark app-wordmark" href="/" aria-label="BracketMotion home">
@@ -2383,40 +2383,26 @@ function ClinicalAppPage() {
         </div>
       )}
 
+      <nav className="app-flow-nav" aria-label="Case workflow">
+        {clinicalFlow.map((item, index) => (
+          <button
+            className={`app-flow-item${activeSection === item.label && !showCaseHub ? " is-active" : ""}`}
+            type="button"
+            key={item.label}
+            title={item.detail}
+            aria-current={activeSection === item.label && !showCaseHub ? "step" : undefined}
+            onClick={() => openSection(item.label)}
+          >
+            <span className="app-flow-item__index">{String(index + 1)}.</span>
+            <span className="app-flow-item__copy">
+              <strong>{item.title}</strong>
+            </span>
+          </button>
+        ))}
+      </nav>
+
       <div className={`clinical-app__body${has3dWorkspace ? " is-3d-workspace" : ""}`}>
-        <aside className="app-sidebar" aria-label="Case workflow">
-          <nav className="app-flow-nav">
-            {clinicalFlow.map((item, index) => (
-              <button
-                className={`app-flow-item${activeSection === item.label && !showCaseHub ? " is-active" : ""}`}
-                type="button"
-                key={item.label}
-                title={item.detail}
-                onClick={() => openSection(item.label)}
-              >
-                <span className="app-flow-item__index">{String(index + 1)}</span>
-                <span className="app-flow-item__copy">
-                  <strong>{item.label}</strong>
-                </span>
-              </button>
-            ))}
-          </nav>
-
-        </aside>
-
         <section className={`app-workspace${has3dWorkspace ? " is-3d-workspace" : ""}${activeSection === "Case" || activeSection === "Findings" || showCaseHub ? " is-clinical-form" : ""}`}>
-          <div className="app-mobile-flow" aria-label="Case workflow">
-            {clinicalFlow.map((item) => (
-              <button
-                className={`app-mobile-flow__item${activeSection === item.label && !showCaseHub ? " is-active" : ""}`}
-                type="button"
-                key={item.label}
-                onClick={() => openSection(item.label)}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
 
           {showCaseHub ? (
             <div className="case-hub">
