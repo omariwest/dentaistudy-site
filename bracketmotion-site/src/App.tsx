@@ -668,9 +668,7 @@ type ClinicalAiReviewResult = {
   boundary?: string;
 };
 
-const viewerLayers = ["Initial", "Planned", "Upper", "Lower", "Gingiva", "Brackets", "Wire"];
 const viewerViews = ["Front", "Right", "Left", "Upper", "Lower"];
-const demoStages = ["Initial", "Alignment", "Leveling", "Space", "Finishing", "Final"];
 
 const requiredRecords: Array<{ key: RecordKey; title: string; detail: string }> = [
   { key: "history", title: "History + chief complaint", detail: "Medical, dental and treatment history" },
@@ -814,7 +812,7 @@ function CaseRecordsView({
       <div className="case-workflow-page__header">
         <div>
           <span className="case-page-kicker">Case records</span>
-          <h1>Build a planning-ready case.</h1>
+          <h1>Case records</h1>
         </div>
         <button className="app-primary-action case-page-primary" type="button" onClick={onOpenFindings}>
           Review findings
@@ -830,7 +828,6 @@ function CaseRecordsView({
       <section className="case-section" aria-labelledby="case-details-title">
         <div className="case-section__heading">
           <div>
-            <span>1</span>
             <h2 id="case-details-title">Case details</h2>
           </div>
         </div>
@@ -905,7 +902,6 @@ function CaseRecordsView({
       <section className="case-section" aria-labelledby="required-records-title">
         <div className="case-section__heading">
           <div>
-            <span>2</span>
             <h2 id="required-records-title">Required records</h2>
           </div>
         </div>
@@ -951,7 +947,7 @@ function FindingsView({
       <div className="case-workflow-page__header">
         <div>
           <span className="case-page-kicker">Clinician-confirmed findings</span>
-          <h1>Review the clinical source of truth.</h1>
+          <h1>Clinical findings</h1>
         </div>
         <button className="app-quiet-button case-page-secondary" type="button" onClick={onBackToCase}>
           Back to records
@@ -967,7 +963,6 @@ function FindingsView({
       <section className="case-section" aria-labelledby="oral-title">
         <div className="case-section__heading">
           <div>
-            <span>1</span>
             <h2 id="oral-title">Oral + periodontal</h2>
           </div>
         </div>
@@ -1007,7 +1002,6 @@ function FindingsView({
       <section className="case-section" aria-labelledby="facial-title">
         <div className="case-section__heading">
           <div>
-            <span>2</span>
             <h2 id="facial-title">Facial + soft tissue</h2>
           </div>
         </div>
@@ -1039,7 +1033,6 @@ function FindingsView({
       <section className="case-section" aria-labelledby="occlusion-title">
         <div className="case-section__heading">
           <div>
-            <span>3</span>
             <h2 id="occlusion-title">Occlusion</h2>
           </div>
         </div>
@@ -1111,7 +1104,6 @@ function FindingsView({
       <section className="case-section" aria-labelledby="ceph-title">
         <div className="case-section__heading">
           <div>
-            <span>4</span>
             <h2 id="ceph-title">Cephalometric summary</h2>
           </div>
         </div>
@@ -1143,7 +1135,6 @@ function FindingsView({
       <section className="case-section" aria-labelledby="scope-screen-title">
         <div className="case-section__heading">
           <div>
-            <span>5</span>
             <h2 id="scope-screen-title">V1 scope screen</h2>
           </div>
         </div>
@@ -1241,38 +1232,19 @@ function ClinicalAiReviewCard({
       </div>
 
       <p className="ai-review-card__intro">
-        BracketMotion sends only the structured case to the authenticated server-side
-        reasoning endpoint. The returned draft stays separate from clinician approvals
-        and 3D geometry.
+        Proffit 2025-based draft guidance. Gemini cannot change tooth positions or approve treatment.
       </p>
-
-      <div className="ai-review-boundaries">
-        <div>
-          <span>Sources</span>
-          <strong>Proffit 2025 only</strong>
-          <small>Mechanics claims cite controlled internal source IDs.</small>
-        </div>
-        <div>
-          <span>Output</span>
-          <strong>Structured review</strong>
-          <small>Concerns, alternatives, stage guidance and missing information.</small>
-        </div>
-        <div>
-          <span>Geometry</span>
-          <strong>No write access</strong>
-          <small>Gemini cannot move teeth, alter transforms or approve setup.</small>
-        </div>
-      </div>
 
       <div className="ai-review-gate">
         <div>
-          <span>Clinical gate</span>
-          <strong>{gateReady ? "Clinical prerequisites met" : "Prerequisites not met"}</strong>
-          <p>
-            {stageMode
-              ? "Stage review requires planning readiness, Clinical Plan Approval and 3D Setup Approval."
-              : "Plan review requires a planning-ready case. The clinician remains responsible for accepting, editing or rejecting the draft."}
-          </p>
+          <strong>{gateReady ? "Ready for clinician review" : "Complete required approvals first"}</strong>
+          {!gateReady && (
+            <p>
+              {stageMode
+                ? "Planning, clinical plan and 3D setup approvals are required."
+                : "Complete the required records and scope screen."}
+            </p>
+          )}
         </div>
         <button
           className="ai-review-button"
@@ -1333,13 +1305,6 @@ function ClinicalAiReviewCard({
         </div>
       )}
 
-      <div className="ai-review-source-note">
-        <strong>Controlled endpoint</strong>
-        <p>
-          Authentication and approval gates are enforced again on the server. A failed
-          review never changes the case, plan approval or setup approval.
-        </p>
-      </div>
     </section>
   );
 }
@@ -1379,7 +1344,7 @@ function TreatmentPlanView({
         <div className="case-workflow-page__header">
           <div>
             <span className="case-page-kicker">Treatment plan</span>
-            <h1>Planning is not available yet.</h1>
+            <h1>Planning unavailable</h1>
             <p>Complete the mandatory records and clear the V1 scope screen before a treatment plan can be reviewed.</p>
           </div>
         </div>
@@ -1401,17 +1366,13 @@ function TreatmentPlanView({
       <div className="case-workflow-page__header">
         <div>
           <span className="case-page-kicker">Treatment plan</span>
-          <h1>Review the strategy before any tooth moves.</h1>
+          <h1>Treatment plan</h1>
         </div>
-        <span className={`plan-approval-badge${planApproved ? " is-approved" : ""}`}>
-          {planApproved ? "Clinical plan approved" : "Approval required"}
-        </span>
       </div>
 
       <section className="case-section" aria-labelledby="problem-list-title">
         <div className="case-section__heading">
           <div>
-            <span>1</span>
             <h2 id="problem-list-title">Problem list</h2>
           </div>
         </div>
@@ -1426,7 +1387,6 @@ function TreatmentPlanView({
       <section className="case-section" aria-labelledby="goals-title">
         <div className="case-section__heading">
           <div>
-            <span>2</span>
             <h2 id="goals-title">Treatment goals</h2>
           </div>
         </div>
@@ -1442,10 +1402,8 @@ function TreatmentPlanView({
         <section className="case-section plan-strategy-card is-primary" aria-labelledby="primary-strategy-title">
           <div className="case-section__heading">
             <div>
-              <span>3</span>
               <h2 id="primary-strategy-title">Primary strategy</h2>
             </div>
-            <span className="strategy-label">Primary</span>
           </div>
           <textarea
             className="plan-textarea"
@@ -1458,10 +1416,8 @@ function TreatmentPlanView({
         <section className="case-section plan-strategy-card" aria-labelledby="alternative-strategy-title">
           <div className="case-section__heading">
             <div>
-              <span>4</span>
               <h2 id="alternative-strategy-title">Alternative strategy</h2>
             </div>
-            <span className="strategy-label is-secondary">Alternative</span>
           </div>
           <textarea
             className="plan-textarea"
@@ -1761,13 +1717,7 @@ function SetupWorkspace({
   return (
     <div className="setup-workspace">
       <div className="app-viewer-toolbar">
-        {isStages ? (
-          <div className="app-viewer-toolbar__group" aria-label="Stages workspace">
-            <button className="app-tool-button is-selected" type="button">
-              Stage + mechanics
-            </button>
-          </div>
-        ) : (
+        {isStages ? null : (
           <>
             <div className="app-viewer-toolbar__group" aria-label="Setup workspace">
               <button
@@ -1787,26 +1737,7 @@ function SetupWorkspace({
             </div>
 
             {workspaceMode === "demo" && (
-              <>
-                <div className="app-viewer-toolbar__group" aria-label="Viewer layers">
-                  {viewerLayers.map((tool, index) => (
-                    <button
-                      className={`app-tool-button${index < 2 ? " is-selected" : ""}`}
-                      type="button"
-                      key={tool}
-                      onClick={() => {
-                        if (tool === "Initial") viewerRef.current?.showInitial();
-                        if (tool === "Planned") viewerRef.current?.showTarget();
-                      }}
-                      disabled={index > 1}
-                      title={index > 1 ? "Layer controls arrive in later 3D/appliance tasks." : undefined}
-                    >
-                      {tool}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="app-viewer-toolbar__group app-viewer-toolbar__views" aria-label="Canonical views">
+              <div className="app-viewer-toolbar__group app-viewer-toolbar__views" aria-label="Canonical views">
                   {viewerViews.map((view) => (
                     <button
                       className="app-view-button"
@@ -1817,8 +1748,7 @@ function SetupWorkspace({
                       {view}
                     </button>
                   ))}
-                </div>
-              </>
+              </div>
             )}
           </>
         )}
@@ -1872,34 +1802,6 @@ function SetupWorkspace({
               </div>
             </div>
 
-            <div className="app-timeline">
-              <button
-                className="app-play-button"
-                type="button"
-                aria-label="Preview selected tooth movement"
-                onClick={() => viewerRef.current?.previewMovement()}
-                disabled={!selectedTooth}
-              >
-                ▶
-              </button>
-              <div className="app-timeline__track">
-                {demoStages.map((stage, index) => (
-                  <button
-                    className={`app-stage-chip${index === 0 ? " is-current" : ""}`}
-                    type="button"
-                    key={stage}
-                    disabled={index > 1}
-                    onClick={() => {
-                      if (index === 0) viewerRef.current?.showInitial();
-                      if (index === 1) viewerRef.current?.showTarget();
-                    }}
-                  >
-                    <span>{index + 1}</span>
-                    {stage}
-                  </button>
-                ))}
-              </div>
-            </div>
           </div>
         </div>
       )}
