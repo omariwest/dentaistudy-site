@@ -683,30 +683,6 @@ type StoredRecordsState = {
   diagnosis?: Partial<DiagnosisState>;
 };
 
-type ClinicalAiReviewResult = {
-  case_summary?: string;
-  clinical_assessment?: string;
-  supported_points?: string[];
-  concerns?: Array<{
-    issue?: string;
-    why_it_matters?: string;
-    source_ids?: string[];
-  }>;
-  alternative_consideration?: string;
-  stage_guidance?: Array<{
-    stage?: string;
-    active_unit?: string;
-    anchorage_unit?: string;
-    movement_tendency?: string;
-    reciprocal_effects?: string;
-    control_strategy?: string;
-    source_ids?: string[];
-  }>;
-  missing_information?: string[];
-  clinician_checks?: string[];
-  boundary?: string;
-};
-
 const viewerViews = ["Front", "Right", "Left", "Upper", "Lower"];
 
 const requiredRecords: Array<{ key: RecordKey; title: string; detail: string }> = [
@@ -1417,7 +1393,7 @@ type TreatmentPlanState = {
   informationGaps: string;
 };
 
-type AiReviewMode = "diagnosis_draft" | "plan_review" | "stage_review";
+type AiReviewMode = "diagnosis_draft" | "treatment_suggestions" | "stage_review";
 
 function TreatmentPlanView({
   planningReady,
@@ -2036,9 +2012,9 @@ function ClinicalAppPage() {
   const [stageState, setStageState] = useState<StagePersistenceState | null>(null);
   const [saveState, setSaveState] =
     useState<"local" | "saving" | "saved" | "error">("local");
-  const [aiReview, setAiReview] = useState<ClinicalAiReviewResult | null>(null);
-  const [aiReviewLoading, setAiReviewLoading] = useState(false);
-  const [aiReviewError, setAiReviewError] = useState("");
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false);
+  const [suggestionsError, setSuggestionsError] = useState("");
+  const suggestionRequestRef = useRef(0);
   const [stageAiReview, setStageAiReview] = useState<StageAiReviewResult | null>(null);
   const [stageAiReviewLoading, setStageAiReviewLoading] = useState(false);
   const [stageAiReviewError, setStageAiReviewError] = useState("");
@@ -2061,7 +2037,13 @@ function ClinicalAppPage() {
       .charAt(0) || "A"
   ).toUpperCase();
 
+  const cancelSuggestions = useCallback(() => {
+    suggestionRequestRef.current += 1;
+    setSuggestionsLoading(false);
+  }, []);
+
   const clearLocalPhotos = useCallback(() => {
+    cancelSuggestions();
     diagnosisRequestRef.current += 1;
     setDiagnosisLoading(false);
     photoGenerationRef.current += 1;
@@ -2072,7 +2054,7 @@ function ClinicalAppPage() {
     photoUrlsRef.current = {};
     setPhotos({});
     setPhotoError("");
-  }, []);
+  }, [cancelSuggestions]);
 
   const refreshCases = useCallback(async () => {
     if (!userId) {
@@ -2143,8 +2125,8 @@ function ClinicalAppPage() {
         setSetupApproved(false);
         setScanState(null);
         setStageState(null);
-        setAiReview(null);
-        setAiReviewError("");
+        cancelSuggestions();
+        setSuggestionsError("");
         setStageAiReview(null);
         setStageAiReviewError("");
         clearLocalPhotos();
@@ -2211,7 +2193,7 @@ function ClinicalAppPage() {
     setDiagnosisLoading(false);
     setPlanApproved(false);
     setSetupApproved(false);
-    setAiReview(null);
+    cancelSuggestions();
     setStageAiReview(null);
   };
 
@@ -2255,7 +2237,7 @@ function ClinicalAppPage() {
     setPlan((current) => ({ ...current, [field]: value }));
     setPlanApproved(false);
     setSetupApproved(false);
-    setAiReview(null);
+    cancelSuggestions();
   };
 
   const openSection = (section: ClinicalSection) => {
@@ -2295,8 +2277,8 @@ function ClinicalAppPage() {
     setRecords(demoRecords);
     setScanState(null);
     setStageState(null);
-    setAiReview(null);
-    setAiReviewError("");
+    cancelSuggestions();
+    setSuggestionsError("");
     setStageAiReview(null);
     setStageAiReviewError("");
     setSaveState("local");
@@ -2345,8 +2327,8 @@ function ClinicalAppPage() {
     setSetupApproved(false);
     setScanState(storedScan);
     setStageState(storedStages);
-    setAiReview(null);
-    setAiReviewError("");
+    cancelSuggestions();
+    setSuggestionsError("");
     setStageAiReview(null);
     setStageAiReviewError("");
     setSaveState("saved");
@@ -2637,7 +2619,7 @@ function ClinicalAppPage() {
     }
 
     setAiReviewLoading(true);
-    setAiReviewError("");
+    setSuggestionsError("");
 
     try {
       const data = await invokeBracketMotionClinicalReview(
