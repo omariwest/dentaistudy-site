@@ -1676,6 +1676,8 @@ function StageWorkspace({
   plannedExtractions,
   applianceLayers,
   endpoints,
+  preferences,
+  bondedTeeth,
   sessionActive,
   aiReview,
   aiReviewLoading,
@@ -1690,6 +1692,8 @@ function StageWorkspace({
   plannedExtractions: Set<string>;
   applianceLayers: ApplianceLayerState;
   endpoints: MechanicEndpoints;
+  preferences: AppliancePreferences;
+  bondedTeeth: string[];
   sessionActive: boolean;
   aiReview: StageAiReviewResult | null;
   aiReviewLoading: boolean;
@@ -1790,6 +1794,8 @@ function StageWorkspace({
               targetTransforms={playbackTransforms}
               layers={playbackLayers}
               endpoints={endpoints}
+              preferences={preferences}
+              bondedTeeth={bondedTeeth}
             />
           </Canvas>
 
@@ -2242,6 +2248,25 @@ export default function ScanWorkflow({
     () => [...upperSegmentLabels, ...lowerSegmentLabels],
     [lowerSegmentLabels, upperSegmentLabels],
   );
+  const bondedLabels = useMemo(
+    () => appliancePreferences.bondedTeeth === null
+      ? allSegmentLabels
+      : allSegmentLabels.filter((label) => appliancePreferences.bondedTeeth?.includes(label)),
+    [allSegmentLabels, appliancePreferences.bondedTeeth],
+  );
+
+  const setBondedFor = (label: string) => {
+    if (!allSegmentLabels.includes(label)) return;
+    setAppliancePreferences((current) => {
+      const selected = current.bondedTeeth === null ? allSegmentLabels : current.bondedTeeth;
+      return {
+        ...current,
+        bondedTeeth: selected.includes(label)
+          ? selected.filter((tooth) => tooth !== label)
+          : [...selected, label],
+      };
+    });
+  };
 
   const sameArchLabels = useCallback(
     (label: string) =>
@@ -2773,6 +2798,8 @@ export default function ScanWorkflow({
         plannedExtractions={plannedExtractions}
         applianceLayers={applianceLayers}
         endpoints={mechanicEndpoints}
+        preferences={appliancePreferences}
+        bondedTeeth={bondedLabels}
         sessionActive={sessionActive}
         aiReview={stageAiReview}
         aiReviewLoading={stageAiReviewLoading}
@@ -3446,6 +3473,8 @@ export default function ScanWorkflow({
                   targetTransforms={targetTransforms}
                   layers={applianceLayers}
                   endpoints={mechanicEndpoints}
+                  preferences={appliancePreferences}
+                  bondedTeeth={bondedLabels}
                 />
               </Canvas>
 
