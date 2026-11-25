@@ -127,8 +127,6 @@ A successful first release is a coherent, trusted clinical workflow that real or
 
 After the interface correction round: founder/clinician closed alpha → fix observed issues → small orthodontist beta → fix clinical/UX findings → validated free V1 release. Then measure repeat use and collect evidence of real professional value before deciding what to monetize or expand.
 
-**Current handoff:** The app's 11 implementation tasks, internal validation, and founder pre-alpha corrections were recorded complete by v35. Five small UI/product-correction gates are tracked in v36. Formal clinician closed alpha remains **pending**, with the orthodontic-resident founder serving as the first clinician tester.
-
 ---
 
 **Document discipline:** Update this file only when product identity, positioning, clinical boundary, or engineering standards change. Task status and implementation history belong in the current master tracker.
