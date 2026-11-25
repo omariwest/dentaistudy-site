@@ -18,6 +18,9 @@ import type {
 } from "./ScanWorkflow";
 import {
   createBracketMotionCase,
+  downloadBracketMotionAvatar,
+  uploadBracketMotionAvatar,
+  removeBracketMotionAvatar,
   invokeBracketMotionClinicalReview,
   listBracketMotionCases,
   loadBracketMotionCase,
@@ -1987,6 +1990,270 @@ function SetupWorkspace({
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+type BracketMotionDoctorProfile = {
+  firstName?: string;
+  lastName?: string;
+  clinic?: string;
+};
+
+function SettingsView({
+  session,
+  avatarUrl,
+  onAvatarChanged,
+  onSignIn,
+}: {
+  session: BracketMotionSession | null;
+  avatarUrl: string | null;
+  onAvatarChanged: () => void;
+  onSignIn: () => void;
+}) {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [clinic, setClinic] = useState("");
+  const [profileBusy, setProfileBusy] = useState(false);
+  const [avatarBusy, setAvatarBusy] = useState(false);
+  const [profileMessage, setProfileMessage] = useState("");
+  const [photoMessage, setPhotoMessage] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordBusy, setPasswordBusy] = useState(false);
+  const [passwordMessage, setPasswordMessage] = useState("");
+  const avatarInputRef = useRef<HTMLInputElement | null>(null);
+
+  const profile = session?.user.user_metadata?.bracketmotion_profile as
+    | BracketMotionDoctorProfile | undefined;
+  useEffect(() => {
+    if (!session) {
+      setFirstName("");
+      setLastName("");
+      setClinic("");
+      return;
+    }
+    const originalName = String(session.user.user_metadata?.full_name || "").trim();
+    const [fallbackFirst, ...fallbackLast] = originalName.split(/\s+/);
+    setFirstName(profile?.firstName ?? fallbackFirst ?? "");
+    setLastName(profile?.lastName ?? fallbackLast.join(" "));
+    setClinic(profile?.clinic ?? "");
+    setProfileMessage("");
+    setPhotoMessage("");
+    setPasswordMessage("");
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+  }, [session?.user.id, profile?.firstName, profile?.lastName, profile?.clinic]);
+
+  if (!session) {
+    return (
+      <div className="settings-workspace">
+        <h1>Account Settings</h1>
+        <section className="settings-card settings-sign-in">
+          <h2>Sign in to manage your profile</h2>
+          <p>Your clinician profile belongs to your authenticated account.</p>
+          <button className="app-primary-action" type="button" onClick={onSignIn}>
+            Sign in
+          </button>
+        </section>
+      </div>
+    );
+  }
+
+  const displayName = [firstName, lastName].map((name) => name.trim()).filter(Boolean).join(" ") ||
+    session.user.email || "Clinician";
+  const saveProfile = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!firstName.trim() || firstName.trim().length > 80 || lastName.trim().length > 80 || clinic.trim().length > 120) {
+      setProfileMessage("Enter a first name and keep the profile fields within their limits.");
+      return;
+    }
+    setProfileBusy(true);
+    setProfileMessage("");
+    try {
+      const { error } = await supabase.auth.updateUser({
+        data: {
+          bracketmotion_profile: {
+            firstName: firstName.trim(),
+            lastName: lastName.trim(),
+            clinic: clinic.trim(),
+          },
+        },
+      });
+      if (error) throw error;
+      setProfileMessage("Profile saved.");
+    } catch {
+      setProfileMessage("Profile could not be saved. Try again.");
+    } finally {
+      setProfileBusy(false);
+    }
+  };
+
+  const onPhotoSelected = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0] || null;
+    event.target.value = "";
+    if (!file) return;
+    setPhotoMessage("");
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type) || file.size === 0 || file.size > 2 * 1024 * 1024) {
+      setPhotoMessage("Choose a JPG, PNG or WebP photo smaller than 2 MB.");
+      return;
+    }
+    try {
+      if (typeof createImageBitmap === "function") {
+        const image = await createImageBitmap(file);
+        image.close();
+      }
+    } catch {
+      setPhotoMessage("This file is not a readable image.");
+      return;
+    }
+    setAvatarBusy(true);
+    try {
+      await uploadBracketMotionAvatar(session.user.id, file);
+      onAvatarChanged();
+      setPhotoMessage("Profile photo updated.");
+    } catch {
+      setPhotoMessage("Photo upload failed. Try again.");
+    } finally {
+      setAvatarBusy(false);
+    }
+  };
+
+  const deletePhoto = async () => {
+    setAvatarBusy(true);
+    setPhotoMessage("");
+    try {
+      await removeBracketMotionAvatar(session.user.id);
+      onAvatarChanged();
+      setPhotoMessage("Profile photo removed.");
+    } catch {
+      setPhotoMessage("Photo could not be removed. Try again.");
+    } finally {
+      setAvatarBusy(false);
+    }
+  };
+
+  const changePassword = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setPasswordMessage("");
+    if (!session.user.email) {
+      setPasswordMessage("This account has no email address for password verification.");
+      return;
+    }
+    if (newPassword.length < 8 || newPassword !== confirmPassword || newPassword === currentPassword) {
+      setPasswordMessage("Choose a different password of at least 8 characters and confirm it exactly.");
+      return;
+    }
+    setPasswordBusy(true);
+    try {
+      const { data, error: loginError } = await supabase.auth.signInWithPassword({
+        email: session.user.email,
+        password: currentPassword,
+      });
+      if (loginError || data.user?.id !== session.user.id) {
+        throw new Error("Current password not verified");
+      }
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) throw error;
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setPasswordMessage("Password updated for your shared DentAIstudy account.");
+    } catch {
+      setPasswordMessage("Password change failed. Check your current password or use your identity provider.");
+    } finally {
+      setPasswordBusy(false);
+    }
+  };
+
+  return (
+    <div className="settings-workspace">
+      <h1>Account Settings</h1>
+      <form className="settings-card" onSubmit={saveProfile}>
+        <h2>1. Profile Information</h2>
+        <div className="settings-profile-layout">
+          <div className="settings-photo-panel">
+            <div className="settings-avatar" aria-label="Clinician profile photo">
+              {avatarUrl
+                ? <img src={avatarUrl} alt={displayName + " profile photo"} />
+                : <span aria-hidden="true">{displayName.charAt(0).toUpperCase()}</span>}
+            </div>
+            <strong>{displayName}</strong>
+            <div className="settings-photo-actions">
+              <input ref={avatarInputRef} className="settings-file-input" type="file"
+                accept="image/png,image/jpeg,image/webp" aria-label="Choose clinician profile photo"
+                onChange={(event) => void onPhotoSelected(event)} />
+              <button type="button" className="app-quiet-button"
+                onClick={() => avatarInputRef.current?.click()} disabled={avatarBusy}>
+                {avatarBusy ? "Updating…" : "Change photo"}
+              </button>
+              {avatarUrl && (
+                <button type="button" className="app-quiet-button"
+                  onClick={() => void deletePhoto()} disabled={avatarBusy}>Remove photo</button>
+              )}
+            </div>
+            {photoMessage && <p role="status" className="settings-feedback">{photoMessage}</p>}
+          </div>
+          <div className="settings-profile-fields">
+            <label><span>First Name</span>
+              <input type="text" value={firstName} autoComplete="given-name"
+                onChange={(event) => setFirstName(event.target.value)} maxLength={80} required />
+            </label>
+            <label><span>Last Name</span>
+              <input type="text" value={lastName} autoComplete="family-name"
+                onChange={(event) => setLastName(event.target.value)} maxLength={80} />
+            </label>
+            <label><span>Email Address</span>
+              <input type="email" value={session.user.email || ""} readOnly />
+            </label>
+            <label><span>Clinic / Practice Name</span>
+              <input type="text" value={clinic} maxLength={120}
+                onChange={(event) => setClinic(event.target.value)} />
+            </label>
+          </div>
+        </div>
+        <div className="settings-form-footer">
+          {profileMessage && <p role="status" className="settings-feedback">{profileMessage}</p>}
+          <button type="submit" className="app-primary-action" disabled={profileBusy}>
+            {profileBusy ? "Saving…" : "Save Changes"}
+          </button>
+        </div>
+      </form>
+      <form className="settings-card" onSubmit={(event) => void changePassword(event)}>
+        <h2>2. Security</h2>
+        <p className="settings-card-note">
+          BracketMotion currently shares your DentAIstudy sign-in. Changing this password affects both services.
+        </p>
+        <div className="settings-security-fields">
+          <label><span>Current Password</span>
+            <input type="password" autoComplete="current-password" value={currentPassword}
+              onChange={(event) => setCurrentPassword(event.target.value)} required />
+          </label>
+          <label><span>New Password</span>
+            <input type="password" autoComplete="new-password" value={newPassword}
+              onChange={(event) => setNewPassword(event.target.value)} minLength={8} required />
+          </label>
+          <label><span>Confirm New Password</span>
+            <input type="password" autoComplete="new-password" value={confirmPassword}
+              onChange={(event) => setConfirmPassword(event.target.value)} minLength={8} required />
+          </label>
+        </div>
+        <div className="settings-form-footer">
+          {passwordMessage && <p role="status" className="settings-feedback">{passwordMessage}</p>}
+          <button className="app-quiet-button" type="submit" disabled={passwordBusy}>
+            {passwordBusy ? "Updating…" : "Change Password"}
+          </button>
+        </div>
+      </form>
+      <section className="settings-danger">
+        <h2>Account deletion</h2>
+        <p>
+          Account deletion is unavailable until BracketMotion has independent authentication.
+          Deleting this shared login would also affect your DentAIstudy account.
+        </p>
+      </section>
     </div>
   );
 }
