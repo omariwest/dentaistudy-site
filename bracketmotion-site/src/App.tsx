@@ -676,6 +676,12 @@ const emptyDiagnosis: DiagnosisState = {
   approved: false,
 };
 
+type DiagnosisReviewResult = {
+  case_summary?: string;
+  clinical_assessment?: string;
+  missing_information?: string[];
+};
+
 type StoredRecordsState = {
   checklist?: Partial<Record<RecordKey, boolean>>;
   details?: Partial<CaseDetailsState>;
@@ -2647,7 +2653,7 @@ function ClinicalAppPage() {
         mechanics: {},
       });
       if (request !== diagnosisRequestRef.current) return;
-      const review = result?.review as ClinicalAiReviewResult | undefined;
+      const review = result?.review as DiagnosisReviewResult | undefined;
       const summary = typeof review?.case_summary === "string" ? review.case_summary.trim() : "";
       const interpretation = typeof review?.clinical_assessment === "string" ? review.clinical_assessment.trim() : "";
       if (!summary || !interpretation) throw new Error("AI_EMPTY_DIAGNOSIS");
