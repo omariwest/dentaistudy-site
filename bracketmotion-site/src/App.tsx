@@ -2908,7 +2908,7 @@ function ClinicalAppPage() {
     !showCaseHub && (activeSection === "Setup" || activeSection === "Stages");
 
   return (
-    <main className="clinical-app">
+    <main className={`clinical-app${showCaseHub ? " is-patients" : ""}`}>
       <header className="app-topbar">
         <div className="app-topbar__brand">
           <a className="wordmark app-wordmark" href="/" aria-label="BracketMotion home">
@@ -2930,14 +2930,15 @@ function ClinicalAppPage() {
             {saveLabel}
           </span>
           <button
-            className="app-quiet-button"
+            className={`app-quiet-button${showCaseHub ? " is-active" : ""}`}
             type="button"
+            aria-current={showCaseHub ? "page" : undefined}
             onClick={() => {
               setShowCaseHub(true);
               if (session) void refreshCases();
             }}
           >
-            Cases
+            Patients
           </button>
           <button
             className="app-account-button"
@@ -2957,7 +2958,7 @@ function ClinicalAppPage() {
         </div>
       )}
 
-      <nav className="app-flow-nav" aria-label="Case workflow">
+      {!showCaseHub && <nav className="app-flow-nav" aria-label="Case workflow">
         {clinicalFlow.map((item, index) => (
           <button
             className={`app-flow-item${activeSection === item.label && !showCaseHub ? " is-active" : ""}`}
@@ -2973,94 +2974,206 @@ function ClinicalAppPage() {
             </span>
           </button>
         ))}
-      </nav>
+      </nav>}
 
-      <div className={`clinical-app__body${has3dWorkspace ? " is-3d-workspace" : ""}`}>
+      <div className={`clinical-app__body${has3dWorkspace ? " is-3d-workspace" : showCaseHub ? " is-patients" : ""}`}>
         <section className={`app-workspace${has3dWorkspace ? " is-3d-workspace" : ""}${activeSection === "Case" || activeSection === "Findings" || showCaseHub ? " is-clinical-form" : ""}`}>
 
           {showCaseHub ? (
             <div className="case-hub">
-              <div className="case-workflow-page__header">
+              <header className="patients-header">
                 <div>
-                  <span className="case-page-kicker">Cases</span>
-                  <h1>Open or create a case.</h1>
+                  <h1>Patients <span>/ My patients</span></h1>
+                  <p>Saved cases in your authenticated account</p>
                 </div>
                 <button
                   className="app-primary-action case-page-primary"
                   type="button"
-                  onClick={startNewCase}
+                  onClick={() => void startNewCase()}
                   disabled={casesLoading || (Boolean(session) && !online)}
                 >
-                  {session ? (online ? "New case" : "Offline") : "Sign in to save"}
+                  + Add New Patient
                 </button>
+              </header>
+
+              <div className="patients-toolbar">
+                <label className="patients-search">
+                  <span className="sr-only">Search patients</span>
+                  <input
+                    type="search"
+                    aria-label="Search patients"
+                    placeholder="Search by patient, case ID, or status…"
+                    value={patientSearch}
+                    onChange={(event) => setPatientSearch(event.target.value)}
+                  />
+                </label>
+                <div className="patients-filter">
+                  <UiSelect
+                    value={patientStatusFilter}
+                    ariaLabel="Filter patient status"
+                    options={["All statuses", ...patientStatuses]}
+                    onChange={setPatientStatusFilter}
+                  />
+                </div>
+                <div className="patients-filter">
+                  <UiSelect
+                    value={patientSort}
+                    ariaLabel="Sort patients"
+                    options={["Last active", "Recently updated", "Name A–Z"]}
+                    onChange={setPatientSort}
+                  />
+                </div>
               </div>
 
-              {caseError && <div className="case-hub__message is-error">{caseError}</div>}
-
-              <button
-                className="case-card"
-                type="button"
-                onClick={openDemoCase}
-              >
-                <div>
-                  <span>Demo Case</span>
-                  <strong>Local example · not saved</strong>
-                </div>
-                <div className="case-card__status">
-                  <span>Demo</span>
-                </div>
-              </button>
-
-              {!authReady && (
-                <div className="case-hub__message">Checking your account…</div>
-              )}
-
-              {authReady && !session && (
-                <button
-                  className="case-signin-card"
-                  type="button"
-                  onClick={() => setAccountOpen(true)}
-                >
-                  <strong>Sign in with your DentAIstudy account</strong>
-                  <span>Enable private case storage, autosave and clinical AI review.</span>
-                </button>
-              )}
-
-              {session && casesLoading && (
-                <div className="case-hub__message">Loading saved cases…</div>
-              )}
-
-              {session &&
-                savedCases.map((savedCase) => (
-                  <button
-                    className={`case-card${caseId === savedCase.id ? " is-current" : ""}`}
-                    type="button"
-                    onClick={() => void openSavedCase(savedCase.id)}
-                    key={savedCase.id}
-                  >
-                    <div>
-                      <span>{savedCase.label}</span>
-                      <strong>
-                        {savedCase.setup_approved
-                          ? "3D setup approved"
-                          : savedCase.plan_approved
-                            ? "Clinical plan approved"
-                            : "Draft"}
-                      </strong>
+              {caseError && <div className="case-hub__message is-error" role="alert">{caseError}</div>}
+              <div className="patients-layout">
+                <section className="patients-list" aria-label="Saved patient cases">
+                  {!authReady && (
+                    <div className="case-hub__message">Checking your account…</div>
+                  )}
+                  {authReady && !session && (
+                    <div className="patients-empty">
+                      <strong>Your patients stay private</strong>
+                      <p>Sign in to see the cases saved to your account.</p>
+                      <button type="button" className="app-primary-action" onClick={() => setAccountOpen(true)}>
+                        Sign in
+                      </button>
+                      <button type="button" className="app-quiet-button" onClick={openDemoCase}>
+                        Open local demo
+                      </button>
                     </div>
-                    <div className="case-card__status">
-                      <span>
-                        {new Date(savedCase.updated_at).toLocaleDateString()}
-                      </span>
+                  )}
+                  {session && casesLoading && (
+                    <div className="case-hub__message">Loading saved patients…</div>
+                  )}
+                  {session && !casesLoading && !caseError && savedCases.length === 0 && (
+                    <div className="patients-empty">
+                      <strong>No saved patients yet</strong>
+                      <p>Create your first patient case to get started.</p>
+                      <button type="button" className="app-quiet-button" onClick={openDemoCase}>
+                        Explore local demo
+                      </button>
+                    </div>
+                  )}
+                  {session && !casesLoading && savedCases.length > 0 && (
+                    <>
+                      <div className="patients-table-wrap">
+                        <table className="patients-table">
+                          <thead>
+                            <tr>
+                              <th scope="col">Patient</th>
+                              <th scope="col">Case ID / Age</th>
+                              <th scope="col">Photos</th>
+                              <th scope="col">Last active</th>
+                              <th scope="col">Progress</th>
+                              <th scope="col">Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {visiblePatients.map((savedCase) => {
+                              const localPhotos = caseId === savedCase.id
+                                ? intraoralPhotoSlots.flatMap((slot) =>
+                                  photos[slot.key] ? [{ key: slot.key, preview: photos[slot.key]!.previewUrl }] : [],
+                                ) : [];
+                              const facePhoto = caseId === savedCase.id ? photos.faceFront?.previewUrl : undefined;
+                              return (
+                                <tr className={caseId === savedCase.id ? "is-current" : ""} key={savedCase.id}>
+                                  <th className="patients-cell-patient" scope="row">
+                                    <div className="patients-identity">
+                                      <span className="patients-avatar">
+                                        {facePhoto
+                                          ? <img src={facePhoto} alt={savedCase.label + " frontal face preview (this tab only)"} />
+                                          : savedCase.label.trim().charAt(0).toUpperCase() || "P"}
+                                      </span>
+                                      <strong>{savedCase.label}</strong>
+                                    </div>
+                                  </th>
+                                  <td className="patients-cell-id">
+                                    <span className="patients-cell-label">Case ID / Age</span>
+                                    <span title={savedCase.id}>{savedCase.id.slice(0, 8)} · {savedCase.age}</span>
+                                  </td>
+                                  <td className="patients-cell-photos">
+                                    <span className="patients-cell-label">Photos</span>
+                                    {localPhotos.length > 0 ? (
+                                      <div className="patients-local-photos">
+                                        <div>
+                                          {localPhotos.map((photo) => (
+                                            <img key={photo.key} src={photo.preview} alt={photo.key + " preview in this tab"} />
+                                          ))}
+                                        </div>
+                                        <small>{localPhotos.length} in this tab only</small>
+                                      </div>
+                                    ) : <span className="patients-muted">Not saved</span>}
+                                  </td>
+                                  <td className="patients-cell-date">
+                                    <span className="patients-cell-label">Last active</span>
+                                    {savedCase.lastActive
+                                      ? new Date(savedCase.lastActive).toLocaleDateString(undefined, {
+                                          year: "numeric", month: "short", day: "numeric",
+                                        })
+                                      : "—"}
+                                  </td>
+                                  <td className="patients-cell-status">
+                                    <span className="patients-cell-label">Progress</span>
+                                    <span className={`patients-status${savedCase.status === "Planning blocked" ? " is-blocked" : savedCase.setup_approved ? " is-complete" : ""}`}>
+                                      {savedCase.status}
+                                    </span>
+                                  </td>
+                                  <td className="patients-cell-action">
+                                    <button
+                                      className="patients-open"
+                                      type="button"
+                                      onClick={() => void openSavedCase(savedCase.id)}
+                                      disabled={!online || casesLoading}
+                                      aria-label={"Open case " + savedCase.label}
+                                    >
+                                      Open Case <span aria-hidden="true">→</span>
+                                    </button>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                        {filteredPatients.length === 0 && (
+                          <div className="case-hub__message">No patients match your search or status filter.</div>
+                        )}
+                      </div>
+                      <div className="patients-pagination">
+                        <span>
+                          {filteredPatients.length === 0 ? "Showing 0" :
+                            `Showing ${(visiblePatientPage - 1) * patientsPerPage + 1}–${Math.min(visiblePatientPage * patientsPerPage, filteredPatients.length)}`}
+                          {" of "}{filteredPatients.length} cases
+                        </span>
+                        <div>
+                          <button type="button" onClick={() => setPatientPage((page) => Math.max(1, page - 1))}
+                            disabled={visiblePatientPage === 1} aria-label="Previous patients page">‹</button>
+                          <span>Page {visiblePatientPage} of {patientPageCount}</span>
+                          <button type="button" onClick={() => setPatientPage((page) => Math.min(patientPageCount, page + 1))}
+                            disabled={visiblePatientPage === patientPageCount} aria-label="Next patients page">›</button>
                         </div>
-                  </button>
-                ))}
-
-              {session && !casesLoading && savedCases.length === 0 && (
-                <div className="case-hub__message">
-                  No saved cases yet. Create your first case above.
-                </div>
-              )}
+                      </div>
+                    </>
+                  )}
+                </section>
+                <aside className="patients-summary" aria-label="Patient case summary">
+                  <h2>Case Summary</h2>
+                  {session && !casesLoading && !caseError ? (
+                    <>
+                      <div className="patients-summary-total">
+                        <span>Total saved cases</span>
+                        <strong>{patientCases.length}</strong>
+                      </div>
+                      {patientStatuses.map((status) => (
+                        <div className="patients-summary-item" key={status}>
+                          <span>{status}</span>
+                          <strong>{patientCases.filter((item) => item.status === status).length}</strong>
+                        </div>
+                      ))}
+                    </>
+                  ) : <p className="patients-muted">Sign in to view your case totals.</p>}
+                </aside>
+              </div>
             </div>
           ) : activeSection === "Case" ? (
             <CaseRecordsView
@@ -3139,7 +3252,7 @@ function ClinicalAppPage() {
           )}
         </section>
 
-        {!has3dWorkspace && (
+        {!has3dWorkspace && !showCaseHub && (
           <aside className="app-inspector" aria-label="Case inspector">
             <div className="app-inspector__header">
               <div>
