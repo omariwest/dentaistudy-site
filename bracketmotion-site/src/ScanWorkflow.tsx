@@ -722,6 +722,11 @@ function TargetTooth({
     ? transform.rotation
     : [0, 0, 0];
 
+  const registerRef = useCallback(
+    (object: Group | null) => onReady(segment.id, object),
+    [onReady, segment.id],
+  );
+
   const color = collision
     ? "#c95656"
     : selected
@@ -732,7 +737,7 @@ function TargetTooth({
 
   return (
     <group
-      ref={(object) => onReady(segment.id, object)}
+      ref={registerRef}
       position={position}
       rotation={rotation}
       userData={{ pivot: prepared.center.toArray() }}
