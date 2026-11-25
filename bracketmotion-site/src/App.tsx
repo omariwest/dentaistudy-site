@@ -482,7 +482,7 @@ type ClinicalSection = (typeof clinicalFlow)[number]["label"];
 type RecordKey = "history" | "exam" | "scans" | "photos" | "pano" | "ceph" | "cephSummary";
 
 type PhotoKey = "frontal" | "upperOcclusal" | "lowerOcclusal" | "rightBuccal" | "leftBuccal" | "faceFront" | "smile" | "profile" | "pano" | "ceph";
-type CasePhoto = { name: string; previewUrl: string };
+type CasePhoto = { name: string; file: File; previewUrl: string };
 
 const intraoralPhotoSlots: Array<{ key: PhotoKey; title: string }> = [
   { key: "frontal", title: "Frontal" },
@@ -1971,6 +1971,9 @@ function ClinicalAppPage() {
   const [setupApproved, setSetupApproved] = useState(false);
   const [plan, setPlan] = useState<TreatmentPlanState>(demoPlan);
   const [records, setRecords] = useState<Record<RecordKey, boolean>>(demoRecords);
+  const [photos, setPhotos] = useState<Partial<Record<PhotoKey, CasePhoto>>>({});
+  const [photoError, setPhotoError] = useState("");
+  const photoUrlsRef = useRef<Partial<Record<PhotoKey, string>>>({});
   const [scanState, setScanState] = useState<ScanPersistenceState | null>(null);
   const [stageState, setStageState] = useState<StagePersistenceState | null>(null);
   const [saveState, setSaveState] =
@@ -1985,10 +1988,13 @@ function ClinicalAppPage() {
   const previousUserIdRef = useRef<string | null>(null);
   const online = useOnlineStatus();
 
-  const missingCount = useMemo(
-    () => requiredRecords.filter((record) => !records[record.key]).length,
-    [records],
-  );
+  const visibleRecords: Record<RecordKey, boolean> = {
+    ...records,
+    photos: intraoralPhotoSlots.every((slot) => Boolean(photos[slot.key])),
+    pano: Boolean(photos.pano),
+    ceph: Boolean(photos.ceph),
+  };
+  const missingCount = requiredRecords.filter((record) => !visibleRecords[record.key]).length;
   const planningReady = missingCount === 0 && !scopeIssue;
   const userId = session?.user.id ?? null;
   const accountInitial = (
@@ -2066,6 +2072,7 @@ function ClinicalAppPage() {
         setAiReviewError("");
         setStageAiReview(null);
         setStageAiReviewError("");
+        clearLocalPhotos();
         setSaveState("local");
         setShowCaseHub(false);
         setActiveSection("Case");
@@ -2075,14 +2082,64 @@ function ClinicalAppPage() {
     }
 
     void refreshCases();
-  }, [refreshCases, userId]);
+  }, [clearLocalPhotos, refreshCases, userId]);
+
+  const clearLocalPhotos = useCallback(() => {
+    Object.values(photoUrlsRef.current).forEach((url) => {
+      if (url) URL.revokeObjectURL(url);
+    });
+    photoUrlsRef.current = {};
+    setPhotos({});
+    setPhotoError("");
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      Object.values(photoUrlsRef.current).forEach((url) => {
+        if (url) URL.revokeObjectURL(url);
+      });
+      photoUrlsRef.current = {};
+    };
+  }, []);
+
+  const changePhoto = (key: PhotoKey, file: File | null) => {
+    if (file && !["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      setPhotoError("Choose a JPG, PNG or WebP image.");
+      return;
+    }
+    if (file && (file.size === 0 || file.size > 12 * 1024 * 1024)) {
+      setPhotoError("Choose an image between 1 byte and 12 MB.");
+      return;
+    }
+
+    const previousUrl = photoUrlsRef.current[key];
+    if (previousUrl) URL.revokeObjectURL(previousUrl);
+    const previewUrl = file ? URL.createObjectURL(file) : null;
+    if (previewUrl) photoUrlsRef.current[key] = previewUrl;
+    else delete photoUrlsRef.current[key];
+
+    setPhotos((current) => {
+      const next = { ...current };
+      if (file && previewUrl) next[key] = { file, name: file.name, previewUrl };
+      else delete next[key];
+      return next;
+    });
+    setPhotoError("");
+    setPlanApproved(false);
+    setSetupApproved(false);
+    setAiReview(null);
+    setStageAiReview(null);
+  };
 
   const completeRecord = (key: RecordKey) => {
+    if (key === "photos" || key === "pano" || key === "ceph") return;
     setRecords((current) => ({ ...current, [key]: true }));
   };
 
   const updateCaseDetail = (field: keyof CaseDetailsState, value: string) => {
     setCaseDetails((current) => ({ ...current, [field]: value }));
+    setPlanApproved(false);
+    setSetupApproved(false);
   };
 
   const updateFinding = (field: keyof FindingsState, value: string) => {
@@ -2115,6 +2172,7 @@ function ClinicalAppPage() {
   };
 
   const openDemoCase = () => {
+    clearLocalPhotos();
     setCaseId(null);
     setCaseLabel("Demo Case");
     setCaseDetails(defaultCaseDetails);
@@ -2136,6 +2194,7 @@ function ClinicalAppPage() {
   };
 
   const applySavedCase = useCallback((row: Awaited<ReturnType<typeof loadBracketMotionCase>>) => {
+    clearLocalPhotos();
     const storedRecords =
       row.records && typeof row.records === "object"
         ? (row.records as StoredRecordsState)
@@ -2179,7 +2238,7 @@ function ClinicalAppPage() {
     setSaveState("saved");
     setShowCaseHub(false);
     setActiveSection("Case");
-  }, []);
+  }, [clearLocalPhotos]);
 
   const openSavedCase = async (savedCaseId: string) => {
     if (!online) {
@@ -2622,8 +2681,11 @@ function ClinicalAppPage() {
               onCaseLabel={setCaseLabel}
               caseDetails={caseDetails}
               onCaseDetail={updateCaseDetail}
-              records={records}
+              records={visibleRecords}
               onCompleteRecord={completeRecord}
+              photos={photos}
+              onPhotoChange={changePhoto}
+              photoError={photoError}
               planningReady={planningReady}
               missingCount={missingCount}
               scopeIssue={scopeIssue}
