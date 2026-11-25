@@ -2042,6 +2042,16 @@ function ClinicalAppPage() {
     setSuggestionsLoading(false);
   }, []);
 
+  const invalidateTreatmentSelection = () => {
+    cancelSuggestions();
+    setPlan((current) => ({
+      ...current,
+      selectedOption: null,
+      primaryStrategy: "",
+      alternativeStrategy: "",
+    }));
+  };
+
   const clearLocalPhotos = useCallback(() => {
     cancelSuggestions();
     diagnosisRequestRef.current += 1;
@@ -2193,7 +2203,7 @@ function ClinicalAppPage() {
     setDiagnosisLoading(false);
     setPlanApproved(false);
     setSetupApproved(false);
-    cancelSuggestions();
+    invalidateTreatmentSelection();
     setStageAiReview(null);
   };
 
@@ -2205,6 +2215,7 @@ function ClinicalAppPage() {
     setDiagnosisLoading(false);
     setPlanApproved(false);
     setSetupApproved(false);
+    invalidateTreatmentSelection();
   };
 
   const updateCaseDetail = (field: keyof CaseDetailsState, value: string) => {
@@ -2214,6 +2225,7 @@ function ClinicalAppPage() {
     setDiagnosisLoading(false);
     setPlanApproved(false);
     setSetupApproved(false);
+    invalidateTreatmentSelection();
   };
 
   const updateFinding = (field: keyof FindingsState, value: string) => {
@@ -2223,6 +2235,7 @@ function ClinicalAppPage() {
     setDiagnosisLoading(false);
     setPlanApproved(false);
     setSetupApproved(false);
+    invalidateTreatmentSelection();
   };
 
   const updateDiagnosis = (field: "summary" | "interpretation" | "informationGaps", value: string) => {
@@ -2231,6 +2244,7 @@ function ClinicalAppPage() {
     setDiagnosisLoading(false);
     setPlanApproved(false);
     setSetupApproved(false);
+    invalidateTreatmentSelection();
   };
 
   const updatePlan = (field: "problemList" | "goals" | "informationGaps", value: string) => {
@@ -2638,6 +2652,7 @@ function ClinicalAppPage() {
       const interpretation = typeof review?.clinical_assessment === "string" ? review.clinical_assessment.trim() : "";
       if (!summary || !interpretation) throw new Error("AI_EMPTY_DIAGNOSIS");
 
+      invalidateTreatmentSelection();
       setDiagnosis({
         summary,
         interpretation,
@@ -2956,6 +2971,7 @@ function ClinicalAppPage() {
                 setDiagnosisLoading(false);
                 setPlanApproved(false);
                 setSetupApproved(false);
+                invalidateTreatmentSelection();
               }}
               findings={findings}
               onFindingChange={updateFinding}
