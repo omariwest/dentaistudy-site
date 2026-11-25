@@ -464,7 +464,7 @@ a {
   position: fixed;
   inset: 0;
   display: grid;
-  grid-template-rows: 58px 48px minmax(0, 1fr);
+  grid-template-rows: 54px 46px minmax(0, 1fr);
   min-width: 320px;
   overflow: hidden;
   color: var(--ink);
@@ -472,7 +472,7 @@ a {
 }
 
 .clinical-app.is-patients {
-  grid-template-rows: 58px minmax(0, 1fr);
+  grid-template-rows: 54px minmax(0, 1fr);
 }
 
 .app-topbar {
@@ -480,8 +480,8 @@ a {
   min-width: 0;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
-  padding: 0 16px 0 18px;
+  gap: 18px;
+  padding: 0 12px;
   border-bottom: 1px solid #ccd2db;
   background: rgba(255, 255, 255, 0.98);
 }
@@ -727,8 +727,8 @@ a {
   min-width: 0;
   overflow-x: auto;
   justify-content: space-between;
-  gap: 14px;
-  padding: 7px 10px;
+  gap: 12px;
+  padding: 5px 8px;
   border-bottom: 1px solid #dfe2e8;
   background: rgba(255, 255, 255, 0.98);
 }
@@ -943,16 +943,16 @@ a {
   min-width: 0;
   min-height: 0;
   overflow-y: auto;
-  padding: clamp(20px, 2.5vw, 34px);
+  padding: clamp(16px, 1.8vw, 24px);
 }
 
 .case-workflow-page__header {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 24px;
+  gap: 18px;
   width: min(980px, 100%);
-  margin: 0 auto 20px;
+  margin: 0 auto 14px;
 }
 
 .case-workflow-page__header > div {
@@ -1004,10 +1004,10 @@ a {
 .readiness-card {
   display: grid;
   grid-template-columns: minmax(130px, 0.34fr) minmax(0, 1fr);
-  gap: 18px;
+  gap: 14px;
   width: min(980px, 100%);
-  margin: 0 auto 14px;
-  padding: 14px 16px;
+  margin: 0 auto 10px;
+  padding: 12px 14px;
   border: 1px solid #cdd2da;
   border-radius: 12px;
   background: #ffffff;
@@ -1057,7 +1057,7 @@ a {
 .case-section {
   width: min(980px, 100%);
   margin: 0 auto 8px;
-  padding: 14px 16px;
+  padding: 12px 14px;
   border-bottom: 1px solid #d5dae1;
   background: #ffffff;
 }
@@ -1070,7 +1070,7 @@ a {
 .case-content-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 450px), 1fr));
-  gap: 16px;
+  gap: 12px;
   width: min(1280px, 100%);
   margin: 0 auto;
   align-items: start;
@@ -1080,7 +1080,7 @@ a {
   display: grid;
   align-content: start;
   min-width: 0;
-  gap: 12px;
+  gap: 10px;
 }
 
 .case-content-grid .case-section {
@@ -1109,7 +1109,7 @@ a {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .case-section__heading > div {
@@ -1350,14 +1350,15 @@ a {
   right: 0;
   left: 0;
   z-index: 180;
-  max-height: 230px;
-  padding: 5px;
+  height: 0;
+  max-height: 0;
+  padding: 0;
   overflow-x: hidden;
   overflow-y: auto;
-  border: 1px solid rgba(17, 24, 39, 0.1);
+  border: 0;
   border-radius: 10px;
   background: #ffffff;
-  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.1);
+  box-shadow: none;
   visibility: hidden;
   pointer-events: none;
 }
@@ -1369,6 +1370,11 @@ a {
 }
 
 .ui-select.is-open .ui-select-menu {
+  height: auto;
+  max-height: 230px;
+  padding: 5px;
+  border: 1px solid rgba(17, 24, 39, 0.1);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.1);
   visibility: visible;
   pointer-events: auto;
 }
@@ -1588,7 +1594,7 @@ a {
   align-items: center;
   justify-content: space-between;
   gap: 14px;
-  margin-bottom: 18px;
+  margin-bottom: 12px;
 }
 
 .patients-header h1 {
@@ -1619,7 +1625,7 @@ a {
   align-items: center;
   flex-wrap: wrap;
   gap: 9px;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .patients-search {
@@ -1926,7 +1932,7 @@ a {
   width: 100%;
   min-width: 0;
   overflow-y: auto;
-  padding: clamp(20px, 3vw, 38px) 16px 36px;
+  padding: clamp(16px, 2vw, 26px) 16px 24px;
   background: #f6f7f9;
 }
 
@@ -2709,15 +2715,15 @@ a {
   min-width: 0;
   min-height: 0;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   overflow: hidden;
-  padding: 8px;
+  padding: 6px;
   background: #ffffff;
 }
 
 .scan-workflow.is-ready {
   gap: 6px;
-  padding: 8px;
+  padding: 6px;
 }
 
 .scan-workflow__top {
@@ -3971,9 +3977,9 @@ a {
   grid-template-rows: auto minmax(0, 1fr) auto;
   min-width: 0;
   min-height: 0;
-  gap: 8px;
+  gap: 6px;
   overflow: hidden;
-  padding: 8px;
+  padding: 6px;
   background: #ffffff;
 }
 
@@ -5127,14 +5133,14 @@ a {
 
   .case-workflow-page,
   .case-hub {
-    padding: 14px 12px 18px;
+    padding: 12px 12px 16px;
   }
 
   .case-workflow-page__header {
     align-items: flex-start;
     flex-direction: column;
-    gap: 14px;
-    margin-bottom: 14px;
+    gap: 10px;
+    margin-bottom: 12px;
   }
 
   .case-page-primary,
@@ -5149,7 +5155,7 @@ a {
   }
 
   .case-section {
-    padding: 14px 12px;
+    padding: 12px;
   }
 
   .case-section__heading {
@@ -5183,7 +5189,7 @@ a {
   }
 
   .clinical-app {
-    grid-template-rows: 52px 42px minmax(0, 1fr);
+    grid-template-rows: 50px 42px minmax(0, 1fr);
   }
 
   .app-topbar {

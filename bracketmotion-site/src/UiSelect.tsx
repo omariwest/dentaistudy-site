@@ -62,6 +62,7 @@ export default function UiSelect({
     normalized.find((option) => option.value === value) ?? normalized[0];
 
   const close = (returnFocus = false) => {
+    menuRef.current?.style.removeProperty("max-height");
     setOpen(false);
     setDropUp(false);
 
@@ -101,7 +102,7 @@ export default function UiSelect({
     if (!button || !menu) return;
 
     const rect = button.getBoundingClientRect();
-    const menuHeight = Math.min(menu.scrollHeight || 230, 230);
+    const menuHeight = Math.min((menu.scrollHeight || 230) + 12, 230);
     const spaceBelow = window.innerHeight - rect.bottom - 12;
     const spaceAbove = rect.top - 12;
     const shouldDropUp = spaceBelow < menuHeight && spaceAbove > spaceBelow;
