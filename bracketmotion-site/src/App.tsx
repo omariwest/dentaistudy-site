@@ -2529,6 +2529,16 @@ function ClinicalAppPage() {
 
     return {
       mode,
+      case_details: {
+        age: caseDetails.age,
+        sex: caseDetails.sex,
+        patient_stage: caseDetails.patientStage,
+        growth_status: caseDetails.growthStatus,
+        chief_complaint: caseDetails.chiefComplaint,
+        medical_history: caseDetails.medicalHistory,
+        dental_history: caseDetails.dentalHistory,
+        clinical_notes: caseDetails.notes,
+      },
       gates: {
         planning_ready: planningReady,
         clinical_plan_approved: planApproved,
@@ -2603,6 +2613,52 @@ function ClinicalAppPage() {
           })) || [],
       },
     };
+  };
+
+  const runDiagnosisDraft = async () => {
+    if (!session) {
+      setAccountOpen(true);
+      return;
+    }
+    if (!online) {
+      setDiagnosisError("Reconnect to generate a draft.");
+      return;
+    }
+    if (!planningReady) {
+      setDiagnosisError("Complete the required clinical records first.");
+      return;
+    }
+    const request = ++diagnosisRequestRef.current;
+    setDiagnosisLoading(true);
+    setDiagnosisError("");
+
+    try {
+      const result = await invokeBracketMotionClinicalReview(
+        buildAiPayload("diagnosis_draft"),
+      );
+      if (request !== diagnosisRequestRef.current) return;
+      const review = result?.review as ClinicalAiReviewResult | undefined;
+      const summary = typeof review?.case_summary === "string" ? review.case_summary.trim() : "";
+      const interpretation = typeof review?.clinical_assessment === "string" ? review.clinical_assessment.trim() : "";
+      if (!summary || !interpretation) throw new Error("AI_EMPTY_DIAGNOSIS");
+
+      setDiagnosis({
+        summary,
+        interpretation,
+        informationGaps: Array.isArray(review?.missing_information)
+          ? review.missing_information.filter((value): value is string => typeof value === "string").join("\n")
+          : "",
+        approved: false,
+      });
+      setPlanApproved(false);
+      setSetupApproved(false);
+    } catch {
+      if (request === diagnosisRequestRef.current) {
+        setDiagnosisError("The draft could not be generated. Your entered findings remain unchanged.");
+      }
+    } finally {
+      if (request === diagnosisRequestRef.current) setDiagnosisLoading(false);
+    }
   };
 
   const runPlanAiReview = async () => {
@@ -2851,11 +2907,22 @@ function ClinicalAppPage() {
               scopeIssue={scopeIssue}
               onScopeIssue={(value) => {
                 setScopeIssue(value);
+                setDiagnosis((current) => ({ ...current, approved: false }));
+                diagnosisRequestRef.current += 1;
                 setPlanApproved(false);
                 setSetupApproved(false);
               }}
               findings={findings}
               onFindingChange={updateFinding}
+              diagnosis={diagnosis}
+              onDiagnosisChange={updateDiagnosis}
+              onApproveDiagnosis={() => setDiagnosis((current) => ({ ...current, approved: true }))}
+              onGenerateDiagnosis={() => void runDiagnosisDraft()}
+              onSignIn={() => setAccountOpen(true)}
+              onOpenPlan={() => openSection("Plan")}
+              sessionActive={Boolean(session)}
+              diagnosisLoading={diagnosisLoading}
+              diagnosisError={diagnosisError}
               planningReady={planningReady}
               missingCount={missingCount}
               onBackToCase={() => setActiveSection("Case")}
