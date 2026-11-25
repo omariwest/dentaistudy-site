@@ -1720,18 +1720,7 @@ function StageWorkspace({
   return (
     <div className="stage-workspace">
       <div className="stage-workspace__header">
-        <div>
-          <span className="case-page-kicker">Stage + mechanics engine</span>
-          <h2>{currentStage ? currentStage.title : "Initial approved setup"}</h2>
-          <p>
-            Stages are derived from the approved target and enabled mechanics.
-            Playback is geometric and does not predict biologic timing.
-          </p>
-        </div>
-        <div className="stage-workspace__status">
-          <span>{stageStep}</span>
-          <small>of {stages.length} stages</small>
-        </div>
+        <h2>{currentStage ? currentStage.title : "Initial approved setup"}</h2>
       </div>
 
       <div className="stage-workspace__body">
@@ -1768,21 +1757,11 @@ function StageWorkspace({
           </div>
 
           <div className="scan-canvas__hint">
-            Playback interpolates Initial → approved Target · mechanics notes describe expected tendencies, not exact force or biologic response
+            Geometric playback only · not a prediction of biological response
           </div>
         </div>
 
         <aside className="stage-panel">
-          <div className="stage-panel__summary">
-            <span>Current stage</span>
-            <strong>{currentStage?.title || "Initial"}</strong>
-            <small>
-              {currentStage
-                ? `${Math.round(currentStage.progress * 100)}% of the approved geometric target`
-                : "Baseline before staged movement"}
-            </small>
-          </div>
-
           {currentStage ? (
             <div className="stage-mechanics-card">
               <div>
@@ -1818,10 +1797,7 @@ function StageWorkspace({
 
           <div className="stage-panel__source-note">
             <strong>Gemini mechanics review</strong>
-            <p>
-              Source-grounded review of the approved stage sequence. Gemini cannot
-              change geometry, mechanics, or approvals.
-            </p>
+            <p>Advisory review only. Gemini cannot change geometry or approve treatment.</p>
             <button
               type="button"
               disabled={aiReviewLoading}
@@ -2761,21 +2737,13 @@ export default function ScanWorkflow({
     <div className={`scan-workflow${scanReady ? " is-ready" : ""}`}>
       <div className="scan-workflow__top">
         <div>
-          <span className="case-page-kicker">Patient scans</span>
           <h2>
             {workflowMode === "segment"
-              ? "Import, align and segment the arches."
+              ? "Scan and segmentation"
               : workflowMode === "target"
-                ? "Review and approve the final 3D target."
-                : "Visualize the fixed appliance on the approved target."}
+                ? "3D target"
+                : "Appliances"}
           </h2>
-          <p>
-            {workflowMode === "segment"
-              ? "STL/PLY files are processed locally in the browser during this workflow."
-              : workflowMode === "target"
-                ? "Target transforms stay clinician-controlled and are checked against the current aligned scan geometry."
-                : "Generic brackets, wire and supported mechanics are layered onto the approved patient geometry."}
-          </p>
         </div>
         <div className="scan-workflow__status">
           <span>
