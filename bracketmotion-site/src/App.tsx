@@ -474,11 +474,26 @@ function HomePage() {
 
 
 const clinicalFlow = [
-  { label: "Case", title: "Case Presentation", detail: "Clinical records" },
-  { label: "Findings", title: "Diagnosis", detail: "Clinical findings" },
-  { label: "Plan", title: "Treatment Plans", detail: "Clinical strategy" },
-  { label: "Setup", title: "3D Setup", detail: "Current scan-based workspace" },
-  { label: "Stages", title: "Mechanics", detail: "Approved setup and stages" },
+  {
+    label: "Case", title: "Case Presentation", detail: "Clinical records",
+    icon: <path d="M9 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-3M9 2h6v4H9zM8 11h8M8 15h8" />,
+  },
+  {
+    label: "Findings", title: "Diagnosis", detail: "Clinical findings",
+    icon: <><circle cx="10" cy="10" r="6.5" /><path d="m15 15 5 5M7 10l2 2 4-4" /></>,
+  },
+  {
+    label: "Plan", title: "Treatment Plans", detail: "Clinical strategy",
+    icon: <path d="m12 3 9 5-9 5-9-5 9-5ZM3 12l9 5 9-5M3 16l9 5 9-5" />,
+  },
+  {
+    label: "Setup", title: "3D Setup", detail: "Current scan-based workspace",
+    icon: <path d="m12 2 9 5v10l-9 5-9-5V7l9-5ZM3 7l9 5 9-5M12 12v10" />,
+  },
+  {
+    label: "Stages", title: "Mechanics", detail: "Approved setup and stages",
+    icon: <><path d="M3 7h18M3 17h18" /><circle cx="9" cy="7" r="2.5" /><circle cx="16" cy="17" r="2.5" /></>,
+  },
 ] as const;
 
 type ClinicalSection = (typeof clinicalFlow)[number]["label"];
@@ -3276,7 +3291,7 @@ function ClinicalAppPage() {
       )}
 
       {!showCaseHub && !showSettings && <nav className="app-flow-nav" aria-label="Case workflow">
-        {clinicalFlow.map((item, index) => (
+        {clinicalFlow.map((item) => (
           <button
             className={`app-flow-item${activeSection === item.label && !showCaseHub ? " is-active" : ""}`}
             type="button"
@@ -3285,7 +3300,11 @@ function ClinicalAppPage() {
             aria-current={activeSection === item.label && !showCaseHub ? "step" : undefined}
             onClick={() => openSection(item.label)}
           >
-            <span className="app-flow-item__index">{String(index + 1)}.</span>
+            <svg className="app-flow-item__icon" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"
+              strokeLinejoin="round" aria-hidden="true">
+              {item.icon}
+            </svg>
             <span className="app-flow-item__copy">
               <strong>{item.title}</strong>
             </span>
