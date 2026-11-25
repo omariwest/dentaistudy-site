@@ -1482,6 +1482,11 @@ function AuthDialog({
     if (!open) return;
     setMessage("");
     setPassword("");
+    const onEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onEscape);
+    return () => window.removeEventListener("keydown", onEscape);
   }, [open, mode]);
 
   if (!open) return null;
