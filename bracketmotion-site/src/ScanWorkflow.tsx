@@ -1695,8 +1695,13 @@ function StageWorkspace({
   jawTransforms,
   targetTransforms,
   plannedExtractions,
-  applianceLayers,
-  endpoints,
+  baseScenario,
+  comparison,
+  onSelectScenario,
+  onCreateComparison,
+  onRemoveComparison,
+  onToggleLayer,
+  onUpdateEndpoint,
   preferences,
   bondedTeeth,
   sessionActive,
@@ -1711,8 +1716,13 @@ function StageWorkspace({
   jawTransforms: Record<Exclude<Jaw, "bite">, RigidTransform>;
   targetTransforms: Record<string, RigidTransform>;
   plannedExtractions: Set<string>;
-  applianceLayers: ApplianceLayerState;
-  endpoints: MechanicEndpoints;
+  baseScenario: MechanicsScenario;
+  comparison: MechanicsComparison;
+  onSelectScenario: (active: "A" | "B") => void;
+  onCreateComparison: () => void;
+  onRemoveComparison: () => void;
+  onToggleLayer: (layer: "powerChain" | "coilSpring" | "elastics" | "closingLoop") => void;
+  onUpdateEndpoint: (endpoint: keyof MechanicEndpoints, value: string) => void;
   preferences: AppliancePreferences;
   bondedTeeth: string[];
   sessionActive: boolean;
@@ -1722,23 +1732,88 @@ function StageWorkspace({
   onRunAiReview: () => void;
   onSignIn: () => void;
 }) {
+  const scenario = comparison.active === "B" && comparison.alternative
+    ? comparison.alternative
+    : baseScenario;
   const stages = useMemo(
     () =>
       deriveStages({
         segments,
         targetTransforms,
         plannedExtractions,
-        applianceLayers,
-        endpoints,
+        applianceLayers: scenario.layers,
+        endpoints: scenario.endpoints,
       }),
-    [applianceLayers, endpoints, plannedExtractions, segments, targetTransforms],
+    [scenario.layers, scenario.endpoints, plannedExtractions, segments, targetTransforms],
   );
+  const availableUpper = upperTeeth.filter((label) =>
+    bondedTeeth.includes(label) &&
+    segments.some((segment) => segment.label === label && !plannedExtractions.has(segment.id)),
+  );
+  const availableLower = lowerTeeth.filter((label) =>
+    bondedTeeth.includes(label) &&
+    segments.some((segment) => segment.label === label && !plannedExtractions.has(segment.id)),
+  );
+  const availableTeeth = [...availableUpper, ...availableLower];
+  const inSameArch = (label: string) => availableUpper.includes(label)
+    ? availableUpper : availableLower.includes(label) ? availableLower : [];
+  const activeMechanics = (
+    layers: ApplianceLayerState,
+  ) => ([
+    layers.powerChain ? "Power chain" : "",
+    layers.coilSpring ? "Closed coil" : "",
+    layers.elastics ? "Elastics" : "",
+    layers.closingLoop ? "Closing loop" : "",
+  ].filter(Boolean).join(" · ") || "No auxiliaries");
+  const endpointGroups: Array<{
+    key: "powerChain" | "coilSpring" | "elastics" | "closingLoop";
+    label: string;
+    controls: Array<[keyof MechanicEndpoints, string, string[]]>;
+  }> = [
+    {
+      key: "powerChain",
+      label: "Power chain",
+      controls: [
+        ["chainStart", "From", availableTeeth],
+        ["chainEnd", "To", inSameArch(scenario.endpoints.chainStart)],
+      ],
+    },
+    {
+      key: "coilSpring",
+      label: "Closed coil",
+      controls: [
+        ["coilStart", "From", availableTeeth],
+        ["coilEnd", "To", inSameArch(scenario.endpoints.coilStart)],
+      ],
+    },
+    {
+      key: "elastics",
+      label: "Interarch elastics",
+      controls: [
+        ["elasticUpper", "Upper", availableUpper],
+        ["elasticLower", "Lower", availableLower],
+      ],
+    },
+    {
+      key: "closingLoop",
+      label: "Closing loop",
+      controls: [
+        ["loopStart", "From", availableTeeth],
+        ["loopEnd", "To", inSameArch(scenario.endpoints.loopStart)],
+      ],
+    },
+  ];
   const [stageStep, setStageStep] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
     setStageStep((current) => Math.min(current, stages.length));
   }, [stages.length]);
+
+  useEffect(() => {
+    setIsPlaying(false);
+    setStageStep(0);
+  }, [comparison.active, Boolean(comparison.alternative)]);
 
   useEffect(() => {
     if (!isPlaying) return;
@@ -1763,15 +1838,11 @@ function StageWorkspace({
     () => scaleTargetTransforms(targetTransforms, progress),
     [progress, targetTransforms],
   );
-  const playbackLayers: ApplianceLayerState =
-    currentStage?.layers || {
-      brackets: true,
-      archwire: true,
-      powerChain: false,
-      coilSpring: false,
-      elastics: false,
-      closingLoop: false,
-    };
+  const playbackLayers: ApplianceLayerState = {
+    ...(currentStage?.layers || scenario.layers),
+    brackets: scenario.layers.brackets,
+    archwire: scenario.layers.archwire,
+  };
   const extractionStageReached =
     stageStep > 0 &&
     stages
@@ -1787,7 +1858,17 @@ function StageWorkspace({
   return (
     <div className="stage-workspace">
       <div className="stage-workspace__header">
-        <h2>{currentStage ? currentStage.title : "Initial approved setup"}</h2>
+        <div>
+          <h2>{currentStage ? currentStage.title : "Mechanics & adjustments"}</h2>
+          <small>Setup {comparison.active} · illustrative sequence, not elapsed treatment time</small>
+        </div>
+        <div className="appliance-action-buttons">
+          {comparison.alternative ? (
+            <button type="button" onClick={onRemoveComparison}>Remove Setup B</button>
+          ) : (
+            <button type="button" onClick={onCreateComparison}>Compare mechanics</button>
+          )}
+        </div>
       </div>
 
       <div className="stage-workspace__body">
@@ -1814,15 +1895,15 @@ function StageWorkspace({
               jawTransforms={jawTransforms}
               targetTransforms={playbackTransforms}
               layers={playbackLayers}
-              endpoints={endpoints}
+              endpoints={scenario.endpoints}
               preferences={preferences}
               bondedTeeth={bondedTeeth}
             />
           </Canvas>
 
           <div className="stage-viewer__badge">
-            <span>{currentStage ? `Stage ${stageStep}` : "Initial"}</span>
-            <strong>{Math.round(progress * 100)}% geometric target</strong>
+            <span>Setup {comparison.active} · {currentStage ? `Stage ${stageStep}` : "Initial"}</span>
+            <strong>{currentStage ? `${Math.round(progress * 100)}% target interpolation` : "Approved starting geometry"}</strong>
           </div>
 
           <div className="scan-canvas__hint">
@@ -1831,6 +1912,98 @@ function StageWorkspace({
         </div>
 
         <aside className="stage-panel">
+          <section className="appliance-panel__section">
+            <div className="appliance-panel__heading">
+              <span>Mechanics comparison</span>
+              <strong>Setup {comparison.active}</strong>
+            </div>
+            {comparison.alternative && (
+              <>
+                <div className="appliance-layer-buttons appliance-layer-buttons--panel" aria-label="Compare mechanics setups">
+                  {(["A", "B"] as const).map((variant) => (
+                    <button
+                      type="button"
+                      key={variant}
+                      className={comparison.active === variant ? "is-active" : ""}
+                      aria-pressed={comparison.active === variant}
+                      onClick={() => onSelectScenario(variant)}
+                    >
+                      Setup {variant}
+                    </button>
+                  ))}
+                </div>
+                <div className="mechanic-editor">
+                  <strong>Setup A: {activeMechanics(baseScenario.layers)}</strong>
+                  <strong>Setup B: {activeMechanics(comparison.alternative.layers)}</strong>
+                  <p className="appliance-panel__empty">
+                    Both use the same approved tooth target. Compare appliance choices and stage sequence, not predicted outcomes.
+                  </p>
+                </div>
+              </>
+            )}
+            {!comparison.alternative && (
+              <p className="appliance-panel__empty">
+                Adjust the current setup, or create Setup B to compare a different mechanics approach.
+              </p>
+            )}
+          </section>
+          <section className="appliance-panel__section">
+            <div className="appliance-panel__heading">
+              <span>Active adjustments</span>
+              <strong>Setup {comparison.active}</strong>
+            </div>
+            <div className="appliance-layer-buttons appliance-layer-buttons--panel" aria-label="Mechanical adjustments">
+              {([
+                ["powerChain", "Power chain"],
+                ["coilSpring", "Closed coil"],
+                ["elastics", "Elastics"],
+                ["closingLoop", "Closing loop"],
+              ] as Array<["powerChain" | "coilSpring" | "elastics" | "closingLoop", string]>)
+                .map(([key, label]) => (
+                  <button
+                    type="button"
+                    key={key}
+                    className={scenario.layers[key] ? "is-active" : ""}
+                    aria-pressed={scenario.layers[key]}
+                    onClick={() => onToggleLayer(key)}
+                    disabled={key === "elastics"
+                      ? availableUpper.length === 0 || availableLower.length === 0
+                      : ![availableUpper.length, availableLower.length].some((length) => length > 1)}
+                  >
+                    {label}
+                  </button>
+                ))}
+            </div>
+            {endpointGroups.filter((group) => scenario.layers[group.key]).map((group) => (
+              <div className="mechanic-editor" key={group.key}>
+                <strong>{group.label}</strong>
+                <div className="mechanic-endpoints">
+                  {group.controls.map(([field, label, options]) => (
+                    <label key={field}>
+                      <span>{label}</span>
+                      <UiSelect
+                        value={options.includes(scenario.endpoints[field]) ? scenario.endpoints[field] : ""}
+                        onChange={(value) => onUpdateEndpoint(field, value)}
+                        options={[
+                          { value: "", label: "Select tooth", disabled: true },
+                          ...options.map((value) => ({ value, label: value })),
+                        ]}
+                        ariaLabel={`Setup ${comparison.active} ${group.label} ${label}`}
+                        disabled={options.length === 0}
+                      />
+                    </label>
+                  ))}
+                </div>
+                {group.controls.some(([field, , options]) => !options.includes(scenario.endpoints[field])) && (
+                  <p className="appliance-panel__empty">Select available bonded teeth to display this mechanic.</p>
+                )}
+              </div>
+            ))}
+            {!endpointGroups.some((group) => scenario.layers[group.key]) && (
+              <p className="appliance-panel__empty">Select an auxiliary to illustrate its placement and stage considerations.</p>
+            )}
+          </section>
+
           {currentStage ? (
             <div className="stage-mechanics-card">
               <div>
@@ -1921,7 +2094,7 @@ function StageWorkspace({
           {isPlaying ? "Ⅱ" : "▶"}
         </button>
 
-        <div className="stage-timeline__track">
+        <div className="stage-timeline__track" aria-label={`Setup ${comparison.active} illustrative stage sequence`}>
           <button
             className={`stage-timeline__item${stageStep === 0 ? " is-current" : ""}`}
             type="button"
