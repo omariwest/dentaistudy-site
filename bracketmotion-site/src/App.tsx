@@ -2500,6 +2500,7 @@ function ClinicalAppPage() {
 
     try {
       const row = await loadBracketMotionCase(savedCaseId);
+      if (row.user_id !== userId || previousUserIdRef.current !== userId) return;
       applySavedCase(row);
       setSavedCases((current) => current.map((item) =>
         item.id === savedCaseId
@@ -2914,21 +2915,6 @@ function ClinicalAppPage() {
           <a className="wordmark app-wordmark" href="/" aria-label="BracketMotion home">
             <span className="wordmark__text">BracketMotion</span>
           </a>
-          <span className="app-topbar__divider" aria-hidden="true" />
-          <div className="app-case-title">
-            <strong>{caseLabel}</strong>
-            <span>Permanent dentition · {planningReady ? "Planning ready" : "Draft"}</span>
-          </div>
-        </div>
-
-        <div className="app-topbar__actions">
-          <span
-            className={`app-save-state${saveState === "error" || !online ? " is-error" : ""}`}
-            role="status"
-            aria-live="polite"
-          >
-            {saveLabel}
-          </span>
           <button
             className={`app-quiet-button${showCaseHub ? " is-active" : ""}`}
             type="button"
@@ -2940,6 +2926,26 @@ function ClinicalAppPage() {
           >
             Patients
           </button>
+          {!showCaseHub && (
+            <>
+              <span className="app-topbar__divider" aria-hidden="true" />
+              <div className="app-case-title">
+                <strong>{caseLabel}</strong>
+                <span>Permanent dentition · {planningReady ? "Planning ready" : "Draft"}</span>
+              </div>
+            </>
+          )}
+        </div>
+        <div className="app-topbar__actions">
+          {!showCaseHub && (
+            <span
+              className={`app-save-state${saveState === "error" || !online ? " is-error" : ""}`}
+              role="status"
+              aria-live="polite"
+            >
+              {saveLabel}
+            </span>
+          )}
           <button
             className="app-account-button"
             type="button"
