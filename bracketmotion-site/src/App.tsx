@@ -1440,7 +1440,7 @@ function TreatmentPlanView({
 
       <section className={`plan-approval-panel${planApproved ? " is-approved" : ""}`}>
         <div>
-          <span>Clinical approval gate</span>
+          <span>Clinical Plan Approval</span>
           <strong>{planApproved ? "Plan approved" : "Approve before 3D setup"}</strong>
           <p>
             {planApproved
@@ -1716,36 +1716,36 @@ function SetupWorkspace({
       {!isStages && (
         <div className="app-viewer-toolbar">
           <div className="app-viewer-toolbar__group" aria-label="Setup workspace">
-              <button
-                className={`app-tool-button${workspaceMode === "patient" ? " is-selected" : ""}`}
-                type="button"
-                onClick={() => setWorkspaceMode("patient")}
-              >
-                Patient scans
-              </button>
-              <button
-                className={`app-tool-button${workspaceMode === "demo" ? " is-selected" : ""}`}
-                type="button"
-                onClick={() => setWorkspaceMode("demo")}
-              >
-                Demo reference
-              </button>
-            </div>
+            <button
+              className={`app-tool-button${workspaceMode === "patient" ? " is-selected" : ""}`}
+              type="button"
+              onClick={() => setWorkspaceMode("patient")}
+            >
+              Patient scans
+            </button>
+            <button
+              className={`app-tool-button${workspaceMode === "demo" ? " is-selected" : ""}`}
+              type="button"
+              onClick={() => setWorkspaceMode("demo")}
+            >
+              Demo reference
+            </button>
+          </div>
 
-            {workspaceMode === "demo" && (
-              <div className="app-viewer-toolbar__group app-viewer-toolbar__views" aria-label="Canonical views">
-                {viewerViews.map((view) => (
-                  <button
-                    className="app-view-button"
-                    type="button"
-                    key={view}
-                    onClick={() => viewerRef.current?.setView(view as "Front" | "Right" | "Left" | "Upper" | "Lower")}
-                  >
-                    {view}
-                  </button>
-                ))}
-              </div>
-            )}
+          {workspaceMode === "demo" && (
+            <div className="app-viewer-toolbar__group app-viewer-toolbar__views" aria-label="Canonical views">
+              {viewerViews.map((view) => (
+                <button
+                  className="app-view-button"
+                  type="button"
+                  key={view}
+                  onClick={() => viewerRef.current?.setView(view as "Front" | "Right" | "Left" | "Upper" | "Lower")}
+                >
+                  {view}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
