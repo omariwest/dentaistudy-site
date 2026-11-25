@@ -1227,8 +1227,8 @@ a {
 
 .case-form-grid input:focus,
 .finding-grid input:focus {
-  border-color: rgba(109, 76, 245, 0.36);
-  box-shadow: 0 0 0 2px rgba(109, 76, 245, 0.055);
+  border-color: #ab9bd9;
+  box-shadow: 0 0 0 1px rgba(109, 76, 245, 0.035);
 }
 
 /* Shared UIORI-style select control */
@@ -1269,8 +1269,8 @@ a {
 
 .ui-select-button:focus-visible,
 .ui-select.is-open .ui-select-button {
-  border-color: rgba(109, 76, 245, 0.36);
-  box-shadow: 0 0 0 2px rgba(109, 76, 245, 0.055);
+  border-color: #ab9bd9;
+  box-shadow: 0 0 0 1px rgba(109, 76, 245, 0.035);
 }
 
 .ui-select-button:disabled {
@@ -1488,8 +1488,8 @@ a {
 }
 
 .field-with-unit:focus-within {
-  border-color: rgba(109, 76, 245, 0.55);
-  box-shadow: 0 0 0 2px rgba(109, 76, 245, 0.055);
+  border-color: #ab9bd9;
+  box-shadow: 0 0 0 1px rgba(109, 76, 245, 0.035);
 }
 
 .field-with-unit input {
@@ -1602,6 +1602,12 @@ a {
   background: #ffffff;
   font: inherit;
   font-size: 0.72rem;
+  outline: none;
+}
+
+.patients-search input:focus-visible {
+  border-color: #ab9bd9;
+  box-shadow: 0 0 0 1px rgba(109, 76, 245, 0.035);
 }
 
 .patients-filter {
@@ -2120,11 +2126,8 @@ a {
 }
 
 .record-status__action:focus-visible,
-.case-form-grid input:focus-visible,
-.finding-grid input:focus-visible,
 .patients-open:focus-visible,
-.patients-pagination button:focus-visible,
-.patients-search input:focus-visible {
+.patients-pagination button:focus-visible {
   outline: 2px solid rgba(109, 76, 245, 0.15);
   outline-offset: 2px;
 }
@@ -2383,8 +2386,8 @@ a {
 }
 
 .auth-dialog__form input:focus {
-  border-color: rgba(109, 76, 245, 0.36);
-  box-shadow: 0 0 0 2px rgba(109, 76, 245, 0.055);
+  border-color: #ab9bd9;
+  box-shadow: 0 0 0 1px rgba(109, 76, 245, 0.035);
   background: #ffffff;
 }
 
@@ -3445,9 +3448,9 @@ a {
 }
 
 .target-value-grid input:focus {
-  border-color: rgba(109, 76, 245, 0.55);
+  border-color: #ab9bd9;
   outline: 0;
-  box-shadow: 0 0 0 2px rgba(109, 76, 245, 0.055);
+  box-shadow: 0 0 0 1px rgba(109, 76, 245, 0.035);
 }
 
 .target-extraction-card {
@@ -4446,8 +4449,8 @@ a {
 }
 
 .plan-textarea:focus {
-  border-color: rgba(109, 76, 245, 0.32);
-  box-shadow: 0 0 0 1px rgba(109, 76, 245, 0.05);
+  border-color: #ab9bd9;
+  box-shadow: 0 0 0 1px rgba(109, 76, 245, 0.035);
 }
 
 .plan-objectives-grid {
@@ -4515,8 +4518,9 @@ a {
 }
 
 .plan-option-field input:focus-visible {
-  outline: 2px solid rgba(109, 76, 245, 0.15);
-  outline-offset: 2px;
+  border-color: #ab9bd9;
+  outline: none;
+  box-shadow: 0 0 0 1px rgba(109, 76, 245, 0.035);
 }
 
 .plan-approval-panel {
@@ -4573,11 +4577,6 @@ a {
   min-width: 155px;
   flex: 0 0 auto;
   padding-inline: 15px;
-}
-
-.plan-textarea:focus-visible {
-  outline: 1px solid rgba(109, 76, 245, 0.13);
-  outline-offset: 0;
 }
 
 /* Legal pages */
