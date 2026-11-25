@@ -1004,6 +1004,48 @@ a {
   background: #ffffff;
 }
 
+.case-workflow-page--split .case-workflow-page__header,
+.case-workflow-page--split .readiness-card {
+  width: min(1280px, 100%);
+}
+
+.case-content-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 490px), 1fr));
+  gap: 16px;
+  width: min(1280px, 100%);
+  margin: 0 auto;
+  align-items: start;
+}
+
+.case-content-column {
+  display: grid;
+  align-content: start;
+  min-width: 0;
+  gap: 12px;
+}
+
+.case-content-grid .case-section {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  border: 1px solid #e3e6eb;
+  border-radius: 10px;
+}
+
+.case-content-grid .case-form-grid,
+.case-content-grid .finding-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.case-content-grid .case-photo-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 145px), 1fr));
+}
+
+.case-content-grid .case-photo-grid--radiographs {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
+}
+
 .case-section__heading {
   display: flex;
   align-items: center;
@@ -4485,7 +4527,9 @@ a {
   }
 
   .case-form-grid,
-  .finding-grid {
+  .finding-grid,
+  .case-content-grid .case-form-grid,
+  .case-content-grid .finding-grid {
     grid-template-columns: 1fr;
   }
 
