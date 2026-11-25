@@ -3839,17 +3839,73 @@ a {
   box-shadow: 0 0 0 2px rgba(109, 76, 245, 0.055);
 }
 
+.plan-objectives-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr));
+  gap: 12px;
+}
+
+.plan-objectives-grid label,
+.plan-option-field {
+  display: grid;
+  align-content: start;
+  gap: 5px;
+  min-width: 0;
+}
+
+.plan-objectives-grid label > span,
+.plan-option-field > span {
+  color: #596473;
+  font-size: 0.69rem;
+  font-weight: 700;
+}
+
 .plan-strategy-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 244px), 1fr));
+  gap: 9px;
   width: min(980px, 100%);
   margin: 0 auto 8px;
 }
 
 .plan-strategy-grid .case-section {
   width: 100%;
+  min-width: 0;
   margin: 0;
+  border: 1px solid #e4e6ec;
+  border-radius: 10px;
+}
+
+.plan-strategy-grid .case-section.is-primary {
+  border-color: rgba(109, 76, 245, 0.75);
+  background: #fcfbff;
+}
+
+.plan-strategy-card .case-section__heading .app-quiet-button {
+  min-height: 30px;
+  padding: 4px 9px;
+  font-size: 0.68rem;
+}
+
+.plan-option-field {
+  margin-top: 9px;
+}
+
+.plan-option-field input {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 11px;
+  border: 1px solid #dfe2e8;
+  border-radius: 9px;
+  color: #2c3440;
+  background: #ffffff;
+  font: inherit;
+  font-size: 0.72rem;
+}
+
+.plan-option-field input:focus-visible {
+  outline: 3px solid rgba(109, 76, 245, 0.2);
+  outline-offset: 2px;
 }
 
 .plan-approval-panel {
