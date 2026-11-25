@@ -2334,7 +2334,7 @@ function ClinicalAppPage() {
     !showCaseHub && (activeSection === "Setup" || activeSection === "Stages");
 
   return (
-    <main className={`clinical-app${online ? "" : " is-offline"}`}>
+    <main className="clinical-app">
       <header className="app-topbar">
         <div className="app-topbar__brand">
           <a className="wordmark app-wordmark" href="/" aria-label="BracketMotion home">
