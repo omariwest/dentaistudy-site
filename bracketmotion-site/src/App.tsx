@@ -2047,25 +2047,11 @@ function SettingsView({
     setConfirmPassword("");
   }, [session?.user.id, profile?.firstName, profile?.lastName, profile?.clinic]);
 
-  if (!session) {
-    return (
-      <div className="settings-workspace">
-        <h1>Account Settings</h1>
-        <section className="settings-card settings-sign-in">
-          <h2>Sign in to manage your profile</h2>
-          <p>Your clinician profile belongs to your authenticated account.</p>
-          <button className="app-primary-action" type="button" onClick={onSignIn}>
-            Sign in
-          </button>
-        </section>
-      </div>
-    );
-  }
-
   const displayName = [firstName, lastName].map((name) => name.trim()).filter(Boolean).join(" ") ||
-    session.user.email || "Clinician";
+    session?.user.email || "Clinician";
   const saveProfile = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (!session) return;
     if (!firstName.trim() || firstName.trim().length > 80 || lastName.trim().length > 80 || clinic.trim().length > 120) {
       setProfileMessage("Enter a first name and keep the profile fields within their limits.");
       return;
@@ -2092,6 +2078,7 @@ function SettingsView({
   };
 
   const onPhotoSelected = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!session) return;
     const file = event.target.files?.[0] || null;
     event.target.value = "";
     if (!file) return;
@@ -2122,6 +2109,7 @@ function SettingsView({
   };
 
   const deletePhoto = async () => {
+    if (!session) return;
     setAvatarBusy(true);
     setPhotoMessage("");
     try {
@@ -2137,6 +2125,7 @@ function SettingsView({
 
   const changePassword = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (!session) return;
     setPasswordMessage("");
     if (!session.user.email) {
       setPasswordMessage("This account has no email address for password verification.");
@@ -2171,6 +2160,12 @@ function SettingsView({
   return (
     <div className="settings-workspace">
       <h1>Account Settings</h1>
+      {!session && (
+        <div className="settings-guest-state">
+          <span>Preview mode. Sign in to edit your profile and manage security.</span>
+          <button className="app-quiet-button" type="button" onClick={onSignIn}>Sign in</button>
+        </div>
+      )}
       <form className="settings-card" onSubmit={saveProfile}>
         <h2>1. Profile Information</h2>
         <div className="settings-profile-layout">
@@ -2186,7 +2181,7 @@ function SettingsView({
                 accept="image/png,image/jpeg,image/webp" aria-label="Choose clinician profile photo"
                 onChange={(event) => void onPhotoSelected(event)} />
               <button type="button" className="app-quiet-button"
-                onClick={() => avatarInputRef.current?.click()} disabled={avatarBusy}>
+                onClick={() => avatarInputRef.current?.click()} disabled={!session || avatarBusy}>
                 {avatarBusy ? "Updating…" : "Change photo"}
               </button>
               {avatarUrl && (
@@ -2199,24 +2194,24 @@ function SettingsView({
           <div className="settings-profile-fields">
             <label><span>First Name</span>
               <input type="text" value={firstName} autoComplete="given-name"
-                onChange={(event) => setFirstName(event.target.value)} maxLength={80} required />
+                onChange={(event) => setFirstName(event.target.value)} maxLength={80} required disabled={!session} />
             </label>
             <label><span>Last Name</span>
               <input type="text" value={lastName} autoComplete="family-name"
-                onChange={(event) => setLastName(event.target.value)} maxLength={80} />
+                onChange={(event) => setLastName(event.target.value)} maxLength={80} disabled={!session} />
             </label>
             <label><span>Email Address</span>
-              <input type="email" value={session.user.email || ""} readOnly />
+              <input type="email" value={session?.user.email || ""} readOnly />
             </label>
             <label><span>Clinic / Practice Name</span>
               <input type="text" value={clinic} maxLength={120}
-                onChange={(event) => setClinic(event.target.value)} />
+                onChange={(event) => setClinic(event.target.value)} disabled={!session} />
             </label>
           </div>
         </div>
         <div className="settings-form-footer">
           {profileMessage && <p role="status" className="settings-feedback">{profileMessage}</p>}
-          <button type="submit" className="app-primary-action" disabled={profileBusy}>
+          <button type="submit" className="app-primary-action" disabled={!session || profileBusy}>
             {profileBusy ? "Saving…" : "Save Changes"}
           </button>
         </div>
@@ -2229,20 +2224,20 @@ function SettingsView({
         <div className="settings-security-fields">
           <label><span>Current Password</span>
             <input type="password" autoComplete="current-password" value={currentPassword}
-              onChange={(event) => setCurrentPassword(event.target.value)} required />
+              onChange={(event) => setCurrentPassword(event.target.value)} required disabled={!session} />
           </label>
           <label><span>New Password</span>
             <input type="password" autoComplete="new-password" value={newPassword}
-              onChange={(event) => setNewPassword(event.target.value)} minLength={8} required />
+              onChange={(event) => setNewPassword(event.target.value)} minLength={8} required disabled={!session} />
           </label>
           <label><span>Confirm New Password</span>
             <input type="password" autoComplete="new-password" value={confirmPassword}
-              onChange={(event) => setConfirmPassword(event.target.value)} minLength={8} required />
+              onChange={(event) => setConfirmPassword(event.target.value)} minLength={8} required disabled={!session} />
           </label>
         </div>
         <div className="settings-form-footer">
           {passwordMessage && <p role="status" className="settings-feedback">{passwordMessage}</p>}
-          <button className="app-quiet-button" type="submit" disabled={passwordBusy}>
+          <button className="app-quiet-button" type="submit" disabled={!session || passwordBusy}>
             {passwordBusy ? "Updating…" : "Change Password"}
           </button>
         </div>
