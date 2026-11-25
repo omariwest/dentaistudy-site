@@ -1854,7 +1854,7 @@ function SetupWorkspace({
       ) : (
         <div className="setup-workspace__surface is-visible">
           <div className="setup-demo-workspace">
-            <div className="app-viewport app-viewport--interactive">
+            <div className="app-viewport">
               <Suspense
                 fallback={
                   <div className="clinical-viewer__message" role="status">
@@ -2650,48 +2650,48 @@ function ClinicalAppPage() {
 
         {!has3dWorkspace && (
           <aside className="app-inspector" aria-label="Case inspector">
-          <div className="app-inspector__header">
-            <div>
-              <span>{showCaseHub ? "Cases" : activeSection} status</span>
-              <strong>{scopeIssue ? "Planning blocked" : planningReady ? "Planning ready" : "Draft case"}</strong>
+            <div className="app-inspector__header">
+              <div>
+                <span>{showCaseHub ? "Cases" : activeSection} status</span>
+                <strong>{scopeIssue ? "Planning blocked" : planningReady ? "Planning ready" : "Draft case"}</strong>
+              </div>
             </div>
-          </div>
 
-          <div className="app-inspector__section app-inspector__section--compact">
-            <div className="app-inspector__row">
-              <span>Clinical plan</span>
-              <strong>{planApproved ? "Approved" : "Not approved"}</strong>
+            <div className="app-inspector__section app-inspector__section--compact">
+              <div className="app-inspector__row">
+                <span>Clinical plan</span>
+                <strong>{planApproved ? "Approved" : "Not approved"}</strong>
+              </div>
+              <div className="app-inspector__row">
+                <span>3D setup</span>
+                <strong>{setupApproved ? "Approved" : "Not approved"}</strong>
+              </div>
+              <div className="app-inspector__row">
+                <span>Storage</span>
+                <strong>{session && caseId ? saveLabel : "Local only"}</strong>
+              </div>
             </div>
-            <div className="app-inspector__row">
-              <span>3D setup</span>
-              <strong>{setupApproved ? "Approved" : "Not approved"}</strong>
-            </div>
-            <div className="app-inspector__row">
-              <span>Storage</span>
-              <strong>{session && caseId ? saveLabel : "Local only"}</strong>
-            </div>
-          </div>
 
-          <div className="app-inspector__footer">
-            <button
-              className="app-primary-action"
-              type="button"
-              disabled={!planningReady}
-              onClick={() =>
-                setActiveSection(
-                  !planApproved ? "Plan" : setupApproved ? "Stages" : "Setup",
-                )
-              }
-            >
-              {!planningReady
-                ? "Complete required records"
-                : !planApproved
-                  ? "Review clinical plan"
-                  : setupApproved
-                    ? "Continue to stages"
-                    : "Continue to 3D setup"}
-            </button>
-          </div>
+            <div className="app-inspector__footer">
+              <button
+                className="app-primary-action"
+                type="button"
+                disabled={!planningReady}
+                onClick={() =>
+                  setActiveSection(
+                    !planApproved ? "Plan" : setupApproved ? "Stages" : "Setup",
+                  )
+                }
+              >
+                {!planningReady
+                  ? "Complete required records"
+                  : !planApproved
+                    ? "Review clinical plan"
+                    : setupApproved
+                      ? "Continue to stages"
+                      : "Continue to 3D setup"}
+              </button>
+            </div>
           </aside>
         )}
       </div>
