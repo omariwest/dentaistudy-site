@@ -578,9 +578,13 @@ a {
   font-weight: 800;
 }
 
+.clinical-app__body.is-3d-workspace {
+  grid-template-columns: 128px minmax(0, 1fr);
+}
+
 .clinical-app__body {
   display: grid;
-  grid-template-columns: 168px minmax(0, 1fr) 214px;
+  grid-template-columns: 144px minmax(0, 1fr) 196px;
   min-width: 0;
   min-height: 0;
 }
@@ -599,14 +603,7 @@ a {
   border-right: 1px solid #dfe2e8;
 }
 
-.app-sidebar__heading {
-  padding: 14px 12px 12px;
-  border-bottom: 1px solid #eceef2;
-}
-
-.app-sidebar__heading span,
-.app-inspector__header span,
-.app-inspector__label {
+.app-inspector__header span {
   display: block;
   color: #8a919e;
   font-size: 0.66rem;
@@ -615,23 +612,16 @@ a {
   text-transform: uppercase;
 }
 
-.app-sidebar__heading strong {
-  display: block;
-  margin-top: 5px;
-  font-size: 0.9rem;
-  font-weight: 750;
-}
-
 .app-flow-nav {
-  padding: 8px;
+  padding: 8px 6px;
 }
 
 .app-flow-item {
   width: 100%;
-  min-height: 46px;
-  gap: 8px;
-  padding: 6px 8px;
-  border-radius: 8px;
+  min-height: 38px;
+  gap: 7px;
+  padding: 7px 9px;
+  border-radius: 7px;
   text-align: left;
 }
 
@@ -657,19 +647,12 @@ a {
 }
 
 .app-flow-item__copy {
-  display: grid;
-  gap: 2px;
   min-width: 0;
 }
 
 .app-flow-item__copy strong {
   font-size: 0.79rem;
   font-weight: 740;
-}
-
-.app-flow-item__copy small {
-  color: #8a919e;
-  font-size: 0.67rem;
 }
 
 .app-workspace {
@@ -679,6 +662,10 @@ a {
   min-height: 0;
   overflow: hidden;
   background: #c9cbd2;
+}
+
+.app-workspace.is-3d-workspace {
+  grid-template-rows: auto minmax(0, 1fr);
 }
 
 .app-viewer-toolbar {
@@ -732,21 +719,7 @@ a {
   min-width: 0;
   min-height: 0;
   overflow: hidden;
-  background:
-    radial-gradient(circle at 50% 45%, rgba(255, 255, 255, 0.2), transparent 34%),
-    #bfc1c9;
-}
-
-.app-viewport::before {
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
-  background-size: 44px 44px;
-  content: "";
-  opacity: 0.24;
-  pointer-events: none;
+  background: #bfc1c9;
 }
 
 .app-viewport__empty {
@@ -788,14 +761,12 @@ a {
 
 .app-viewport__corner {
   position: absolute;
-  top: 12px;
-  left: 12px;
+  top: 10px;
+  left: 10px;
   z-index: 2;
-  padding: 8px 10px;
-  border: 1px solid rgba(255, 255, 255, 0.34);
-  border-radius: 9px;
-  background: rgba(250, 250, 252, 0.72);
-  backdrop-filter: blur(8px);
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: rgba(250, 250, 252, 0.88);
 }
 
 .app-viewport__corner span {
@@ -873,7 +844,7 @@ a {
 }
 
 .app-inspector__header {
-  min-height: 54px;
+  min-height: 48px;
   justify-content: space-between;
   gap: 10px;
   padding: 0 12px;
@@ -900,24 +871,11 @@ a {
 
 .app-inspector__section {
   padding: 12px;
-  border-bottom: 1px solid #eceef2;
-}
-
-.app-empty-selection {
-  margin-top: 8px;
-  padding: 10px;
-  border: 1px solid #e7e9ed;
-  border-radius: 11px;
-  background: #fafbfc;
-}
-
-.app-empty-selection strong {
-  font-size: 0.77rem;
 }
 
 .app-inspector__section--compact {
   display: grid;
-  gap: 11px;
+  gap: 9px;
 }
 
 .app-inspector__row {
@@ -967,7 +925,7 @@ a {
 
 @media (max-width: 1180px) {
   .clinical-app__body {
-    grid-template-columns: 154px minmax(0, 1fr) 204px;
+    grid-template-columns: 136px minmax(0, 1fr) 188px;
   }
 
   .app-tool-button,
@@ -2139,7 +2097,7 @@ a {
 /* Patient scan + segmentation workflow */
 .setup-workspace {
   display: grid;
-  grid-row: 1 / -1;
+  grid-row: 2;
   grid-template-rows: auto minmax(0, 1fr);
   min-width: 0;
   min-height: 0;
@@ -2170,15 +2128,15 @@ a {
   min-width: 0;
   min-height: 0;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   overflow: hidden;
-  padding: 12px;
-  background: #f4f5f7;
+  padding: 8px;
+  background: #ffffff;
 }
 
 .scan-workflow.is-ready {
-  gap: 7px;
-  padding: 9px;
+  gap: 6px;
+  padding: 8px;
 }
 
 .scan-workflow.is-ready .scan-workflow__top p {
@@ -2371,8 +2329,6 @@ a {
   min-height: 0;
   flex: 1 1 auto;
   overflow: hidden;
-  border: 1px solid #dfe2e7;
-  border-radius: 12px;
   background: #ffffff;
 }
 
@@ -2723,8 +2679,6 @@ a {
   min-height: 0;
   flex: 1 1 auto;
   overflow: hidden;
-  border: 1px solid #dfe2e7;
-  border-radius: 12px;
   background: #ffffff;
 }
 
@@ -3142,8 +3096,6 @@ a {
   min-height: 0;
   flex: 1 1 auto;
   overflow: hidden;
-  border: 1px solid #dfe2e7;
-  border-radius: 12px;
   background: #ffffff;
 }
 
@@ -4226,7 +4178,7 @@ a {
   }
 
   .clinical-app__body {
-    grid-template-columns: 184px minmax(0, 1fr);
+    grid-template-columns: 136px minmax(0, 1fr);
   }
 
   .app-inspector {
@@ -4613,7 +4565,8 @@ a {
     padding-inline: 9px;
   }
 
-  .clinical-app__body {
+  .clinical-app__body,
+  .clinical-app__body.is-3d-workspace {
     grid-template-columns: minmax(0, 1fr);
   }
 
