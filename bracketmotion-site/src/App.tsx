@@ -2003,6 +2003,15 @@ function ClinicalAppPage() {
       .charAt(0) || "A"
   ).toUpperCase();
 
+  const clearLocalPhotos = useCallback(() => {
+    Object.values(photoUrlsRef.current).forEach((url) => {
+      if (url) URL.revokeObjectURL(url);
+    });
+    photoUrlsRef.current = {};
+    setPhotos({});
+    setPhotoError("");
+  }, []);
+
   const refreshCases = useCallback(async () => {
     if (!userId) {
       setSavedCases([]);
@@ -2083,15 +2092,6 @@ function ClinicalAppPage() {
 
     void refreshCases();
   }, [clearLocalPhotos, refreshCases, userId]);
-
-  const clearLocalPhotos = useCallback(() => {
-    Object.values(photoUrlsRef.current).forEach((url) => {
-      if (url) URL.revokeObjectURL(url);
-    });
-    photoUrlsRef.current = {};
-    setPhotos({});
-    setPhotoError("");
-  }, []);
 
   useEffect(() => {
     return () => {
