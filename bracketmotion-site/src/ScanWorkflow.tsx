@@ -1302,17 +1302,20 @@ function deriveStages({
 
   stages.push({
     id: "finishing",
-    title: "Finishing + settling",
-    activeUnits: movedLabels.length ? movedLabels.join(", ") : "Residual correction units",
+    title: movedLabels.length ? "Finishing + settling" : "Appliance review",
+    activeUnits: movedLabels.length ? movedLabels.join(", ") : "Configured appliance units",
     anchorageUnits: "Full-arch fixed appliance with the stabilized teeth acting as the reference unit.",
-    intendedMovement:
-      "Complete residual alignment, torque/root-position control, arch coordination and settling to the approved target.",
-    reciprocalEffects:
-      "Local torque and settling corrections can redistribute reaction forces through the arch or across both arches.",
+    intendedMovement: movedLabels.length
+      ? "Complete residual alignment, torque/root-position control, arch coordination and settling to the approved target."
+      : "No tooth movements are entered in the approved target. Review appliance and auxiliary placement only.",
+    reciprocalEffects: movedLabels.length
+      ? "Local torque and settling corrections can redistribute reaction forces through the arch or across both arches."
+      : "Potential reactions depend on the clinician's selected mechanics, which are not calculated as delivered forces.",
     warning:
       "Final contact and root-position decisions require clinical and radiographic verification; geometric playback is not a biologic prediction.",
-    controlStrategy:
-      "Use appropriate final rectangular wires for root control, limit auxiliaries to the remaining objective and remove anchorage auxiliaries once their task is complete.",
+    controlStrategy: movedLabels.length
+      ? "Use appropriate final rectangular wires for root control, limit auxiliaries to the remaining objective and remove anchorage auxiliaries once their task is complete."
+      : "Define target tooth movements clinically before interpreting staged geometric changes.",
     layers: {
       brackets: true,
       archwire: true,
@@ -1903,7 +1906,7 @@ function StageWorkspace({
 
           <div className="stage-viewer__badge">
             <span>Setup {comparison.active} · {currentStage ? `Stage ${stageStep}` : "Initial"}</span>
-            <strong>{currentStage ? `${Math.round(progress * 100)}% target interpolation` : "Approved starting geometry"}</strong>
+            <strong>{currentStage ? "Mechanics overlay" : "Approved starting geometry"}</strong>
           </div>
 
           <div className="scan-canvas__hint">
