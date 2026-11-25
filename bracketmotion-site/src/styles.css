@@ -1876,14 +1876,6 @@ a {
 }
 
 /* Interactive 3D proof of concept */
-.app-viewport--interactive {
-  background: #bfc1c9;
-}
-
-.app-viewport--interactive::before {
-  display: none;
-}
-
 .clinical-viewer {
   position: absolute;
   inset: 0;
