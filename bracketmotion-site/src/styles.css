@@ -1902,6 +1902,26 @@ a {
   font-weight: 770;
 }
 
+.settings-guest-state {
+  display: flex;
+  width: min(960px, 100%);
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0 auto 14px;
+  padding: 12px 15px;
+  border: 1px solid #e0e3e9;
+  border-radius: 9px;
+  color: #5f6877;
+  background: #ffffff;
+  font-size: 0.7rem;
+}
+
+.settings-guest-state .app-quiet-button {
+  flex: 0 0 auto;
+}
+
 .settings-card {
   display: grid;
   gap: 20px;
@@ -1972,6 +1992,11 @@ a {
 
 .settings-file-input {
   display: none;
+}
+
+.settings-photo-actions .app-quiet-button:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
 }
 
 .settings-profile-fields,
