@@ -2069,7 +2069,7 @@ function ClinicalAppPage() {
             ? "Diagnosis drafted"
             : "Case presentation";
     const savedAge = stored.details?.age;
-    const age = typeof savedAge === "string" && /^\\d{1,3}$/.test(savedAge.trim())
+    const age = typeof savedAge === "string" && /^\d{1,3}$/.test(savedAge.trim())
       ? savedAge.trim() : "—";
     const updated = Date.parse(savedCase.updated_at);
     const opened = Date.parse(savedCase.last_opened_at);
@@ -2998,7 +2998,6 @@ function ClinicalAppPage() {
 
               <div className="patients-toolbar">
                 <label className="patients-search">
-                  <span className="sr-only">Search patients</span>
                   <input
                     type="search"
                     aria-label="Search patients"
