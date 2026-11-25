@@ -4,7 +4,7 @@
 > **Status:** Approved direction; ongoing implementation.  
 > **Product:** BracketMotion  
 > **Tagline:** *Plan the mechanics. See the movement.*  
-> **Task execution:** [BracketMotion Master Project Plan v36](BracketMotion-Master-Project-Plan-v36.md)  
+> **Task execution:** The highest-numbered `BracketMotion-Master-Project-Plan-v*.md` file on the `bracketmotion` branch; earlier versions remain as history.  
 > **Frozen detailed V1 clinical contract:** [Master Project Plan v35](BracketMotion-Master-Project-Plan-v35.md), Clinical V1 scope / Gate 4.
 
 ## Why BracketMotion exists
