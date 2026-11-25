@@ -1269,39 +1269,7 @@ function FindingsView({
           </label>
         </div>
       </section>
-      <section className="case-section" aria-labelledby="scope-screen-title">
-        <div className="case-section__heading">
-          <div>
-            <h2 id="scope-screen-title">V1 scope screen</h2>
-          </div>
-        </div>
 
-        <label className="scope-select">
-          <span>Primary unsupported treatment need</span>
-          <UiSelect
-            value={scopeIssue}
-            onChange={onScopeIssue}
-            ariaLabel="Primary unsupported treatment need"
-            options={[
-              { value: "", label: "None — within current V1 scope" },
-              ...outOfScopeGroups.flatMap((group) =>
-                group.options.map((option) => ({
-                  value: option,
-                  label: option,
-                  group: group.label,
-                })),
-              ),
-            ]}
-          />
-        </label>
-
-        {scopeIssue && (
-          <div className="scope-warning" role="alert">
-            <strong>Planning blocked</strong>
-            <p>{scopeIssue} is not supported in BracketMotion V1. The clinician can keep the case as a record, but treatment-plan generation stays unavailable.</p>
-          </div>
-        )}
-      </section>
         </div>
         <div className="case-content-column">
       <section className="case-section" aria-labelledby="occlusion-title">
@@ -1403,6 +1371,39 @@ function FindingsView({
             <input value={findings.cephConcern} onChange={(event) => onFindingChange("cephConcern", event.target.value)} type="text" />
           </label>
         </div>
+      </section>
+      <section className="case-section" aria-labelledby="scope-screen-title">
+        <div className="case-section__heading">
+          <div>
+            <h2 id="scope-screen-title">V1 scope screen</h2>
+          </div>
+        </div>
+
+        <label className="scope-select">
+          <span>Primary unsupported treatment need</span>
+          <UiSelect
+            value={scopeIssue}
+            onChange={onScopeIssue}
+            ariaLabel="Primary unsupported treatment need"
+            options={[
+              { value: "", label: "None — within current V1 scope" },
+              ...outOfScopeGroups.flatMap((group) =>
+                group.options.map((option) => ({
+                  value: option,
+                  label: option,
+                  group: group.label,
+                })),
+              ),
+            ]}
+          />
+        </label>
+
+        {scopeIssue && (
+          <div className="scope-warning" role="alert">
+            <strong>Planning blocked</strong>
+            <p>{scopeIssue} is not supported in BracketMotion V1. The clinician can keep the case as a record, but treatment-plan generation stays unavailable.</p>
+          </div>
+        )}
       </section>
         </div>
       </div>
