@@ -1716,10 +1716,9 @@ function SetupWorkspace({
 
   return (
     <div className="setup-workspace">
-      <div className="app-viewer-toolbar">
-        {isStages ? null : (
-          <>
-            <div className="app-viewer-toolbar__group" aria-label="Setup workspace">
+      {!isStages && (
+        <div className="app-viewer-toolbar">
+          <div className="app-viewer-toolbar__group" aria-label="Setup workspace">
               <button
                 className={`app-tool-button${workspaceMode === "patient" ? " is-selected" : ""}`}
                 type="button"
@@ -1738,21 +1737,20 @@ function SetupWorkspace({
 
             {workspaceMode === "demo" && (
               <div className="app-viewer-toolbar__group app-viewer-toolbar__views" aria-label="Canonical views">
-                  {viewerViews.map((view) => (
-                    <button
-                      className="app-view-button"
-                      type="button"
-                      key={view}
-                      onClick={() => viewerRef.current?.setView(view as "Front" | "Right" | "Left" | "Upper" | "Lower")}
-                    >
-                      {view}
-                    </button>
-                  ))}
+                {viewerViews.map((view) => (
+                  <button
+                    className="app-view-button"
+                    type="button"
+                    key={view}
+                    onClick={() => viewerRef.current?.setView(view as "Front" | "Right" | "Left" | "Upper" | "Lower")}
+                  >
+                    {view}
+                  </button>
+                ))}
               </div>
             )}
-          </>
-        )}
-      </div>
+        </div>
+      )}
 
       {showPatientSurface ? (
         <div className="setup-workspace__surface is-visible">
@@ -1801,7 +1799,6 @@ function SetupWorkspace({
                 <strong>{selectedTooth || "Select a tooth"}</strong>
               </div>
             </div>
-
           </div>
         </div>
       )}
