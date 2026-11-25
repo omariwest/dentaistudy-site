@@ -2102,7 +2102,7 @@ function ClinicalAppPage() {
     };
   }, []);
 
-  const changePhoto = (key: PhotoKey, file: File | null) => {
+  const changePhoto = async (key: PhotoKey, file: File | null) => {
     if (file && !["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
       setPhotoError("Choose a JPG, PNG or WebP image.");
       return;
@@ -2110,6 +2110,15 @@ function ClinicalAppPage() {
     if (file && (file.size === 0 || file.size > 12 * 1024 * 1024)) {
       setPhotoError("Choose an image between 1 byte and 12 MB.");
       return;
+    }
+    if (file && typeof createImageBitmap === "function") {
+      try {
+        const decoded = await createImageBitmap(file);
+        decoded.close();
+      } catch {
+        setPhotoError("This image cannot be opened. Choose another JPG, PNG or WebP.");
+        return;
+      }
     }
 
     const previousUrl = photoUrlsRef.current[key];
