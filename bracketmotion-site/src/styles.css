@@ -1684,86 +1684,6 @@ a {
   grid-column: span 2;
 }
 
-.record-list {
-  overflow: hidden;
-  border: 1px solid #e6e8ec;
-  border-radius: 10px;
-}
-
-.record-row {
-  display: flex;
-  min-height: 58px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 10px 12px;
-  background: #ffffff;
-}
-
-.record-row + .record-row {
-  border-top: 1px solid #eceef2;
-}
-
-.record-row__copy {
-  display: grid;
-  gap: 3px;
-  min-width: 0;
-}
-
-.record-row__copy strong {
-  font-size: 0.72rem;
-  font-weight: 720;
-}
-
-.record-row__copy span {
-  overflow: hidden;
-  color: #848b96;
-  font-size: 0.64rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.record-status {
-  display: flex;
-  flex: 0 0 auto;
-  align-items: center;
-  gap: 7px;
-}
-
-.record-status__pill {
-  display: inline-flex;
-  min-height: 25px;
-  align-items: center;
-  padding: 0 8px;
-  border-radius: 999px;
-  color: #9a681e;
-  background: #fff5df;
-  font-size: 0.6rem;
-  font-weight: 760;
-}
-
-.record-status__pill.is-complete {
-  color: #19734a;
-  background: #eaf7f0;
-}
-
-.record-status__action {
-  min-height: 28px;
-  padding: 0 9px;
-  border: 1px solid #dfe2e8;
-  border-radius: 7px;
-  color: #59616d;
-  background: #ffffff;
-  cursor: pointer;
-  font-size: 0.62rem;
-  font-weight: 750;
-}
-
-.record-status__action:hover {
-  border-color: rgba(109, 76, 245, 0.3);
-  color: var(--accent);
-}
-
 .field-with-unit {
   position: relative;
   display: flex;
@@ -2486,7 +2406,6 @@ a {
   opacity: 0.46;
 }
 
-.record-status__action:focus-visible,
 .patients-open:focus-visible,
 .patients-pagination button:focus-visible {
   outline: 2px solid rgba(109, 76, 245, 0.15);
@@ -5638,19 +5557,6 @@ a {
   .case-form-grid__wide,
   .finding-grid__wide {
     grid-column: auto;
-  }
-
-  .record-row {
-    align-items: flex-start;
-  }
-
-  .record-row__copy span {
-    white-space: normal;
-  }
-
-  .record-status {
-    align-items: flex-end;
-    flex-direction: column;
   }
 
   .clinical-app {
