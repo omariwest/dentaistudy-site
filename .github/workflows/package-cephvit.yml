@@ -1,0 +1,32 @@
+name: Package reviewed CephViT ONNX asset
+on:
+  push:
+    branches: [bracketmotion]
+    paths:
+      - .github/workflows/package-cephvit.yml
+permissions:
+  contents: write
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+      - name: Install pinned CPU tools
+        run: |
+          python -m pip install --no-cache-dir torch==2.15.0+cpu --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install --no-cache-dir timm==1.0.31 onnx==1.23.2 onnxruntime==1.32.0 cryptography
+      - name: Export and checksum-verify 29-landmark model
+        working-directory: bracketmotion-site/scripts
+        run: python export-cephvit-model.py
+      - name: Publish versioned binary (no patient data)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create cephvit-web-v1 bracketmotion-site/scripts/cephvit-dynamic-int8.onnx \
+            --target "${GITHUB_SHA}" \
+            --title "CephViT browser weights — reviewed v1" \
+            --notes "CephViT research checkpoint by Hou et al., NIH/NLM group. Original model materials OpenMDW 1.1; include attribution and original license notices in BracketMotion. Quantized ONNX model, 29 landmark heatmaps, SHA256 0d3984e6809a1708f2e41645162273d88e1763f7b03d4e1b3438e5ab8d045044. Human-reviewed research aid, not automatically approved measurements."
