@@ -776,7 +776,7 @@ function ReadinessCard({
     <div className={`readiness-card${planningReady ? " is-ready" : ""}`} role="status">
       <div>
         <span>Records status</span>
-        <strong>{planningReady ? "Records complete" : "Draft case"}</strong>
+        <strong>{planningReady ? "Ready for diagnosis" : "Draft case"}</strong>
       </div>
       <p>
         {planningReady
@@ -974,7 +974,7 @@ function CaseRecordsView({
       </section>
       <section className="case-section" aria-labelledby="required-records-title">
         <div className="case-section__heading">
-          <div><h2 id="required-records-title">Other clinical records</h2></div>
+          <div><h2 id="required-records-title">Additional clinical records</h2></div>
         </div>
         <div className="record-list">
           {clinicalRecordRows.filter((record) => !["photos", "pano", "ceph"].includes(record.key)).map((record) => (
@@ -3310,7 +3310,7 @@ function ClinicalAppPage() {
               <span className="app-topbar__divider" aria-hidden="true" />
               <div className="app-case-title">
                 <strong>{caseLabel}</strong>
-                <span>{caseDetails.patientStage === "Not specified" ? "Patient stage not set" : caseDetails.patientStage} · {planningReady ? "Records complete" : "Draft"}</span>
+                <span>{caseDetails.patientStage === "Not specified" ? "Patient stage not set" : caseDetails.patientStage} · {planApproved ? "Plan approved" : diagnosis.approved ? "Diagnosis approved" : planningReady ? "Ready for diagnosis" : "Draft"}</span>
               </div>
             </>
           )}
@@ -3699,7 +3699,7 @@ function ClinicalAppPage() {
             <div className="app-inspector__header">
               <div>
                 <span>{showCaseHub ? "Cases" : activeSection} status</span>
-                <strong>{scopeIssue ? "Planning blocked" : !planningReady ? "Records incomplete" : activeSection === "Findings" && diagnosis.approved ? "Diagnosis approved" : activeSection === "Plan" && planApproved ? "Plan approved" : "Records complete"}</strong>
+                <strong>{scopeIssue ? "Planning blocked" : !planningReady ? "Photos incomplete" : planApproved ? "Plan approved" : diagnosis.approved ? "Diagnosis approved" : "Ready for diagnosis"}</strong>
               </div>
             </div>
 
