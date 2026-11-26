@@ -2,6 +2,7 @@ import fs from "node:fs";
 
 const read = (path) => fs.readFileSync(new URL(path, import.meta.url), "utf8");
 const app = read("../src/App.tsx");
+const css = read("../src/styles.css");
 const scan = read("../src/ScanWorkflow.tsx");
 const ceph = read("../src/CephAnalysis.tsx");
 const cephGeometry = read("../src/cephGeometry.ts");
@@ -39,6 +40,36 @@ if (app.includes("Additional clinical records") || app.includes("RecordStatus") 
   'notes: "Not provided"',
   'placeholder="Patient name or case ID"',
 ].forEach((token) => requireText(app, token, "neutral new-case defaults"));
+
+const recordPage = app.split("function CaseRecordsView(")[1]?.split("function FindingsView(")[0] || "";
+const diagnosisPage = app.split("function FindingsView(")[1]?.split("type TreatmentPlanState")[0] || "";
+const recordCards = ["case-details-title", "intraoral-photos-title", "facial-photos-title", "radiographs-title"];
+const cardPositions = recordCards.map((id) => recordPage.indexOf(`aria-labelledby="${id}"`));
+if (cardPositions.some((position) => position < 0) ||
+    cardPositions.some((position, index) => index > 0 && position <= cardPositions[index - 1]) ||
+    recordPage.includes('className="case-content-column"')) {
+  throw new Error("V1 validation failed: Clinical Records grid must preserve natural mobile reading order.");
+}
+const rightColumn = diagnosisPage.lastIndexOf('className="case-content-column"');
+const facial = diagnosisPage.indexOf('aria-labelledby="facial-title"');
+const scope = diagnosisPage.indexOf('aria-labelledby="scope-screen-title"');
+if (rightColumn < 0 || facial <= rightColumn || scope <= facial) {
+  throw new Error("V1 validation failed: Diagnosis facial and scope cards are not balanced in the right column.");
+}
+for (const selector of [
+  ".case-workflow-page__header {", ".readiness-card {", ".case-section {",
+  ".ai-review-card {", ".plan-blocked-card {", ".plan-strategy-grid {",
+  ".plan-approval-panel {",
+]) {
+  const start = css.indexOf(selector);
+  const end = css.indexOf("}", start);
+  if (start < 0 || end < 0 || !css.slice(start, end).includes("width: min(1280px, 100%);")) {
+    throw new Error(`V1 validation failed: workflow width is inconsistent (${selector}).`);
+  }
+}
+if (css.includes(".case-workflow-page--split") || app.includes("case-workflow-page--split")) {
+  throw new Error("V1 validation failed: obsolete split-layout overrides remain.");
+}
 
 const photoFirstGate = [
   'const missingCount = intraoralPhotoSlots.filter((slot) => !photos[slot.key]).length;',
@@ -223,5 +254,5 @@ if (serviceWorker.includes("supabase.co")) {
 }
 
 console.log(
-  `BracketMotion V1 validation passed: ${representativeFamilies.length}/6 representative family profiles, ${clinicalRecordInputs.length} clinical record inputs, five-photo Diagnosis gate, ${exclusions.length} scope exclusions, approval gates, AI photo contract, ceph groups, and PWA invariants.`,
+  `BracketMotion V1 validation passed: ${representativeFamilies.length}/6 representative family profiles, ${clinicalRecordInputs.length} clinical record inputs, balanced workflow cards, five-photo Diagnosis gate, ${exclusions.length} scope exclusions, approval gates, AI photo contract, ceph groups, and PWA invariants.`,
 );
