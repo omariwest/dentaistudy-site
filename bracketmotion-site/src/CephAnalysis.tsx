@@ -240,7 +240,7 @@ export default function CephAnalysis({
               <div className="ceph-tracing__actions">
                 <button type="button" className="app-quiet-button" disabled={busy}
                   aria-busy={busy} onClick={() => void run()}>
-                  <span role="status" aria-live="polite">
+                  <span aria-live="polite">
                     {busy ? progress || "Preparing image…" : current ? "Run again" : "Detect landmarks"}
                   </span>
                 </button>
