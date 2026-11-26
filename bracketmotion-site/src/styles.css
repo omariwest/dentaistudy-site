@@ -1270,11 +1270,14 @@ a {
   box-shadow: 0 0 0 1px rgba(109, 76, 245, 0.035);
 }
 
-/* Cephalometric tracing: integrated with the existing Diagnosis card. */
+/* Cephalometric analysis: full-width Diagnosis section with compact inline results. */
+.case-content-grid > .case-ceph-section {
+  grid-column: 1 / -1;
+}
+
 .ceph-tracing {
   min-width: 0;
-  margin-top: 14px;
-  padding-top: 14px;
+  padding-top: 12px;
   border-top: 1px solid #d7dce5;
 }
 
@@ -1284,6 +1287,7 @@ a {
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 9px;
+  margin-bottom: 12px;
 }
 
 .ceph-tracing__heading strong {
@@ -1292,12 +1296,12 @@ a {
 }
 
 .ceph-tracing__heading p,
-.ceph-tracing__credit,
 .ceph-tracing__caption,
-.ceph-tracing__empty p {
+.ceph-tracing__empty p,
+.ceph-tracing__empty-result {
   margin: 4px 0 0;
   color: #788291;
-  font-size: 0.66rem;
+  font-size: 0.68rem;
   line-height: 1.45;
 }
 
@@ -1315,6 +1319,26 @@ a {
   background: #e8f6ef;
 }
 
+.ceph-tracing__workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.ceph-tracing__image-column,
+.ceph-tracing__analysis-column {
+  min-width: 0;
+}
+
+.ceph-tracing__analysis-column > h3,
+.ceph-tracing__clinical-fields h3 {
+  margin: 0 0 8px;
+  color: #1e2837;
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
 .ceph-tracing__empty {
   display: grid;
   justify-items: start;
@@ -1328,7 +1352,7 @@ a {
   align-items: center;
   flex-wrap: wrap;
   gap: 7px;
-  margin: 12px 0 10px;
+  margin: 0 0 10px;
 }
 
 .ceph-tracing__selector {
@@ -1369,105 +1393,117 @@ a {
 
 .ceph-tracing__line {
   fill: none;
-  stroke: #7049d2;
-  stroke-width: 2;
-  stroke-dasharray: 8 6;
+  stroke: #03b9df;
+  stroke-width: 1.5;
   vector-effect: non-scaling-stroke;
+  pointer-events: none;
 }
 
-.ceph-tracing__landmark circle {
-  fill: #6842db;
-  stroke: #ffffff;
-  stroke-width: 2;
-  vector-effect: non-scaling-stroke;
+.ceph-tracing__landmark .ceph-tracing__hit {
+  fill: transparent;
+  stroke: transparent;
   cursor: grab;
   touch-action: none;
+  pointer-events: all;
 }
 
-.ceph-tracing__landmark circle.is-selected {
-  fill: #d43f68;
+.ceph-tracing__landmark .ceph-tracing__hit:active {
+  cursor: grabbing;
+}
+
+.ceph-tracing__landmark .ceph-tracing__hit:focus-visible {
   stroke: #ffffff;
-  stroke-width: 3;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+  outline: none;
+}
+
+.ceph-tracing__landmark .ceph-tracing__point {
+  fill: #ed4048;
+  stroke: #ffffff;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+
+.ceph-tracing__landmark .ceph-tracing__point.is-selected {
+  fill: #e3303d;
+  stroke-width: 1.5;
 }
 
 .ceph-tracing__landmark text {
-  fill: #ffeeb1;
-  stroke: #252736;
-  stroke-width: 2;
+  fill: #ffe36b;
+  stroke: #20232a;
+  stroke-width: 1.15;
   paint-order: stroke;
   font-weight: 750;
   pointer-events: none;
 }
 
 .ceph-tracing__caption {
-  margin-top: 6px;
+  margin-top: 7px;
 }
 
 .ceph-tracing__measurements {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
-  margin-top: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 18px;
 }
 
 .ceph-tracing__measurements > div {
-  display: grid;
+  display: flex;
   min-width: 0;
-  gap: 2px;
-  padding: 9px 10px;
-  border: 1px solid #d6dbe3;
-  border-radius: 8px;
-  background: #f9fafc;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid #e1e5eb;
 }
 
 .ceph-tracing__measurements span {
   color: #697484;
-  font-size: 0.64rem;
+  font-size: 0.72rem;
 }
 
 .ceph-tracing__measurements strong {
   color: #263144;
-  font-size: 0.94rem;
+  font-size: 0.82rem;
   font-variant-numeric: tabular-nums;
+}
+
+.ceph-tracing__clinical-fields {
+  min-width: 0;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid #e1e5eb;
 }
 
 .ceph-tracing__approval {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
   gap: 8px;
-  margin-top: 12px;
+  margin-top: 14px;
 }
 
-.ceph-tracing__approval small {
-  color: #707988;
-  font-size: 0.68rem;
+.ceph-tracing__approval .app-primary-action {
+  width: fit-content;
+  max-width: 100%;
 }
 
-.ceph-tracing__confirmed {
-  margin: 8px 0 0;
-  color: #236d58;
-  font-size: 0.68rem;
-}
-
-.ceph-tracing__credit {
-  margin-top: 13px;
-}
-
-.ceph-tracing__credit a {
-  color: #5b3cc4;
-  text-decoration: underline;
-  text-underline-offset: 2px;
+@media (max-width: 1100px) {
+  .ceph-tracing__workspace {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
 }
 
 @media (max-width: 640px) {
-  .ceph-tracing__measurements {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .ceph-tracing__actions {
     align-items: flex-start;
+  }
+
+  .ceph-tracing__measurements {
+    column-gap: 12px;
   }
 }
 
