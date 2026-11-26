@@ -1,0 +1,285 @@
+# BracketMotion — Master Project Plan v67
+> **Status:** Founder-directed clinical workflow, cephalometry UI and AI drafting correction round. Shared DentAIstudy Supabase retained; no changes to GitHub `main` or Task 18.
+> **Branch:** `bracketmotion` in `omariwest/dentaistudy-site` only; `main` untouched.
+> **Product identity:** [BracketMotion Product Identity](BracketMotion-Product-Identity.md).
+> **Previous master tracker:** [v66](BracketMotion-Master-Project-Plan-v66.md); all v7–v66 remain historical records.
+> **Current gate:** P1 founder approved; P2 cephalometric workspace **implemented in source** on `bracketmotion`, awaiting founder approval. No Vercel preview/build was requested for P2; save integrated build, browser and device QA for final P5. P3 (more measured analyses from 29 landmarks) is next. Task 18 photo-to-3D remains last.
+
+## Product direction (unchanged)
+Photo-first, clinician-controlled visual fixed-appliance planning; five intraoral photos; editable AI draft diagnosis and up to three editable treatment suggestions; approximate clinician-reviewed 3D crown/gingiva representation; illustrative mechanics, not biological prediction. No domain purchase, paid service, uncontrolled patient-photo upload or removal of the working STL/PLY engine until photo matching is proven.
+
+## Approved implementation queue
+
+| Task | Scope | Current status |
+| --- | --- | --- |
+| 1–9 | Existing photo-first workflow, 3D mechanics prototype, responsive improvements and Patients workspace | **Founder approved** — details in v52 |
+| 10 | Settings, clinician profile, private circular avatar, subtle focus work | **Implemented** in deployed preview; founder final visual approval / authenticated behavior pending |
+| 11 | Separate Supabase backend, owner-scoped cases/buckets and AI function | **Deferred by founder** — stay on the existing DentAIstudy backend for now; migration source prepared but not activated |
+| 12 | BracketMotion-specific auth, professional danger-zone account deletion modeled on DentAIstudy; real authenticated profile and patient persistence QA | **Pending** — independent deletion must not affect a shared DentAIstudy account; do not claim signed-in tests passed |
+| 13 | Focus/border/button refinements; subtle single-focus outline, selectively darker 1px borders and compact text-fitting buttons, including public pages | **Approved by founder 26 Nov 2026** |
+| 14 | Header/wordmark: `bracket` light and **motion** bold across app, public site, legal pages, footer; Patients/Settings right; circular clinician portrait/name | **Approved by founder 26 Nov 2026** |
+| 15 | Five compact icon-plus-label clinical workflow steps on existing horizontal ribbon; contextual tools stay in side panel; avoid duplicating LightForce | **Approved by founder 26 Nov 2026** |
+| 16 | Reduce surrounding chrome/padding, remove Diagnosis trailing blank scroll, rebalance section columns; responsive dropdown QA and clinical regression | **Approved by founder 26 Nov 2026** |
+| 16B | Center ribbon, rename Clinical Records, restyle sign-in popup, dark Settings save, single Patients heading, light numeric arrows | **Superseded visual defects corrected in Task 16C; founder review pending** |
+| 16C | Put mm/% before far-right steppers, compact login/signup vertically to avoid standard-height popup scrolling, use existing transparent black standalone icon without circular badge | **Founder approved; frontend refinements completed** |
+| 17 | Clinician-editable cephalometric landmarks and deterministic measurements from legally reusable code **and weights** | **Development integration deployed and browser-tested; Ojimba comparison and founder clinical visual acceptance outstanding** |
+| P1–P5 | Founder correction round: clean case state/flow, professional ceph UI, additional supported ceph measurements, one image-aware Gemini assistant, final UI/clinical regression | **P1 founder approved; P2 source implemented (QA deferred to P5)**; P3–P5 pending |
+| 18 | Five-photo approximate 3D reconstruction, corrections, measured feasibility and integrated clinician alpha | Pending / heaviest and last |
+
+## Task 11 — historical migration preparation; deferred at founder request
+- Existing DentAIstudy Supabase project: `hlvkbqpesiqjxbastxux`. BracketMotion case table contained **zero** rows on 25 Nov 2026. Keep this shared backend fully operational now; no auth, data, storage or AI migration.
+- Source-only SQL: [independent Supabase bootstrap](bracketmotion-site/supabase/migrations/20261125_bracketmotion_independent_backend.sql). **Not applied** to either project; requires a newly created project.
+- Source-only Edge Function: [bracketmotion-clinical-reasoning](bracketmotion-site/supabase/functions/bracketmotion-clinical-reasoning/index.ts), copied from currently active v3. It expects its own `GEMINI_API_KEY` secret and verified user auth; do not claim it was deployed to the new backend.
+- Future client cutover is limited to the BracketMotion-specific Supabase URL/publishable key in `bracketmotion-site/src/supabase.ts`, the **new** project's redirect settings and signed-in verification. Remove DentAIstudy-specific signup/account labels and metadata **at the source** during cutover. Do not swap before backend exists.
+- Auth user IDs do not need to be migrated because there are no BracketMotion users. This is a new product signup, not a DentAIstudy account migration.
+- Profile/scan storage remains private; the **five intraoral photographs stay browser-local** during Task 11. No photos to Gemini.
+- Founder confirmed there is another project in a separate organization, accounting for the two-Free-project quota. **Do not pursue new project creation now.** No authorization bypass, payment or changes to either live project.
+- **Task 11 completion requires:** new project healthy, SQL applied and inspected, Edge Function deployed with secret, auth URL/email flow configured, separate client preview deployed, signed-in patient row and avatar read/write/delete tested without accessing another account, and DentAIstudy unaffected.
+
+## Task 13 — first small subgate (focus-only)
+
+- [x] Reworked existing focus states for clinical record inputs, shared dropdowns, unit fields, diagnosis/plan text areas, plan option inputs, patient search, auth dialog and 3D target values.
+- [x] Removed the duplicate `.plan-textarea:focus-visible` outline and overlapping clinical input outline selectors at their source.
+- [x] Used restrained 1px low-opacity shadow and subtle visible border-color on focus; no changes to control width, height, margins, padding, breakpoints, layouts or fonts.
+- [x] Exact CSS-only commit: `7b1744666ca90530519eeaf7ad976962aa5070c9`; Vercel preview: https://bracketmotion-preview-3tjqrcjy0-amarsaaliomer-6121.vercel.app/app
+- [x] Production deployment **READY**. Build logs: V1 guard (6 profiles, 7 records, 34 exclusions) PASS; TypeScript and Vite PASS. Existing large-chunk warning remains nonblocking.
+- [ ] Human/browser visual inspection of focused fields on actual devices not independently completed; do not claim screenshot validation.
+- [ ] Remaining Task 13 darker neutral 1px actionable borders and tighter/thinner button fit, including public pages, deliberately not mixed into this focus gate.
+
+## Task 13 — border/button subgate, 26 November 2026
+
+- [x] Edited the original `bracketmotion-site/src/styles.css` only, without new files, copied styling systems, appended overrides, `!important`, HTML inline styles or React/JavaScript changes.
+- [x] Selectively strengthened existing **1px** neutral borders on patient/diagnosis records, input/select/textarea fields, panels, clinical cards, settings, dialog and primary/secondary actions; preserved intentional purple selected states and colored warnings.
+- [x] Reduced common public/clinical action heights and padding: public CTA 48→42px (compact 40→34), quiet app buttons 34→30, primary app buttons 38→34; removed enforced large minimum widths on clinical page/approval actions. Full-width account/inspector actions remain appropriate.
+- [x] Updated **existing narrow-screen rules** for label-fitting clinical and public action buttons. No new breakpoint, fixed container width, geometry change, AI change or database change.
+- [x] Removed public install-button upward movement on hover; stable hover state remains.
+- [x] CSS-only implementation commit: `1b6d2b3d83e7c07d51fe18eb128d3f22fdf3266d`.
+- [x] Vercel preview: https://bracketmotion-preview-8igi3y0f7-amarsaaliomer-6121.vercel.app/app — **READY**, correct commit SHA. Build logs confirmed 6/6 V1 profiles, 7 required record groups, 34 exclusions, clinical approval/PWA invariants; TypeScript and Vite production build passed.
+- [ ] Independent browser screenshot and interactive QA at 1440, 1280, 1024, 768, 390 and 320px has **not been executed in this gate**; do not assert no overflow from build alone. Founder preview review still pending.
+- **Next after approval:** Task 14 split light `bracket` / bold `motion` wordmark and app header account/Patients/Settings alignment; keep design inside current components.
+
+## Task 14 — header, branding and clinician account, 26 November 2026
+
+- [x] Edited the **existing** `bracketmotion-site/src/App.tsx` and `src/styles.css` only. No new components, dependencies, CSS files, cloned styles, backend changes or overrides.
+- [x] All three shared wordmark occurrences changed to lowercase light `bracket` + bold **motion**, via the existing wordmark styling: landing/header, footer (including legal pages through the shared layout), clinical app header.
+- [x] Moved existing Patients and Settings controls to the right-side topbar actions without changing their handlers, active states or navigation conditions; no Help link.
+- [x] Restyled existing account control as subtle capsule with circular 28px saved-avatar/initial and existing clinician name, ellipsis for long names. Signed-out state says Sign in; mobile shows avatar-only, retaining accessible button label.
+- [x] Under existing 1180px breakpoint, hide long case title to protect action space; at existing 640px breakpoint, show avatar only and retain compact Patients/Settings buttons. No new breakpoint or fixed-page width.
+- [x] Source commit: `30482e1da0b7124bfd0347fa657c57c0c6e6ecfb`; Vercel **READY** preview: https://bracketmotion-preview-fl4zksa14-amarsaaliomer-6121.vercel.app/app
+- [x] Production build logs: 6/6 V1 family profile regression, 7 required record groups, 34 exclusions, clinician gates, PWA invariants, TypeScript and Vite completed without errors.
+- [x] Isolated **header-only** Chromium layout fixture using matching revised markup/CSS measured browser viewport and bounding boxes at 1440, 1280, 1180, 1024, 768, 640, 390 and 320px with a deliberately long name: no fixture overflow or clipped action row; profile name hidden under 640px.
+- [ ] **Live** interactive browser QA at all widths not completed. Preview requires Vercel SSO; do not conflate fixture or build validation with a live authenticated browser test. Avatar save and name persistence also remain signed-in QA work from Task 12.
+- [ ] Founder to inspect live preview and approve Task 14 before starting Task 15 workflow ribbon.
+
+## Task 15 — five-step icon-and-label workflow ribbon, 26 November 2026
+
+- [x] Edited existing `bracketmotion-site/src/App.tsx` `clinicalFlow` and existing ribbon render block; added five lightweight outlined SVG icon paths in existing flow data, drawn through the same small reusable SVG in the existing item markup. No icon library, dependencies, new components or external artwork.
+- [x] Removed obsolete step-number markup and its original `.app-flow-item__index` CSS; used original `.app-flow-nav`, `.app-flow-item`, `.app-flow-item__copy` and the existing 640px media block for all changes. No appended CSS overrides, `!important` or inline styling.
+- [x] Kept the exact five workflow labels and current implementation semantics: Case Presentation → Diagnosis → Treatment Plans → 3D Setup (existing scan workspace, **not yet photo-to-3D**) → Mechanics. Did not claim unbuilt five-photo matching is live.
+- [x] Kept `openSection` handlers, `aria-current`, title/tooltips, all clinician approval gates, existing 48px desktop / 42px mobile ribbon grid rows and contextual 3D toolbars/inspector untouched.
+- [x] Selected state is subdued lavender, regular actions stay neutral. Five controls use small icon above label inside the fixed ribbon; narrow screens keep its original independent horizontal scrolling rather than forcing page-level overflow.
+- [x] Exact frontend commit `28a984819b4e19b129793db11ae98baced975d11`; **READY** preview: https://bracketmotion-preview-ev9i34zmz-amarsaaliomer-6121.vercel.app/app
+- [x] Vercel production build PASS: 6/6 representative V1 family profiles, 7 Gate 2 record groups, 34 Gate 4 exclusions, clinician gates/PWA invariants, TypeScript and Vite. No build errors.
+- [x] Isolated **Chromium ribbon fixture** tested at 1440, 1280, 1180, 1024, 768, 640, 390 and 320 px. No document horizontal overflow or vertically clipped ribbon items; all five actions reachable with horizontal nav scroll at 390/320. This is not a whole-app browser regression test.
+- [ ] Full authenticated live-app browser inspection blocked by Vercel Deployment Protection; do not claim live responsive screenshots or auth testing were performed. Leave protection in place.
+- [ ] Founder visual approval of Task 15. **Next task after approval: Task 16** stage density and comprehensive responsive/clinical-gate checks.
+
+## Task 16 — compact workspace and Diagnosis empty-scroll fix, 26 November 2026
+
+- [x] Root cause of the reported Diagnosis bottom blank region traced to the shared `.ui-select-menu`. A closed dropdown previously used `visibility:hidden` but still occupied an **absolutely positioned 230px scrollable box**, extending its ancestor scrollable area. An isolated Chromium reproduction showed roughly **191px of phantom extra scroll** in a representative case.
+- [x] Edited the original hidden/open menu rules in `src/styles.css`: closed menus now have zero box height, maximum height, padding, border and shadow. The **same menu** regains its original padding, border, 230px maximum and shadow while open. Did **not** hide a broken container, change placement to fixed, or introduce CSS overrides.
+- [x] Edited the existing `src/UiSelect.tsx` opening calculation to account for the restored 12px menu frame and clear the prior inline `max-height` on close. The existing `is-dropup` state, measured available-space direction, focus, keyboard/escape and option selection behavior otherwise remain untouched.
+- [x] Closed/open/close **isolated Chromium dropdown fixture** verified at 1440, 1280, 1024, 768, 390 and 320px: dropdowns below the fold opened **up**, near the top opened **down**, no vertical clipping, no document horizontal overflow, and ancestor scrollHeight stayed stable after close. This tests the original component behavior pattern, not a signed-in live app.
+- [x] **Reused and moved** the single existing Diagnosis **V1 scope screen** section to the end of the right column, after cephalometric findings. The previous 4-section left / 2-section right imbalance is now 3 / 3, which reduces the visibly unused right-hand area. Scope selection and clinician gating logic untouched. Single-column mobile reading order remains logical.
+- [x] Reduced existing shell header height (desktop 58→54px, ribbon 48→46px; mobile header 52→50px); compacted outer form padding, card/gap/header spacing, settings/patients chrome, 3D viewer toolbars and stage/scan margins. Kept existing widths, mobile breakpoints, anatomy canvas rendering, and contextual controls; no CSS added at file bottom.
+- [x] Changed only `bracketmotion-site/src/styles.css`, `src/UiSelect.tsx`, and the existing Diagnosis section location in `src/App.tsx`. Commits: `ba1eed629bd1b41e25e045f89be0d659b66efc62` (dropdown and density), `61680c5b3988f8dee73925311e5fb896cb262895` (column rebalance).
+- [x] Final Vercel **READY** preview: https://bracketmotion-preview-bkrszgtk0-amarsaaliomer-6121.vercel.app/app for commit `61680c5b3988f8dee73925311e5fb896cb262895`. Build logs: 6/6 V1 representative families, 7 record groups, 34 scope exclusions, clinical gates and PWA invariants PASS; TypeScript/Vite build in 4.36s; no deployment errors.
+- [ ] Full **live** app visual/browser QA at all six sizes is not independently verified while the preview remains behind Vercel authentication. The isolated dropdown fixture is not an app-level substitute.
+- [ ] Founder to review at the bottom of Diagnosis, open the V1 scope dropdown near the page bottom, and inspect case/3D workspace density.
+
+## Task 16B — interface polish before cephalometry, 26 November 2026
+
+- [x] On the original `.app-flow-nav`, `justify-content: safe center` centers the five actions when they fit, and falls back to start alignment when wider than the available scrollable ribbon so the leftmost action stays reachable on phones. Same routing and clinician approval gates.
+- [x] Renamed the visual first-phase title to **Clinical Records**, without changing the `Case` internal label, stored state or clinical flow behavior.
+- [x] Removed `/ My patients` and its now-obsolete style directly from existing sources, leaving `Patients` as the single heading.
+- [x] Made the Settings **Save Changes** primary button black inside its existing footer style; other purple clinical action semantics unchanged.
+- [x] Rebuilt the **existing** React auth-dialog markup and its original, co-located stylesheet section to follow the DentAIstudy login/signup visual language: centered BracketMotion app icon, large title, subtitle, Google G in circular button, email divider, native email/password fields, password visibility, forgot-password affordance, black primary action, policy links and switch action. Preserved BracketMotion blur backdrop and popup (no new auth pages, no new CSS file, no inline CSS).
+- [x] Copied DentAIstudy's actual `assets/img/google-icon.svg` into BracketMotion's own `public/icons/google-icon.svg`, used existing `/icons/icon-180.png` for the auth logo. GitHub V1 asset check prohibits a visible `bracketmotion-icon.svg` import into the React app, so the existing PWA icon is used **without weakening the guard**.
+- [x] Added Google sign-in via the existing Supabase project's `signInWithOAuth({ provider:"google", options:{redirectTo:"/app" on current origin} })`. Password reset uses DentAIstudy's existing `settings.html` recovery destination while accounts remain shared. Password eye toggle and registration terms use the existing BracketMotion routes.
+- [x] Added one reusable `NumberInput.tsx` with thin, opposing chevron SVG stepper buttons using the browser's real `HTMLInputElement.stepUp()/stepDown()` and React `onChange`. Replaced native spinner controls in records/findings and 3D target transformation positions/angles. Kept number inputs, min/step settings, typed and keyboard entry. Relevant CSS lives beside the original number-field rules in `styles.css`; no appended override blocks or `!important`.
+- [x] Source commit `05234abf2d22c09f16f401d13cbeeed3422b3902`; release-check correction commit `6c15da80cf9d1e5f99194a769f3d820c087f1db5`.
+- [x] Final Vercel preview **READY**: https://bracketmotion-preview-avm2ynvuv-amarsaaliomer-6121.vercel.app/app (exact UI commit `6c15da80cf9d1e5f99194a769f3d820c087f1db5`). Clinical validation PASS: 6/6 family profiles, 7 records, 34 exclusions, clinician approval gates and PWA invariants. TypeScript/Vite production build finished successfully, no errors. Initial attempt failed the preexisting no-visible-favicon-SVG assertion; corrected by using the existing 180px PWA app icon and retested without modifying the validator.
+- [ ] **Not claimed:** live authenticated Google callback success, password-reset email delivery, full 320–1440px interactive browser sign-in, or live clinician avatar/patient persistence tests. The app preview is protected by Vercel SSO and a user-authenticated session is needed. The Supabase redirect URL allowlist may require confirmation if Google returns to the wrong origin; don't change shared production auth settings blindly.
+- [ ] Founder to review the center alignment, sign-in/sign-up modal, settings Save Changes, Patients heading and numeric steppers. After approval, proceed to Task 17 cephalometric feasibility, keeping independent account deletion gated until independent auth.
+
+## Task 16C — UI corrections requested by founder, 26 November 2026
+
+- [x] Fixed the unit/stepper ordering in existing `src/styles.css`: `.field-with-unit` is the positioned anchor, the existing `NumberInput` uses the unit field as its positioning context, and `mm` or `%` is physically between the numeric value and two far-right arrow buttons. Numeric input state, steps, min/max, keyboard and handlers are **unchanged**. No new numeric component or CSS appended at the end.
+- [x] Retained the compact **vertical** authentication popup and its blur backdrop, but edited existing auth CSS directly: 64px circular logo replaced with a 49×42px standalone black transparent SVG; 30px header top padding→17px, Google button 54→43px, form gap 12→8px, input height 42→37px, bottom padding 26→17px; smaller overall form spacing and narrower mobile padding. Controls remain readable. No separate sign-in page.
+- [x] The existing `public/icons/bracketmotion-icon.svg` already contains transparent black artwork; used as the background of the **auth dialog only** and removed the black circular badge and white-inverted image. Original file not altered and the release validator's no-icon-in-wordmark guard remains intact.
+- [x] Isolated Chromium CSS popup layout fixture tested signup at widths/heights 1440×900, 1209×802 (100%, 125%, 150% zoom approximations), 390×844, 320×640 and 320×568: **no internal popup scrollbar and no horizontal overflow** in these test conditions. This is not a full live-app screenshot.
+- [x] Isolated Chromium numeric-unit layout fixture verified unit label is visually before the right-edge steppers with no horizontal page overflow; numeric control still uses native number input.
+- [x] Source-only commit `d67ad10e4cff7309f67ae7e00a84dee5a8612a31` changes **only** `bracketmotion-site/src/App.tsx` and `src/styles.css` in-place; no Supabase, authentication logic, patient storage, CSS breakpoints, domain or `main` changes.
+- [x] Vercel **READY** preview https://bracketmotion-preview-r6vo6tvhn-amarsaaliomer-6121.vercel.app/app is built from the exact UI commit `d67ad10e4cff7309f67ae7e00a84dee5a8612a31`. Release guard passed 6/6 V1 family profiles, 7 records, 34 exclusions, clinical gates and PWA invariants; Vite/TypeScript production build passed in 4.91s; deployment logs show no errors.
+- [ ] Founder actual modal and number-field visual review; separate live Google OAuth callback/password reset and real signed-in persistence tests remain unverified.
+
+## Task 17A — cephalometry model and license feasibility, 26 November 2026
+
+**Decision: select one provisional trial candidate; do not integrate or ship it as a diagnostic AI yet.** The existing `photos.ceph` tab-local lateral-cephalogram upload is the entry. Existing Diagnosis cephalometric-summary fields remain clinician-entered until real inference is demonstrated.
+
+### Lead candidate — CEPHA29 HRNet-W32 ONNX
+
+- Weights/model card: https://huggingface.co/MuhammadNabeelSh/cephalometry-landmarks
+- Provided artifacts: `landmarks-cepha29.int8.onnx` **29.7 MB** (static-QDQ INT8), `landmarks-cepha29.onnx` **114 MB** (FP32); input **1×3×768×768**, output **1×29×192×192 heatmaps**. Channel ordering must match the card **exactly**. No downloaded file or checksum verified locally yet.
+- License/provenance: model card lists **CC BY 4.0**, training implementation https://github.com/Cestovatels/CephaloHRNet is **MIT**, listed ImageNet backbone `hrnet_w32.ms_in1k` **Apache-2.0**. The underlying Aariz dataset license was independently checked at its **source metadata** https://api.figshare.com/v2/articles/27986417 — **CC BY 4.0**, DOI https://doi.org/10.6084/m9.figshare.27986417.v1.
+- Claims (author-reported validation, **not independently reproduced**): mean radial error **1.24 mm**; successful detection within 2 mm **83.1%**, 3 mm **93.7%**, 4 mm **97.2%** on **150 validation images**.
+- Model card also says **"Research and education only. Not a medical device; not for diagnosis or treatment."** Its intended-use wording warrants explicit clarification before offering it as a clinical/commercial diagnostic service, notwithstanding CC BY 4.0 metadata. No declaration of full medical-device/clinical clearance.
+- Potential architecture: on-demand, lazy-loaded **ONNX Runtime Web/WASM** (https://onnxruntime.ai/docs/tutorials/web/) working **locally in the browser**; avoid new Supabase function, GPU server or radiograph upload. Test operator support, memory, initial load, speed and mobile/desktop behavior *before* adding dependency or 29.7 MB binary to the release. No inference benchmark yet.
+
+### Compared and excluded for this first trial
+
+- **CephTrace v4:** https://github.com/sidwiz/cephtrace-research — published pipeline and self-reported 1.04 mm MRE, but ONNX weights **CC BY-NC-SA 4.0**, ~277 MB, and explicit patent notice. **Do not use these weights in a future commercial service without separate permission.**
+- **CephaloHRNet standalone:** MIT source with train/evaluate/predict support, but the repository is mainly a *training framework*; assuming pretrained cephalometric checkpoints are automatically usable/commercially cleared would be an error. No reason to train a new model while the compact licensed candidate can be feasibility-tested.
+- Avoid unconstrained Gemini landmark coordinate generation and guessed radiographic findings.
+
+### Next implementation subgates (sequential, no unnecessary infrastructure)
+
+1. **17B — Runtime proof:** acquire/verify the INT8 artifact and provenance; load a permitted nonpatient test radiograph, run inference **in the browser**, compare output heatmaps/29 named coordinates with reference landmarks, correctly map all letterbox/resize transforms back to original image. Record timing/memory on representative machines and actual output errors; reject/defer if inaccurate, slow, or incompatible. Use original published sample data under its terms and attribution.
+2. **17C — Interactive measurement layer:** reuse `photos.ceph` **without uploading twice**; add editable landmark overlay on the original lateral film, with clear automatic/manual provenance. First calculations **SNA, SNB, ANB and FMA** from corrected points using deterministic angle geometry (Po–Or Frankfort plane; Go–Me mandibular plane); do not invent uncalibrated linear-mm measurements. Changes recalculate immediately; missing landmarks show missing values, not zeros.
+3. **17D — Clinical integration and checks:** clinician reviews, edits and explicitly approves landmarks/measurements; only approved structured results feed the existing Diagnosis draft. Photo/radiograph replacement invalidates prior tracing approval. Test incorrect orientation, unreadable scans, inferred missing points, wide/mobile viewports and clinical status gating. Keep both radiograph and unsaved landmark work browser-local in this development phase.
+
+**Task 17A completion is documentary research only.** No new package, ONNX artifact, X-ray data transfer, UI change, Supabase modification, clinical feature claim or Vercel deployment in this gate. Current build from latest frontend fix remains unchanged.
+
+## Task 17B — actual ONNX model test and rejection decision, 26 November 2026
+
+**Verdict: DO NOT integrate the 29.7 MB INT8 model; DO NOT mark automated cephalometry completed.** The full-precision model is more plausible but must be validated on reference landmark annotations before any clinical-facing integration.
+
+### What was actually executed
+- Downloaded both the official Hugging Face ONNX binaries into a temporary test environment; **not uploaded to or committed into BracketMotion**. INT8: **29,745,715 bytes** SHA256 `f7f1db9cc2de37c0fa94dab431d7d3446d1d8ffc62fa92e6610c2380af83080d`. FP32: **114 MB** SHA256 `cacd38201ada69fa7d3ea2566cb63b315302f35e3c66fb483a6eed32c88f14c5`.
+- Used **onnxruntime-web 1.31.1**, WebAssembly CPU execution provider, 2 vCPU / 4 GB RAM cloud sandbox. Both artifacts successfully loaded and produced exactly **29×192×192** float heatmaps for **1×3×768×768** float32 inputs. This was ONNX Runtime Web **under Node.js WASM**; not interactive browser UI and not a true mobile-device test.
+- Preprocessing duplicated the CephaloHRNet published inference path: resize the original RGB radiograph to **768×768** (bilinear, stretch), RGB pixels normalized `(pixel/255 - [0.485,0.456,0.406])/[0.229,0.224,0.225]`, CHW tensor. For each of 29 channels, choose maximum heatmap position and map the coordinate back to original image width/height.
+- Public test image 1: `alexcorvi/cephalometric/sample.png`, **1398×1702**, not an Aariz annotated test-set case. Public test image 2: `thomaspenny/Lateral-Cephalogram-App/Example  lat ceph image.png`, **1154×978**. No patient data transferred outside the local user-provided files; specifically **Ojimba was not uploaded to the cloud test sandbox or processed by this model**.
+
+| Public image | Quantized INT8 | FP32 full precision | Finding |
+| --- | --- | --- | --- |
+| Image 1 | SNA **74.67°**, SNB **78.97°**, ANB **−4.30°** | SNA **81.37°**, SNB **79.89°**, ANB **+1.48°** | Same source produces a **5.78° ANB difference**, enough to alter skeletal classification |
+| Image 2 | SNA **74.77°**, SNB **73.72°** | SNA **78.83°**, SNB **77.40°** | Several angles differ by 3–4° |
+| Image 2 Orbitale | `Or` at **y=823**, peak **0.071**, well beneath expected orbit | `Or` at **y=390**, peak **0.425** | **433 px** vertical disagreement; the INT8 finding is anatomically implausible |
+| Approximate FMA from predicted FH and mandibular plane, image 2 | **20.56°** | **29.56°** | **9.0°** difference; do not use either for clinical interpretation without correction |
+
+- Sample inference timings (after input preprocessing, not including network download): **INT8 ~4.6–5.0 s**, **FP32 ~7.7–7.8 s** on the 2-vCPU test environment; load ~0.7–1.1 s. FP32 requires a **114 MB download** plus browser memory and compute; production mobile responsiveness/load not verified.
+- **Interpretation:** performance claims reported on the model card (1.24 mm mean error, 83.1% within 2 mm) were **not replicated**: these public images do not carry verified 29-point ground truth. The tests prove the smaller release has unsafe internal divergences, not that the larger release is clinically accurate. Numeric heatmap peaks are **not calibrated confidence probabilities**.
+- **License:** author lists CC BY 4.0 weights, but also labels intended use **research and education only / not for diagnosis or treatment**. Attribution and a two-word results note **“Verify landmarks.”** cannot establish clinical suitability or provide legal immunity. Do not assume this research model is an independently validated clinical product.
+
+### Decision and direct handoff
+**No feature code, additional services, AI calls, Gemini prompt, backend, patient upload path or release dependency was changed for Task 17B.** Do not integrate INT8 or label cephalometry done. If pursuing FP32, the single acceptance gate is a **browser-local** test using Ojimba's original cephalogram with independent orthodontist-annotated coordinate reference, and a review of which discrepancies are landmark error versus the user's different cephalometric analyses. The current screenshots contain manually interpreted summary tables, **not a full machine-readable 29-landmark ground truth**, and SNA differs between reference tables. After actual accuracy/clinical-purpose validation, either ship the **complete** clinician-correctable, clinician-approved, deterministic-angle workflow once or omit automatic tracing; no misleading intermediate release.
+
+Files and provenance: https://huggingface.co/MuhammadNabeelSh/cephalometry-landmarks ; https://github.com/Cestovatels/CephaloHRNet ; public sample sources above. No external patient dataset copied into GitHub. The sandbox test session was stopped after use.
+
+## Task 17C — second-round model search and candidate selection, 26 November 2026
+
+**Selected for the next isolated feasibility test: NIH/NLM CephViT (do not integrate yet).**
+
+- Model and code: https://huggingface.co/nlm-dir/CephViT ; original paper https://arxiv.org/abs/2608.16535 (ODIN 2026 MICCAI satellite event). Authors Benjamin Hou, Konstantinia Almpani, Janice S. Lee, Zhiyong Lu; NLM/NIDCR US NIH research groups.
+- **29 landmark heatmaps** on the Aariz public dataset; published held-out test results **1.28 ± 1.42 mm MRE**, **82.1% SDR@2 mm**, **92.0% SDR@3 mm**. Source: original paper Results §3.1, not arbitrary model-card marketing figures. **Reported results are not reproduced locally by BracketMotion**, and the prior model's 1.24 mm figure is not a valid direct superiority comparison without identical benchmark protocol.
+- Hugging Face repository distributes Python/PyTorch/Gradio inference code, landmark heatmap decoding (DARK), and an **encrypted pretrained `best.pt.enc` checkpoint**. Its model card **publishes the decryption key**. Source explicitly exposes `args["num_landmarks"]`, and app includes a temporary hard-coded list of 29 labels; do **not** trust label order blindly—verify checkpoint metadata and map to full documented anatomy.
+- Model card declares **OpenMDW 1.1**. Official FAQ https://openmdw.ai/faq/ identifies it as a permissive model-materials license with commercial use and modification rights without field-of-use restrictions, conditional on retaining its license and copyright/origin notices when redistributing. Third-party data/dependency provenance and model release must still be respected; this is not clinical-device authorization.
+- The **original 29.7 MB CEPHA29 INT8** is still REJECTED from Task 17B; the 114 MB CEPHA29 FP32 works technically but remains unvalidated.
+- Alternatives screened: cwlachap/HRNet https://huggingface.co/cwlachap/hrnet-cephalometric-landmark-detection has MIT weights but **347 MB** PyTorch checkpoint and weaker independent research evidence; CEPHMark-Net https://github.com/manwaarkhd/CEPHMark-Net has Apache-2.0 research implementation but an immediately reproducible and downloadable full pretrained clinical checkpoint remains unverified; CeLDA+ https://github.com/ShanghaiTech-IMPACT/CeLDA_plus publishes strong age-robust research code but the benchmark data is restricted to research and repository examples assume training checkpoints, not a ready-to-run permissive pretrained release. Don't train a new model.
+- **Next test (17D):** independently confirm checkpoint download/decryption + 29-name order, run author's unmodified reference inference on approved nonpatient cephalograms; compare with source annotations where available. If credible, export to ONNX **without quantizing yet**, run exactly the same inputs and compare heatmaps/coordinates/angles across PyTorch and browser WASM; record weight size and cold-load/inference timing at realistic memory/CPU. Test Ojimba only with local permission and proper clinical reference before making claims.
+- **Implementation boundary:** keep the original upload local (`photos.ceph`), no automatic results from Gemini, no external patient-image API and no new paid/cloud service. After a real accuracy gate, integrate complete clinician-editable landmark/tracing + deterministic SNA/SNB/ANB/FMA and explicit acceptance. Note under results: **“Verify landmarks.”** No unfinished norms selector.
+- **Status:** Documentary second-round research only. No CephViT binary downloaded or executed, no ONNX export, no Ojimba validation, no app code, Supabase or preview modification. Do not mark Task 17 finished.
+
+## Task 17D — CephViT reference inference, ONNX conversion and independent 20-case benchmark, 26 November 2026
+
+**Verdict: CephViT is accepted as a technical candidate for a clinician-reviewed local trial. NOT accepted as a finished clinical BracketMotion feature.** The founder's requested Ojimba-specific analysis was NOT performed and must not be implied. No patient data were uploaded to third-party inference services, GitHub or the temporary Vercel evaluation sandbox.
+
+### Actual inference and conversion
+- Downloaded official encrypted CephViT checkpoint from https://huggingface.co/nlm-dir/CephViT ; repository revision 220de6977793eb1b80aa982d04b33f0aa40bef1c. AES-GCM decryption succeeded with the publicly published model key; source checkpoint has an 87,592,221-parameter ViT-Base network plus optimizer state. PyTorch model is 29-landmark, 512×512 BGR/255 input, 29×128×128 heatmaps. Exact label order was checked against dataset senior-orthodontist annotation JSON.
+- Encrypted checkpoint 976,710,027 bytes, SHA256 018b89108a18be63689aea6ce7d2cedbc22c09e1fe28558b5bddd901efb3f558. Decrypted checkpoint 1,051,274,214 bytes SHA256 5aee9c220e3a36e119325ef4cc3c750ca5d318cac03d30536621289d8a05fe92. These are test-environment files only, not committed.
+- Successfully exported the exact FP32 PyTorch network to ONNX opset 18, fixed 1×3×512×512 input. ONNX checker PASS, 647 graph nodes, 350,471,595 bytes, SHA256 1c664fdc7651a2cd87b5a00887c3537ccb3a5cb059806521453d8f76ec5db46a.
+- Native ONNX Runtime FP32 predictions on two public radiographs matched PyTorch at **all 29 DARK-decoded coordinates**. Mean heatmap absolute delta ~1.7–1.8×10^-8 and max ~1.8×10^-6; ONNX CPU ~5.5–5.7 s per image.
+- Dynamic MatMul INT8 quantization produced **90,531,621 bytes**, SHA256 0d3984e6809a1708f2e41645162273d88e1763f7b03d4e1b3438e5ab8d045044, WITHOUT retraining. Do not confuse this validated model-specific conversion with the previously REJECTED CEPHA29 INT8 model.
+
+### Reproduced landmark and angle errors versus true reference annotations
+- Downloaded original Aariz Figshare CC BY 4.0 test archive (Figshare 27986417). Chose **20 fixed, spaced cases from its 150-image held-out test set** (580 landmarks), using each image's **senior orthodontist coordinate JSON** and machine-calibrated mm-per-pixel mapping. Images were resized using the upstream author's reference preprocessing; coordinates decoded with the published DARK postprocessing. No inference on Ojimba's attached radiograph.
+- Error columns below are computed differences from values derived from senior-annotated landmarks, not population reference ranges or class interpretations.
+
+| Independent 20-image metric | FP32 ONNX / source PyTorch | Dynamic INT8 ONNX |
+| --- | ---: | ---: |
+| Mean landmark radial error | 1.228 mm | **1.224 mm** |
+| Fraction within 2 mm | 81.6% | **82.2%** |
+| Fraction within 3 mm | 92.6% | **93.3%** |
+| SNA mean absolute angle difference | 1.63° | **1.69°** |
+| SNB mean absolute angle difference | 1.37° | **1.37°** |
+| ANB mean absolute angle difference | 0.75° | **0.77°** |
+| FMA mean absolute angle difference | 1.70° | **1.71°** |
+| Worst case ANB / FMA difference | 2.33° / 5.14° | **2.40° / 5.39°** |
+
+- The quantized variant's per-case difference from the full variant's reference-error magnitude averaged only **0.078° for ANB** and **0.188° for FMA** across these 20 cases. No sizeable benchmark collapse, unlike the earlier CEPHA29 INT8. These are internal feasibility estimates on a small but authentically annotated held-out sample, not regulatory/clinical clearance.
+- ORT Web WASM package 1.31.1 loaded and executed both FP32 and INT8 artifacts in Node.js (browser-compatible WASM provider, **not actual Chrome/phone UI**). On a test system with 2 vCPUs and 4 GB RAM, solo FP32 cold model initialization ~7.1 seconds + inference **28.34 seconds**, INT8 initialization ~2.59 seconds + inference **27.80 seconds**. Dynamic INT8 reduced network/model download by ~74%, but **did not materially speed up WASM inference** on this hardware.
+- Model checkpoint **does not include embedded landmark-name mapping**. Upstream app.py hardcodes all 29 names; the current mapping was cross-checked against the full senior orthodontist reference order. Implementation must retain a version-pinned mapping and audit the origin.
+- Model material license documented by author as OpenMDW 1.1 (commercial use permissions subject to its attribution/notice conditions); Aariz data under CC BY 4.0. Licensing is separate from clinical accuracy and patient-data obligations.
+
+### Boundary and next decision
+- The user-supplied Ojimba CP.jpg and tracing are visually available in the ChatGPT conversation, but their **raw image bytes could not be accessed inside the isolated Vercel inference sandbox** from this session. Therefore **NO numerical Ojimba landmarks, SNA, SNB, ANB or FMA were generated or compared**, and the model is NOT patient-case-approved. Do not manufacture those results from the reference tables or mix SNA 86/88 sources.
+- For the first BracketMotion end-to-end delivery, the candidate is **the 90.5 MB ONNX INT8 model**, evaluated locally on a real Ojimba browser upload, with all 29 markers draggable, SNA/SNB/ANB/FMA recalculated from corrected points, doctor confirmation, and only **“Verify landmarks.”** displayed. No unfinished population-norm selector or Gemini-derived coordinates.
+- Browser-only inference is technically possible but slow on measured CPU hardware. A private GPU/CPU inference backend can be assessed if the actual clinician hardware fails the performance criterion, but do NOT silently activate a paid service or move patient radiographs to Hugging Face. Existing DentAIstudy Supabase remains the account backend, not an inference host.
+- No BracketMotion application code, AI functions, Supabase storage, identity settings, patient records or published frontend changed in this task. Model weights, public sample radiographs and evaluation outputs remain out of the product repository. Do not mark Task 17 complete until the entire clinician-approved feature and Ojimba comparison are verified.
+
+## Task 17E — completed CephViT integration and browser validation, 26 November 2026
+
+**Status: implemented and Vercel READY; development technical gates passed on a public radiograph. Pending the founder's actual Ojimba browser upload and comparison.**
+
+- [x] Reproduced the *reviewed and SHA-pinned* 90,531,621-byte NIH/NLM CephViT dynamic INT8 ONNX file from model revision `220de6977793eb1b80aa982d04b33f0aa40bef1c`. GitHub Actions CPU build successfully decrypted, exported FP32, applied dynamic MatMul quantization and verified SHA256 **`0d3984e6809a1708f2e41645162273d88e1763f7b03d4e1b3438e5ab8d045044`**. Versioned release: https://github.com/omariwest/dentaistudy-site/releases/tag/cephvit-web-v1 . **Model binary not committed to Git source**.
+- [x] Only on `bracketmotion` branch, integrated a lazy-loaded CephAnalysis component inside the existing **Diagnosis → Cephalometric summary**. Reuses `photos.ceph` from **Clinical Records → Lateral cephalogram** (JPG/PNG/WebP, max 12 MB). Image processed in a Web Worker with locally running ONNX Runtime Web 1.31.1 WASM; **no external image inference API, AI landmarks from Gemini, Supabase storage or new server**. Build downloads and verifies binary into same-origin `public/models/` before Vite. Includes OpenMDW 1.1/NLM attribution and existing legal-page limitations.
+- [x] Preserved published **BGR / 255, 512×512** image preprocessing, fixed 29-index name mapping and **11-pixel Gaussian + DARK peak-refinement** decoding back to original radiograph coordinates. Initial heatmaps produce 29 editable landmarks. User may show all 29, drag or keyboard-nudge a selected point. SNA, SNB, ANB and FMA deterministically recalculate; no population-norm selector and no guessed linear measurements. Brief result note: **“Verify landmarks.”**
+- [x] Explicit clinician approval required; modifying a verified landmark removes approval and invalidates the existing Diagnosis/Plan/3D approvals where applicable. Only **approved** numerical angles are added to the existing clinician AI payload. Replacing/removing radiograph, switching/reopening cases or clearing local photos invalidates browser-local tracing.
+- [x] Existing styles edited in-place near shared clinical controls; no new CSS file, inline CSS/JS, `!important`, or overrides appended to the bottom. Build-time fetch checksums fail closed if unavailable.
+- [x] Public upload **actually tested in headless Chromium** at `http://127.0.0.1:4173/app`: selected source file `https://raw.githubusercontent.com/alexcorvi/cephalometric/master/sample.png` (not patient data), uploaded through real Clinical Records file input, moved to Diagnosis, clicked **Detect landmarks**, model loaded and returned **SNA 81.0°, SNB 77.7°, ANB 3.3°, FMA 25.9°** in ~32 seconds end-to-end. Previously tested FP32 reference source yielded 80.89°, 77.55°, 3.34°, 26.29°; close agreement. All 29 markers rendered; clinician approval changed status to verified; keyboard movement of N changed displayed angles and returned status to review required, re-enabling approval.
+- [x] Chromium width checks after tracing at **1280, 1024, 768, 390 and 320 px**, document scrollWidth matched viewport width (no page-level horizontal overflow); viewer remained within viewport. Existing clinical V1 validation (6 representative families, 7 required records, 34 excluded scope groups, gates/PWA) **PASS**, TypeScript/Vite build PASS.
+- [x] Vercel **READY** preview from exact integration commit `b428d20e021ba5dc48015fb90bf1c5a212d80b32`: https://bracketmotion-preview-c3l95ifwo-amarsaaliomer-6121.vercel.app/app ; Vercel release guard and checksum verification passed, deployment errors none.
+- [ ] **Ojimba raw-radiograph patient-specific inference NOT performed**: attached `Ojimba CP.jpg` and reference tracing are present in conversation Files, but the user-authored raw file cannot be carried into the isolated Vercel browser session under the current file-tool bridge. **Do not fabricate patient-specific SNA/SNB/ANB/FMA, do not claim actual Ojimba pass.** Founder can upload original Ojimba CP.jpg to the protected preview's Clinical Records lateral ceph slot, click Diagnosis → Detect landmarks, review/adjust and provide the resulting numbers/screenshot; then we can compare to **Steiner SNA 88°, SNB 86°, ANB 2°; FMA 22°** (not the inconsistent ABO SNA=86 with SNB=86 and ANB=2).
+- [ ] Still no genuine authenticated account persistence, real patient's browser benchmark, independent prospective clinical evaluation, or mobile hardware inference timings. The benchmark is a development feasibility test, not independent regulatory/clinical clearance.
+- **Next:** founder Ojimba upload/review and any required tracing corrections before formally closing full Task 17 and moving to Task 18 photo-to-3D.
+
+## Founder correction round — five small tasks before Task 18 (26 November 2026)
+
+This round implements the requested clinician-centered, Canva-like workflow without a new agent, new paid inference backend, new CSS system or mandatory STL/PLY entry. DentAIstudy is the first design-pattern reference. Implement one task, verify, and return for founder approval before beginning the next.
+
+| Task | Scope | Status |
+| --- | --- | --- |
+| **P1** | Eliminate fabricated preview clinical data; make five intraoral photos sufficient to enter Diagnosis; synchronize inspector and page navigation with clinician diagnosis/plan approvals | **DONE — founder approved** |
+| **P2** | Rebalance cephalogram beside a compact, plain-text measurement panel; make cyan tracing thin, landmark dots red and labels yellow, with comfortable drag targets; remove developer/model/download metadata from the clinical workspace while retaining required attribution in legal/about surfaces | **IMPLEMENTED in source; founder approval pending; no new preview** |
+| **P3** | Derive additional clinically meaningful skeletal, dental and soft-tissue analyses from the same 29 landmarks using independently checkable formulas; organize them as concise text sections, distinguish not measurable from measured, and preserve clinician correction/approval | Pending |
+| **P4** | Improve the existing one Gemini clinical-reasoning Edge Function for photo-aware provisional findings, editable diagnosis and up to three genuinely distinct treatment options. Reuse the existing sign-in/backend and Proffit source-note method. Five photo inputs are processed only on explicit clinician request, with proportionate privacy protection, not silently sent when uploaded. No second agent/model/server | Pending |
+| **P5** | Integrated UI and clinical-flow regression, legal disclosures in legal pages rather than repeated clinical chrome, auth/saved-case review, responsive browser QA, and final polish. Keep existing 3D reconstruction work as Task 18 | Pending |
+
+### P1 — Completed: eliminate demo case clinical defaults and correct next-action flow
+
+- [x] Replaced example case details, fabricated Class I/crowding/overjet/overbite findings, seven pre-checked record flags and prewritten problem-list/plan goals with true empty local-case state in original `bracketmotion-site/src/App.tsx`. Explicit 3D demo reference remains available; no real saved cases were retroactively overwritten.
+- [x] Replaced the old mandatory seven-item diagnosis readiness shortcut with **five uploaded intraoral photos**. Panoramic, lateral ceph, clinician exams and legacy STL/PLY remain visible as additional records and available for later steps, but no longer prevent an initial editable Diagnosis draft. Ceph measurements still need an actual radiograph.
+- [x] Clinical Records main CTA and inspector both say **Continue to Diagnosis** and enable together when the five photos exist and scope is not blocked. Diagnosis inspector says **Review clinical plan** but stays disabled until clinician approval. Treatment Plans inspector says **Continue to 3D setup** and stays disabled until clinical-plan approval. Both use the existing `openSection` gating path; no shortcut directly sets a later section.
+- [x] Sidebar now shows a separate Diagnosis approval row. Case header no longer assumes every local case has permanent dentition or claims a pre-approved treatment plan; progress status says **Ready for diagnosis**, not that all optional records are complete. Existing CSS and breakpoints untouched.
+- [x] Code commits `988f90e25744ec8aa0a25596d8dad8de4f6245dd`, `55dfa405ec7d63ebc8214d0ff2e609ec77ad6d10`, and final wording refinement `38ac551aaeecd0f1572a8e351026328d08d8fe18`. Exact final **READY** Vercel preview: https://bracketmotion-preview-4arsx3o8x-amarsaaliomer-6121.vercel.app/app .
+- [x] Vercel build confirmed existing V1 source guard (6 representative profiles, seven clinical record surfaces, 34 scope exclusions, gates/PWA) PASS; TypeScript, model fetch/integrity and Vite compilation completed. The guard retains legacy record names for regression but those records are **not all mandatory before Diagnosis**.
+- [ ] Full authenticated live-browser visual/interaction and real clinician sign-in tests were not independently completed. The protected preview and code/build checks are not proof of full clinical QA.
+- **Founder approved P1** in the following chat and requested no new Vercel previews before the final P5; proceed with P2 in a source-only review gate.
+
+### P2 — Implemented in source: clean cephalometric workspace
+
+- [x] Moved the existing Diagnosis cephalometric section out of the narrow right-column stack into one full-width grid row; within that row the **radiograph + edit tools are on the left** and **compact analysis + clinician-entered cephalometric fields are on the right**. The original V1 scope form stays in its existing clinical workflow; no second ceph section or duplicated content.
+- [x] Reworked the original `CephAnalysis.tsx` display in place. Four existing deterministic SNA/SNB/ANB/FMA values are now compact plain text rows under **Skeletal analysis**, with the original manually editable clinical findings below. **No new measurements or invented interpretations in P2**; additional supported measurements are reserved for P3.
+- [x] Replaced the original ceph CSS rules in `src/styles.css` rather than appending overrides: thin continuous **cyan** line strokes, small **red** landmark points, **yellow** landmark labels; independent, larger transparent hit circles maintain mouse/touch selection and existing arrow-key corrections. Breakpoint at 1100 px stacks the columns without changing the global responsive system.
+- [x] Removed CephViT name, NIH/NLM technical footer, OpenMDW version and 90.5 MB model-size messaging from the **clinical panel**. The model provenance and OpenMDW 1.1 attribution remain stated in the existing BracketMotion Terms (legal page), which was not altered.
+- [x] The same one CephViT browser worker, 29 landmark mapping, approval and invalidation hooks, 4-angle calculations, original image privacy, and 3D/plan gates are unchanged.
+- [x] Code commits: `18f6e6cf75d0842d439fa9bb025649b88f904d32` (layout), `0a0a75bf97f711e3148ed4a30a509a2eb17a950a` (viewer/interaction), `c84ba241007b07635e244226fb1ab59437be25d7` (existing ceph styles), `f520677d986f5cb8ad63dc3aaf97536ce5fdda82` (source formatting).
+- [x] Static source review: 15/15 checks for single cephalometric component, editor/approval retention, four clinical fields, larger pointer hit region, prescribed colors, full-span layout, narrow-screen CSS, legal attribution and no inline/duplicate/important CSS.
+- [ ] No TypeScript/Vite build, actual browser screenshot, cephalogram pointer test or viewport overflow measurements ran during P2. Founder explicitly asked **not to create or share Vercel previews between now and P5**; all actual browser/integration regression will run before final P5 acceptance. P2 is *source-implemented*, not independently browser-verified.
+- **Next after founder approval:** P3 — expand only computable cephalometric measurements from existing 29 landmarks. No fabricated values, new inference model or task 18 work.
+
+## Engineering and review rules
+Edit existing source blocks and remove the original obsolete rule instead of appending overrides. No `!important`, inline CSS/JS, unrelated design system, new CSS file, duplicate hidden UI, or silent merge to `main`. Small reviewed gates; guarded build and real browser QA before claiming completion. Use existing DentAIstudy/UIORI controls as reference, not blindly imported CSS.
+
+## Handoff
+**P1 founder approved; P2 source-implemented and awaiting founder approval.** Diagnosis ceph row now spans both columns; radiograph on left, four existing verified-angle calculations and manually editable findings on right; cyan tracing, red points, yellow labels, larger transparent drag targets. Removed clinical model/license/download text; attribution remains in Terms. Code branch `bracketmotion`, final source commit `f520677d986f5cb8ad63dc3aaf97536ce5fdda82`; no new Vercel deployment/preview or changes to shared Supabase, DentAIstudy `main` or Task 18. Begin P3 only after approval. Save full browser/build/regression test until P5, as founder requested.
