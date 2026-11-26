@@ -568,17 +568,6 @@ type FindingsState = {
   cephConcern: string;
 };
 
-const defaultCaseDetails: CaseDetailsState = {
-  age: "24",
-  sex: "Not specified",
-  patientStage: "Adult",
-  growthStatus: "Adult",
-  chiefComplaint: "Improve alignment and bite.",
-  medicalHistory: "No relevant medical-history flags reported.",
-  dentalHistory: "No previous orthodontic treatment.",
-  notes: "None reported.",
-};
-
 const emptyCaseDetails: CaseDetailsState = {
   age: "",
   sex: "Not specified",
@@ -590,53 +579,39 @@ const emptyCaseDetails: CaseDetailsState = {
   notes: "",
 };
 
-const defaultFindings: FindingsState = {
-  oralHygiene: "Acceptable",
-  periodontalStatus: "Healthy",
-  activeCaries: "No",
-  restorativeConsiderations: "None",
-  missingTeeth: "None",
-  impactedTeeth: "None",
-  unsuitableTeeth: "None",
-  profile: "Straight",
-  lipCompetence: "Competent",
-  facialVerticalPattern: "Average",
-  facialAsymmetry: "None",
-  smileConcern: "None",
-  molarRight: "Class I",
-  molarLeft: "Class I",
-  canineRight: "Class I",
-  canineLeft: "Class I",
-  overjet: "4",
-  overbite: "45",
-  maxillaryCrowding: "-3",
-  mandibularCrowding: "-4",
-  upperMidline: "Coincident",
-  lowerMidline: "1 mm left",
-  midlineDiscrepancy: "1",
-  curveOfSpee: "Mild",
-  crossbite: "None",
-  scissorBite: "None",
-  rotations: "Mild lower anterior rotations.",
-  skeletalAp: "Class I",
-  skeletalVertical: "Average",
-  maxillaryIncisors: "Normal",
-  mandibularIncisors: "Normal",
-  cephConcern: "None",
-};
-
-const emptyFindings: FindingsState = Object.fromEntries(
-  Object.keys(defaultFindings).map((key) => [key, ""]),
-) as FindingsState;
-
-const demoRecords: Record<RecordKey, boolean> = {
-  history: true,
-  exam: true,
-  scans: true,
-  photos: true,
-  pano: false,
-  ceph: false,
-  cephSummary: true,
+const emptyFindings: FindingsState = {
+  oralHygiene: "",
+  periodontalStatus: "",
+  activeCaries: "",
+  restorativeConsiderations: "",
+  missingTeeth: "",
+  impactedTeeth: "",
+  unsuitableTeeth: "",
+  profile: "",
+  lipCompetence: "",
+  facialVerticalPattern: "",
+  facialAsymmetry: "",
+  smileConcern: "",
+  molarRight: "",
+  molarLeft: "",
+  canineRight: "",
+  canineLeft: "",
+  overjet: "",
+  overbite: "",
+  maxillaryCrowding: "",
+  mandibularCrowding: "",
+  upperMidline: "",
+  lowerMidline: "",
+  midlineDiscrepancy: "",
+  curveOfSpee: "",
+  crossbite: "",
+  scissorBite: "",
+  rotations: "",
+  skeletalAp: "",
+  skeletalVertical: "",
+  maxillaryIncisors: "",
+  mandibularIncisors: "",
+  cephConcern: "",
 };
 
 const emptyRecords: Record<RecordKey, boolean> = {
@@ -658,20 +633,6 @@ type TreatmentOption = {
 
 const emptyTreatmentOptions = (): TreatmentOption[] =>
   Array.from({ length: 3 }, () => ({ title: "", aims: "", mechanics: "", checks: "" }));
-
-const demoPlan: TreatmentPlanState = {
-  problemList:
-    "Mild maxillary crowding; moderate mandibular crowding; mild lower anterior rotations; 4 mm overjet; 45% overbite.",
-  goals:
-    "Resolve crowding and rotations; coordinate the arches; maintain a Class I molar/canine relationship; normalize overjet and overbite while preserving facial balance.",
-  primaryStrategy:
-    "Non-extraction fixed-appliance treatment. Align and level both arches with progressive NiTi wires, coordinate arch form, then finish on stainless steel with controlled settling as needed.",
-  alternativeStrategy:
-    "Consider limited space creation if alignment cannot be achieved within the approved arch-form and incisor-position goals. Reassess space requirements before progressing beyond alignment.",
-  options: emptyTreatmentOptions(),
-  selectedOption: null,
-  informationGaps: "",
-};
 
 const emptyPlan: TreatmentPlanState = {
   problemList: "",
@@ -803,7 +764,7 @@ function ReadinessCard({
     return (
       <div className="readiness-card is-blocked" role="status">
         <div>
-          <span>Planning status</span>
+          <span>Records status</span>
           <strong>Out of V1 scope</strong>
         </div>
         <p>{scopeIssue} is outside the frozen BracketMotion V1 boundary. Treatment-plan generation is blocked.</p>
@@ -814,12 +775,12 @@ function ReadinessCard({
   return (
     <div className={`readiness-card${planningReady ? " is-ready" : ""}`} role="status">
       <div>
-        <span>Planning status</span>
-        <strong>{planningReady ? "Planning ready" : "Draft case"}</strong>
+        <span>Records status</span>
+        <strong>{planningReady ? "Records complete" : "Draft case"}</strong>
       </div>
       <p>
         {planningReady
-          ? "All mandatory Gate 2 records are present. The case can move to treatment planning."
+          ? "Required records are complete. Continue to Diagnosis."
           : `${missingCount} required record${missingCount === 1 ? "" : "s"} missing. Planning remains locked.`}
       </p>
     </div>
@@ -918,7 +879,7 @@ function CaseRecordsView({
         <div>
           <h1>Clinical Records</h1>
         </div>
-        <button className="app-primary-action case-page-primary" type="button" onClick={onOpenFindings}>
+        <button className="app-primary-action case-page-primary" type="button" disabled={!planningReady} onClick={onOpenFindings}>
           Continue to Diagnosis
         </button>
       </div>
@@ -2391,9 +2352,9 @@ function ClinicalAppPage() {
   const [patientPage, setPatientPage] = useState(1);
   const casesRequestRef = useRef(0);
   const [caseId, setCaseId] = useState<string | null>(null);
-  const [caseLabel, setCaseLabel] = useState("Demo Case");
-  const [caseDetails, setCaseDetails] = useState<CaseDetailsState>(defaultCaseDetails);
-  const [findings, setFindings] = useState<FindingsState>(defaultFindings);
+  const [caseLabel, setCaseLabel] = useState("Local Case");
+  const [caseDetails, setCaseDetails] = useState<CaseDetailsState>(emptyCaseDetails);
+  const [findings, setFindings] = useState<FindingsState>(emptyFindings);
   const [diagnosis, setDiagnosis] = useState<DiagnosisState>(emptyDiagnosis);
   const [diagnosisLoading, setDiagnosisLoading] = useState(false);
   const [diagnosisError, setDiagnosisError] = useState("");
@@ -2401,8 +2362,8 @@ function ClinicalAppPage() {
   const [scopeIssue, setScopeIssue] = useState("");
   const [planApproved, setPlanApproved] = useState(false);
   const [setupApproved, setSetupApproved] = useState(false);
-  const [plan, setPlan] = useState<TreatmentPlanState>(demoPlan);
-  const [records, setRecords] = useState<Record<RecordKey, boolean>>(demoRecords);
+  const [plan, setPlan] = useState<TreatmentPlanState>(emptyPlan);
+  const [records, setRecords] = useState<Record<RecordKey, boolean>>(emptyRecords);
   const [photos, setPhotos] = useState<Partial<Record<PhotoKey, CasePhoto>>>({});
   const [cephTrace, setCephTrace] = useState<CephTrace | null>(null);
   const [photoError, setPhotoError] = useState("");
@@ -2621,16 +2582,16 @@ function ClinicalAppPage() {
 
       if (previousUserId) {
         setCaseId(null);
-        setCaseLabel("Demo Case");
-        setCaseDetails(defaultCaseDetails);
-        setFindings(defaultFindings);
+        setCaseLabel("Local Case");
+        setCaseDetails(emptyCaseDetails);
+        setFindings(emptyFindings);
         setDiagnosis(emptyDiagnosis);
         diagnosisRequestRef.current += 1;
         setDiagnosisLoading(false);
         setDiagnosisError("");
-        setRecords(demoRecords);
+        setRecords(emptyRecords);
         setScopeIssue("");
-        setPlan(demoPlan);
+        setPlan(emptyPlan);
         setPlanApproved(false);
         setSetupApproved(false);
         setScanState(null);
@@ -2815,20 +2776,20 @@ function ClinicalAppPage() {
     setActiveSection(section);
   };
 
-  const openDemoCase = () => {
+  const openLocalCase = () => {
     clearLocalPhotos();
     setCaseId(null);
-    setCaseLabel("Demo Case");
-    setCaseDetails(defaultCaseDetails);
-    setFindings(defaultFindings);
+    setCaseLabel("Local Case");
+    setCaseDetails(emptyCaseDetails);
+    setFindings(emptyFindings);
     setDiagnosis(emptyDiagnosis);
     setDiagnosisLoading(false);
     setDiagnosisError("");
     setScopeIssue("");
     setPlanApproved(false);
     setSetupApproved(false);
-    setPlan(demoPlan);
-    setRecords(demoRecords);
+    setPlan(emptyPlan);
+    setRecords(emptyRecords);
     setScanState(null);
     setStageState(null);
     cancelSuggestions();
@@ -3327,6 +3288,15 @@ function ClinicalAppPage() {
 
   const has3dWorkspace =
     !showCaseHub && !showSettings && (activeSection === "Setup" || activeSection === "Stages");
+  const inspectorNextSection: ClinicalSection =
+    activeSection === "Case" ? "Findings" : activeSection === "Findings" ? "Plan" : "Setup";
+  const inspectorCanAdvance = planningReady && (
+    activeSection === "Case" ||
+    (activeSection === "Findings" ? diagnosis.approved : planApproved)
+  );
+  const inspectorActionLabel = activeSection === "Case"
+    ? "Continue to Diagnosis"
+    : activeSection === "Findings" ? "Review clinical plan" : "Continue to 3D setup";
 
   return (
     <main className={`clinical-app${showCaseHub || showSettings ? " is-patients" : ""}`}>
@@ -3340,7 +3310,7 @@ function ClinicalAppPage() {
               <span className="app-topbar__divider" aria-hidden="true" />
               <div className="app-case-title">
                 <strong>{caseLabel}</strong>
-                <span>Permanent dentition · {planningReady ? "Planning ready" : "Draft"}</span>
+                <span>{caseDetails.patientStage === "Not specified" ? "Patient stage not set" : caseDetails.patientStage} · {planningReady ? "Records complete" : "Draft"}</span>
               </div>
             </>
           )}
@@ -3491,8 +3461,8 @@ function ClinicalAppPage() {
                       <button type="button" className="app-primary-action" onClick={() => setAccountOpen(true)}>
                         Sign in
                       </button>
-                      <button type="button" className="app-quiet-button" onClick={openDemoCase}>
-                        Open local demo
+                      <button type="button" className="app-quiet-button" onClick={openLocalCase}>
+                        Open local case
                       </button>
                     </div>
                   )}
@@ -3503,8 +3473,8 @@ function ClinicalAppPage() {
                     <div className="patients-empty">
                       <strong>No saved patients yet</strong>
                       <p>Create your first patient case to get started.</p>
-                      <button type="button" className="app-quiet-button" onClick={openDemoCase}>
-                        Explore local demo
+                      <button type="button" className="app-quiet-button" onClick={openLocalCase}>
+                        Open local case
                       </button>
                     </div>
                   )}
@@ -3729,11 +3699,15 @@ function ClinicalAppPage() {
             <div className="app-inspector__header">
               <div>
                 <span>{showCaseHub ? "Cases" : activeSection} status</span>
-                <strong>{scopeIssue ? "Planning blocked" : planningReady ? "Planning ready" : "Draft case"}</strong>
+                <strong>{scopeIssue ? "Planning blocked" : !planningReady ? "Records incomplete" : activeSection === "Findings" && diagnosis.approved ? "Diagnosis approved" : activeSection === "Plan" && planApproved ? "Plan approved" : "Records complete"}</strong>
               </div>
             </div>
 
             <div className="app-inspector__section app-inspector__section--compact">
+              <div className="app-inspector__row">
+                <span>Diagnosis</span>
+                <strong>{diagnosis.approved ? "Approved" : "Not approved"}</strong>
+              </div>
               <div className="app-inspector__row">
                 <span>Clinical plan</span>
                 <strong>{planApproved ? "Approved" : "Not approved"}</strong>
@@ -3752,20 +3726,10 @@ function ClinicalAppPage() {
               <button
                 className="app-primary-action"
                 type="button"
-                disabled={!planningReady}
-                onClick={() =>
-                  setActiveSection(
-                    !planApproved ? "Plan" : setupApproved ? "Stages" : "Setup",
-                  )
-                }
+                disabled={!inspectorCanAdvance}
+                onClick={() => openSection(inspectorNextSection)}
               >
-                {!planningReady
-                  ? "Complete required records"
-                  : !planApproved
-                    ? "Review clinical plan"
-                    : setupApproved
-                      ? "Continue to stages"
-                      : "Continue to 3D setup"}
+                {inspectorActionLabel}
               </button>
             </div>
           </aside>
