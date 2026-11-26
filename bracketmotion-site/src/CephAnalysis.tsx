@@ -17,6 +17,31 @@ type WorkerResult =
 
 const keyLandmarks: CephLandmark[] = ["S", "N", "A", "B", "Po", "Or", "Go", "Me"];
 
+// Standard angular measurements from the 29 available points; no mm calibration.
+const measurementGroups = [
+  {
+    title: "Skeletal analysis",
+    items: [
+      ["SNA", "SNA"], ["SNB", "SNB"], ["ANB", "ANB"], ["FMA", "FMA"],
+      ["SN_MP", "SN–MP"], ["SN_PP", "SN–PP"], ["PP_MP", "PP–MP"],
+      ["GONIAL", "Gonial angle"], ["Y_FH", "Y-axis / FH"],
+    ],
+  },
+  {
+    title: "Dental analysis",
+    items: [
+      ["U1_SN", "U1–SN"], ["U1_NA", "U1–NA"], ["L1_NB", "L1–NB"],
+      ["IMPA", "IMPA"], ["INTERINCISAL", "Interincisal"],
+    ],
+  },
+  {
+    title: "Soft tissue analysis",
+    items: [
+      ["ST_CONVEXITY", "N′–Sn–Pog′"], ["ST_FH", "N′–Pog′ / FH"],
+    ],
+  },
+] as const;
+
 async function prepareCephInput(file: File): Promise<{
   input: Float32Array;
   width: number;
@@ -319,16 +344,23 @@ export default function CephAnalysis({
         </div>
 
         <div className="ceph-tracing__analysis-column">
-          <h3>Skeletal analysis</h3>
           {current ? (
-            <div className="ceph-tracing__measurements" aria-label="Calculated cephalometric angles">
-              {(["SNA", "SNB", "ANB", "FMA"] as const).map((name) => (
-                <div key={name}>
-                  <span>{name}</span>
-                  <strong>{currentAngles ? currentAngles[name].toFixed(1) + "°" : "—"}</strong>
+            measurementGroups.map((group) => (
+              <section key={group.title} aria-label={group.title}>
+                <h3>{group.title}</h3>
+                <div className="ceph-tracing__measurements">
+                  {group.items.map(([name, label]) => {
+                    const value = currentAngles?.[name];
+                    return (
+                      <div key={name}>
+                        <span>{label}</span>
+                        <strong>{typeof value === "number" ? value.toFixed(1) + "°" : "—"}</strong>
+                      </div>
+                    );
+                  })}
                 </div>
-              ))}
-            </div>
+              </section>
+            ))
           ) : (
             <p className="ceph-tracing__empty-result">Measurements appear after landmark detection.</p>
           )}
