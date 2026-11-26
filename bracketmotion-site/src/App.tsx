@@ -1053,6 +1053,25 @@ function FindingsView({
         scopeIssue={scopeIssue}
       />
 
+      <section className="ai-review-card" aria-label="Diagnosis draft">
+        <div className="ai-review-gate">
+          <div>
+            <strong>Diagnosis draft</strong>
+            <p>Reviews the five intraoral photographs and available clinical findings.</p>
+          </div>
+          <button
+            className="ai-review-button"
+            type="button"
+            disabled={diagnosisLoading || (sessionActive && !planningReady)}
+            onClick={sessionActive ? onGenerateDiagnosis : onSignIn}
+          >
+            {!sessionActive ? "Sign in to prepare" : diagnosisLoading ? "Reviewing photographs…" : "Prepare diagnosis"}
+          </button>
+        </div>
+        {diagnosisError && <div className="ai-review-error" role="alert">{diagnosisError}</div>}
+
+      </section>
+
       <div className="case-content-grid">
         <div className="case-content-column">
       <section className="case-section" aria-labelledby="diagnosis-draft-title">
@@ -1097,22 +1116,6 @@ function FindingsView({
             />
           </label>
         </div>
-
-        <div className="ai-review-gate">
-          <div>
-            <strong>AI-assisted draft</strong>
-            <p>Uses the five intraoral photos, clinical findings and verified cephalometric measurements.</p>
-          </div>
-          <button
-            className="ai-review-button"
-            type="button"
-            disabled={diagnosisLoading || (sessionActive && !planningReady)}
-            onClick={sessionActive ? onGenerateDiagnosis : onSignIn}
-          >
-            {!sessionActive ? "Sign in to generate" : diagnosisLoading ? "Generating…" : "Generate AI draft"}
-          </button>
-        </div>
-        {diagnosisError && <div className="ai-review-error" role="alert">{diagnosisError}</div>}
 
         <div className={`plan-approval-panel${diagnosis.approved ? " is-approved" : ""}`}>
           <div>
@@ -3114,7 +3117,7 @@ function ClinicalAppPage() {
       setSetupApproved(false);
     } catch {
       if (request === diagnosisRequestRef.current) {
-        setDiagnosisError("Could not analyze the photographs. Check the five images and try again.");
+        setDiagnosisError("Diagnosis could not be prepared. Please try again.");
       }
     } finally {
       if (request === diagnosisRequestRef.current) setDiagnosisLoading(false);
