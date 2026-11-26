@@ -847,7 +847,7 @@ function CaseRecordsView({
   const intraoralCount = intraoralPhotoSlots.filter((slot) => Boolean(photos[slot.key])).length;
 
   return (
-    <div className="case-workflow-page case-workflow-page--split">
+    <div className="case-workflow-page">
       <div className="case-workflow-page__header">
         <div>
           <h1>Clinical Records</h1>
@@ -1032,7 +1032,7 @@ function FindingsView({
   onOpenRecords: () => void;
 }) {
   return (
-    <div className="case-workflow-page case-workflow-page--split">
+    <div className="case-workflow-page">
       <div className="case-workflow-page__header">
         <div>
           <h1>Diagnosis</h1>
