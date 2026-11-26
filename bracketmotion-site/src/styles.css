@@ -506,6 +506,10 @@ a {
 
 .app-wordmark {
   flex: 0 0 auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
   font-size: 1.16rem;
 }
 
@@ -906,6 +910,7 @@ a {
 }
 
 .app-quiet-button:focus-visible,
+.app-wordmark:focus-visible,
 .app-account-button:focus-visible,
 .app-tool-button:focus-visible,
 .app-view-button:focus-visible,
@@ -2762,7 +2767,10 @@ a {
 
 .auth-dialog__form .app-primary-action,
 .auth-dialog__account .app-primary-action {
+  width: fit-content;
   min-height: 37px;
+  justify-self: center;
+  padding-inline: 24px;
   border-color: #111827;
   border-radius: 999px;
   background: #111827;
