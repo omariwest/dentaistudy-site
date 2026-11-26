@@ -1,8 +1,8 @@
 import { createSupabaseContext } from "npm:@supabase/server@1.9.2";
 
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY") ?? "";
-const MODEL = "gemini-3.8-flash";
-const FALLBACK_MODEL = "gemini-3.6-flash";
+const MODEL = "gemini-3.6-flash";
+const FALLBACK_MODEL = "gemini-2.5-flash-lite";
 const MAX_BODY_CHARS = 2_600_000;
 const MAX_TEXT_CHARS = 4_000;
 
@@ -449,6 +449,7 @@ ${JSON.stringify(clinicalCase)}`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify(body),
+      signal: AbortSignal.timeout(model === MODEL ? 55_000 : 45_000),
     },
   );
 
@@ -477,7 +478,7 @@ async function generateReview(input: ReturnType<typeof sanitizeInput>) {
     return await callGemini(MODEL, input);
   } catch (error: any) {
     const status = Number(error?.status ?? 0);
-    if (status === 429 || status >= 500) {
+    if (error?.name === "TimeoutError" || error?.name === "AbortError" || status === 404 || status === 429 || status >= 500) {
       return await callGemini(FALLBACK_MODEL, input);
     }
     throw error;
