@@ -47,5 +47,5 @@ export function cephAngles(points: readonly CephPoint[]): CephAngles | null {
 }
 
 export function cephAngleSummary(angles: CephAngles): string {
-  return \`SNA \${angles.SNA.toFixed(1)}°, SNB \${angles.SNB.toFixed(1)}°, ANB \${angles.ANB.toFixed(1)}°, FMA \${angles.FMA.toFixed(1)}°\`;
+  return `SNA ${angles.SNA.toFixed(1)}°, SNB ${angles.SNB.toFixed(1)}°, ANB ${angles.ANB.toFixed(1)}°, FMA ${angles.FMA.toFixed(1)}°`;
 }

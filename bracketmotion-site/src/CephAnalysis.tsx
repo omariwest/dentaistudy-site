@@ -240,7 +240,7 @@ export default function CephAnalysis({
             {imageWidth > 0 && imageHeight > 0 ? (
               <svg
                 ref={svgRef}
-                viewBox={\`0 0 \${imageWidth} \${imageHeight}\`}
+                viewBox={`0 0 ${imageWidth} ${imageHeight}`}
                 preserveAspectRatio="xMidYMid meet"
                 className="ceph-tracing__svg"
                 aria-label="Lateral cephalogram with editable landmark positions"
@@ -266,7 +266,7 @@ export default function CephAnalysis({
                         r={landmark === selected ? pointRadius * 1.8 : pointRadius * 1.3}
                         className={landmark === selected ? "is-selected" : ""}
                         role="button" tabIndex={0}
-                        aria-label={\`Move \${landmark} landmark\`}
+                        aria-label={`Move ${landmark} landmark`}
                         onPointerDown={(event) => {
                           setSelected(landmark);
                           dragRef.current = index;
