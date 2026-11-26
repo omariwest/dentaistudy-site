@@ -1277,8 +1277,6 @@ a {
 
 .ceph-tracing {
   min-width: 0;
-  padding-top: 12px;
-  border-top: 1px solid #d7dce5;
 }
 
 .ceph-tracing__heading {
@@ -1287,19 +1285,20 @@ a {
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 9px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
-.ceph-tracing__heading strong {
+.ceph-tracing__heading strong,
+.ceph-tracing__empty-result strong {
+  display: block;
   color: #1e2837;
   font-size: 0.82rem;
 }
 
-.ceph-tracing__heading p,
 .ceph-tracing__caption,
 .ceph-tracing__empty p,
-.ceph-tracing__empty-result {
-  margin: 4px 0 0;
+.ceph-tracing__empty-result p {
+  margin: 0;
   color: #788291;
   font-size: 0.68rem;
   line-height: 1.45;
@@ -1344,10 +1343,10 @@ a {
 }
 
 .ceph-tracing__empty {
-  display: grid;
-  justify-items: start;
-  gap: 9px;
-  padding: 12px 0 2px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .ceph-tracing__actions {
@@ -1374,6 +1373,7 @@ a {
   display: grid;
   width: 100%;
   min-width: 0;
+  height: clamp(260px, calc(100dvh - 300px), 540px);
   overflow: hidden;
   place-items: center;
   border: 1px solid #cdd3dd;
@@ -1385,8 +1385,7 @@ a {
 .ceph-tracing__svg {
   display: block;
   width: 100%;
-  height: auto;
-  max-height: 480px;
+  height: 100%;
   object-fit: contain;
 }
 
