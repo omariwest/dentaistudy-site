@@ -1365,28 +1365,28 @@ function FindingsView({
           >
             <div className="ceph-tracing__clinical-fields">
               <h3>Clinical findings</h3>
-          <div className="finding-grid">
-            <label>
-              <span>Skeletal AP pattern</span>
-              <UiSelect value={findings.skeletalAp} onChange={(value) => onFindingChange("skeletalAp", value)} options={["Not assessed", "Class I","Class II","Class III"]} ariaLabel="Skeletal AP pattern" />
-            </label>
-            <label>
-              <span>Vertical skeletal pattern</span>
-              <UiSelect value={findings.skeletalVertical} onChange={(value) => onFindingChange("skeletalVertical", value)} options={["Not assessed", "Low","Average","High"]} ariaLabel="Vertical skeletal pattern" />
-            </label>
-            <label>
-              <span>Maxillary incisors</span>
-              <UiSelect value={findings.maxillaryIncisors} onChange={(value) => onFindingChange("maxillaryIncisors", value)} options={["Not assessed", "Retroclined","Normal","Proclined"]} ariaLabel="Maxillary incisors" />
-            </label>
-            <label>
-              <span>Mandibular incisors</span>
-              <UiSelect value={findings.mandibularIncisors} onChange={(value) => onFindingChange("mandibularIncisors", value)} options={["Not assessed", "Retroclined","Normal","Proclined"]} ariaLabel="Mandibular incisors" />
-            </label>
-            <label className="finding-grid__wide">
-              <span>Important cephalometric concern</span>
-              <input value={findings.cephConcern} onChange={(event) => onFindingChange("cephConcern", event.target.value)} type="text" />
-            </label>
-          </div>
+              <div className="finding-grid">
+                <label>
+                  <span>Skeletal AP pattern</span>
+                  <UiSelect value={findings.skeletalAp} onChange={(value) => onFindingChange("skeletalAp", value)} options={["Not assessed", "Class I","Class II","Class III"]} ariaLabel="Skeletal AP pattern" />
+                </label>
+                <label>
+                  <span>Vertical skeletal pattern</span>
+                  <UiSelect value={findings.skeletalVertical} onChange={(value) => onFindingChange("skeletalVertical", value)} options={["Not assessed", "Low","Average","High"]} ariaLabel="Vertical skeletal pattern" />
+                </label>
+                <label>
+                  <span>Maxillary incisors</span>
+                  <UiSelect value={findings.maxillaryIncisors} onChange={(value) => onFindingChange("maxillaryIncisors", value)} options={["Not assessed", "Retroclined","Normal","Proclined"]} ariaLabel="Maxillary incisors" />
+                </label>
+                <label>
+                  <span>Mandibular incisors</span>
+                  <UiSelect value={findings.mandibularIncisors} onChange={(value) => onFindingChange("mandibularIncisors", value)} options={["Not assessed", "Retroclined","Normal","Proclined"]} ariaLabel="Mandibular incisors" />
+                </label>
+                <label className="finding-grid__wide">
+                  <span>Important cephalometric concern</span>
+                  <input value={findings.cephConcern} onChange={(event) => onFindingChange("cephConcern", event.target.value)} type="text" />
+                </label>
+              </div>
             </div>
           </CephAnalysis>
         </Suspense>
