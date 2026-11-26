@@ -1363,18 +1363,12 @@ a {
   min-width: 0;
 }
 
-.ceph-tracing__progress {
-  margin: 0 0 9px;
-  color: #5e49aa;
-  font-size: 0.7rem;
-}
-
 .ceph-tracing__viewer {
   display: grid;
   grid-template-rows: minmax(0, 1fr);
   width: 100%;
   min-width: 0;
-  height: clamp(260px, calc(100dvh - 300px), 540px);
+  height: clamp(340px, calc(100dvh - 210px), 730px);
   overflow: hidden;
   place-items: center;
   border: 1px solid #cdd3dd;
