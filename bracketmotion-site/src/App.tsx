@@ -3814,7 +3814,7 @@ function LegalLayout({
           <div className="legal-header">
             <p className="section-kicker">Legal</p>
             <h1>{title}</h1>
-            <p className="legal-updated">Last updated: 22 November 2026</p>
+            <p className="legal-updated">Last updated: 26 November 2026</p>
           </div>
 
           <article className="legal-article">
@@ -3839,7 +3839,7 @@ function PrivacyPage() {
       <ul>
         <li><strong>Account data:</strong> name, email address, login credentials and account preferences.</li>
         <li><strong>Clinical case data:</strong> patient labels, age, orthodontic records, measurements, images, uploaded STL/PLY models, treatment notes and related case information you choose to provide.</li>
-        <li><strong>AI inputs and outputs:</strong> structured case information sent for treatment-planning assistance and the responses returned to the application.</li>
+        <li><strong>AI inputs and outputs:</strong> case information and the five intraoral photographs submitted when you explicitly generate an AI diagnosis draft, as well as the responses returned to the application. The photographs are transmitted to the Google Gemini API for that request; they are not saved as part of your BracketMotion case.</li>
         <li><strong>Technical data:</strong> browser, device, IP address, error logs and basic service-usage information needed to operate and secure the platform.</li>
       </ul>
 
