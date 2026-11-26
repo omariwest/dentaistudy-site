@@ -14,7 +14,7 @@ from pathlib import Path
 
 REPO_REV = "220de6977793eb1b80aa982d04b33f0aa40bef1c"
 BASE_URL = f"https://huggingface.co/nlm-dir/CephViT/resolve/{REPO_REV}/"
-KEY = bytes.fromhex("2d65697cf6ad50c95a0a2558c73658a7")  # Author-published model key, not an app secret.
+KEY = b"2d65697cf6ad50c95a0a2558c73658a7"  # Author-published ASCII AES-256 key, not an app secret.
 ENCRYPTED_SHA = "018b89108a18be63689aea6ce7d2cedbc22c09e1fe28558b5bddd901efb3f558"
 DECRYPTED_SHA = "5aee9c220e3a36e119325ef4cc3c750ca5d318cac03d30536621289d8a05fe92"
 FP32_SHA = "1c664fdc7651a2cd87b5a00887c3537ccb3a5cb059806521453d8f76ec5db46a"

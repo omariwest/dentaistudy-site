@@ -4,6 +4,7 @@ on:
     branches: [bracketmotion]
     paths:
       - .github/workflows/package-cephvit.yml
+      - bracketmotion-site/scripts/export-cephvit-model.py
 permissions:
   contents: write
 jobs:
