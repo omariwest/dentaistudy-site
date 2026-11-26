@@ -1331,12 +1331,16 @@ a {
   min-width: 0;
 }
 
-.ceph-tracing__analysis-column > h3,
+.ceph-tracing__analysis-column > section h3,
 .ceph-tracing__clinical-fields h3 {
   margin: 0 0 8px;
   color: #1e2837;
   font-size: 0.78rem;
   font-weight: 750;
+}
+
+.ceph-tracing__analysis-column > section + section {
+  margin-top: 14px;
 }
 
 .ceph-tracing__empty {
