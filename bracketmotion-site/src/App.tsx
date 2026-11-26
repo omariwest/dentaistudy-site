@@ -500,7 +500,6 @@ const clinicalFlow = [
 ] as const;
 
 type ClinicalSection = (typeof clinicalFlow)[number]["label"];
-type RecordKey = "history" | "exam" | "scans" | "photos" | "pano" | "ceph" | "cephSummary";
 
 type PhotoKey = "frontal" | "upperOcclusal" | "lowerOcclusal" | "rightBuccal" | "leftBuccal" | "faceFront" | "smile" | "profile" | "pano" | "ceph";
 type CasePhoto = { name: string; file: File; previewUrl: string };
@@ -593,10 +592,10 @@ const emptyCaseDetails: CaseDetailsState = {
   sex: "Not specified",
   patientStage: "Not specified",
   growthStatus: "Uncertain",
-  chiefComplaint: "",
-  medicalHistory: "",
-  dentalHistory: "",
-  notes: "",
+  chiefComplaint: "Improve my smile.",
+  medicalHistory: "Not provided",
+  dentalHistory: "Not provided",
+  notes: "Not provided",
 };
 
 const emptyFindings: FindingsState = {
@@ -632,16 +631,6 @@ const emptyFindings: FindingsState = {
   maxillaryIncisors: "",
   mandibularIncisors: "",
   cephConcern: "",
-};
-
-const emptyRecords: Record<RecordKey, boolean> = {
-  history: false,
-  exam: false,
-  scans: false,
-  photos: false,
-  pano: false,
-  ceph: false,
-  cephSummary: false,
 };
 
 type TreatmentOption = {
@@ -685,23 +674,12 @@ type DiagnosisReviewResult = {
 };
 
 type StoredRecordsState = {
-  checklist?: Partial<Record<RecordKey, boolean>>;
   details?: Partial<CaseDetailsState>;
   findings?: Partial<FindingsState>;
   diagnosis?: Partial<DiagnosisState>;
 };
 
 const viewerViews = ["Front", "Right", "Left", "Upper", "Lower"];
-
-const clinicalRecordRows: Array<{ key: RecordKey; title: string; detail: string }> = [
-  { key: "history", title: "History + chief complaint", detail: "Medical, dental and treatment history" },
-  { key: "exam", title: "Clinical examination", detail: "Periodontal, facial and occlusal findings" },
-  { key: "scans", title: "Upper + lower scans", detail: "Optional STL/PLY for the current 3D workspace" },
-  { key: "photos", title: "Clinical photographs", detail: "Five intraoral photographs" },
-  { key: "pano", title: "Panoramic radiograph", detail: "Additional radiographic record" },
-  { key: "ceph", title: "Lateral cephalogram", detail: "For cephalometric tracing" },
-  { key: "cephSummary", title: "Cephalometric summary", detail: "Additional clinician-entered findings" },
-];
 
 const outOfScopeGroups = [
   {
@@ -749,27 +727,6 @@ const outOfScopeGroups = [
     ],
   },
 ] as const;
-
-function RecordStatus({
-  complete,
-  onAdd,
-}: {
-  complete: boolean;
-  onAdd: () => void;
-}) {
-  return (
-    <div className="record-status">
-      <span className={`record-status__pill${complete ? " is-complete" : ""}`}>
-        {complete ? "Complete" : "Missing"}
-      </span>
-      {!complete && (
-        <button className="record-status__action" type="button" onClick={onAdd}>
-          Add
-        </button>
-      )}
-    </div>
-  );
-}
 
 function ReadinessCard({
   planningReady,
@@ -867,8 +824,6 @@ function CaseRecordsView({
   onCaseLabel,
   caseDetails,
   onCaseDetail,
-  records,
-  onCompleteRecord,
   photos,
   onPhotoChange,
   photoError,
@@ -881,8 +836,6 @@ function CaseRecordsView({
   onCaseLabel: (value: string) => void;
   caseDetails: CaseDetailsState;
   onCaseDetail: (field: keyof CaseDetailsState, value: string) => void;
-  records: Record<RecordKey, boolean>;
-  onCompleteRecord: (key: RecordKey) => void;
   photos: Partial<Record<PhotoKey, CasePhoto>>;
   onPhotoChange: (key: PhotoKey, file: File | null) => void;
   photoError: string;
@@ -919,7 +872,7 @@ function CaseRecordsView({
         <div className="case-form-grid">
           <label>
             <span>Patient label / case ID</span>
-            <input value={caseLabel} onChange={(event) => onCaseLabel(event.target.value)} type="text" />
+            <input value={caseLabel} onChange={(event) => onCaseLabel(event.target.value)} placeholder="Patient name or case ID" type="text" />
           </label>
           <div className="number-field">
             <label htmlFor="case-record-age">Age at records</label>
@@ -992,22 +945,6 @@ function CaseRecordsView({
           </label>
         </div>
       </section>
-      <section className="case-section" aria-labelledby="required-records-title">
-        <div className="case-section__heading">
-          <div><h2 id="required-records-title">Additional clinical records</h2></div>
-        </div>
-        <div className="record-list">
-          {clinicalRecordRows.filter((record) => !["photos", "pano", "ceph"].includes(record.key)).map((record) => (
-            <div className="record-row" key={record.key}>
-              <div className="record-row__copy">
-                <strong>{record.title}</strong>
-                <span>{record.detail}</span>
-              </div>
-              <RecordStatus complete={records[record.key]} onAdd={() => onCompleteRecord(record.key)} />
-            </div>
-          ))}
-        </div>
-      </section>
         </div>
         <div className="case-content-column">
       <section className="case-section" aria-labelledby="intraoral-photos-title">
@@ -1031,7 +968,6 @@ function CaseRecordsView({
       <section className="case-section" aria-labelledby="facial-photos-title">
         <div className="case-section__heading">
           <div><h2 id="facial-photos-title">Facial photographs</h2></div>
-          <span className="case-photo-count">Additional records</span>
         </div>
         <div className="case-photo-grid case-photo-grid--additional">
           {facialPhotoSlots.map((slot) => (
@@ -2395,7 +2331,7 @@ function ClinicalAppPage() {
   const [patientPage, setPatientPage] = useState(1);
   const casesRequestRef = useRef(0);
   const [caseId, setCaseId] = useState<string | null>(null);
-  const [caseLabel, setCaseLabel] = useState("Local Case");
+  const [caseLabel, setCaseLabel] = useState("");
   const [caseDetails, setCaseDetails] = useState<CaseDetailsState>(emptyCaseDetails);
   const [findings, setFindings] = useState<FindingsState>(emptyFindings);
   const [diagnosis, setDiagnosis] = useState<DiagnosisState>(emptyDiagnosis);
@@ -2406,7 +2342,6 @@ function ClinicalAppPage() {
   const [planApproved, setPlanApproved] = useState(false);
   const [setupApproved, setSetupApproved] = useState(false);
   const [plan, setPlan] = useState<TreatmentPlanState>(emptyPlan);
-  const [records, setRecords] = useState<Record<RecordKey, boolean>>(emptyRecords);
   const [photos, setPhotos] = useState<Partial<Record<PhotoKey, CasePhoto>>>({});
   const [cephTrace, setCephTrace] = useState<CephTrace | null>(null);
   const [photoError, setPhotoError] = useState("");
@@ -2428,12 +2363,6 @@ function ClinicalAppPage() {
   const previousUserIdRef = useRef<string | null>(null);
   const online = useOnlineStatus();
 
-  const visibleRecords: Record<RecordKey, boolean> = {
-    ...records,
-    photos: intraoralPhotoSlots.every((slot) => Boolean(photos[slot.key])),
-    pano: Boolean(photos.pano),
-    ceph: Boolean(photos.ceph),
-  };
   const missingCount = intraoralPhotoSlots.filter((slot) => !photos[slot.key]).length;
   const planningReady = missingCount === 0 && !scopeIssue;
   const userId = session?.user.id ?? null;
@@ -2625,14 +2554,13 @@ function ClinicalAppPage() {
 
       if (previousUserId) {
         setCaseId(null);
-        setCaseLabel("Local Case");
+        setCaseLabel("");
         setCaseDetails(emptyCaseDetails);
         setFindings(emptyFindings);
         setDiagnosis(emptyDiagnosis);
         diagnosisRequestRef.current += 1;
         setDiagnosisLoading(false);
         setDiagnosisError("");
-        setRecords(emptyRecords);
         setScopeIssue("");
         setPlan(emptyPlan);
         setPlanApproved(false);
@@ -2711,17 +2639,6 @@ function ClinicalAppPage() {
     setSetupApproved(false);
     invalidateTreatmentSelection();
     setStageAiReview(null);
-  };
-
-  const completeRecord = (key: RecordKey) => {
-    if (key === "photos" || key === "pano" || key === "ceph") return;
-    setRecords((current) => ({ ...current, [key]: true }));
-    setDiagnosis((current) => ({ ...current, approved: false }));
-    diagnosisRequestRef.current += 1;
-    setDiagnosisLoading(false);
-    setPlanApproved(false);
-    setSetupApproved(false);
-    invalidateTreatmentSelection();
   };
 
   const updateCaseDetail = (field: keyof CaseDetailsState, value: string) => {
@@ -2822,7 +2739,7 @@ function ClinicalAppPage() {
   const openLocalCase = () => {
     clearLocalPhotos();
     setCaseId(null);
-    setCaseLabel("Local Case");
+    setCaseLabel("");
     setCaseDetails(emptyCaseDetails);
     setFindings(emptyFindings);
     setDiagnosis(emptyDiagnosis);
@@ -2832,7 +2749,6 @@ function ClinicalAppPage() {
     setPlanApproved(false);
     setSetupApproved(false);
     setPlan(emptyPlan);
-    setRecords(emptyRecords);
     setScanState(null);
     setStageState(null);
     cancelSuggestions();
@@ -2874,7 +2790,6 @@ function ClinicalAppPage() {
     skipNextAutosaveRef.current = true;
     setCaseId(row.id);
     setCaseLabel(row.label || "Untitled Case");
-    setRecords({ ...emptyRecords, ...(storedRecords.checklist || {}) });
     setCaseDetails({ ...emptyCaseDetails, ...(storedRecords.details || {}) });
     setFindings({ ...emptyFindings, ...(storedRecords.findings || {}) });
     setDiagnosis({ ...emptyDiagnosis, ...(storedRecords.diagnosis || {}), approved: false });
@@ -2977,7 +2892,6 @@ function ClinicalAppPage() {
       void saveBracketMotionCase(caseId, {
         label: dbLabel,
         records: {
-          checklist: records,
           details: caseDetails,
           findings,
           diagnosis,
@@ -3004,7 +2918,6 @@ function ClinicalAppPage() {
                       updated_at: now,
                       scope_issue: scopeIssue,
                       records: {
-                        checklist: records,
                         details: caseDetails,
                         findings,
                         diagnosis,
@@ -3031,7 +2944,6 @@ function ClinicalAppPage() {
     findings,
     plan,
     planApproved,
-    records,
     scanState,
     scopeIssue,
     online,
@@ -3362,7 +3274,7 @@ function ClinicalAppPage() {
             <>
               <span className="app-topbar__divider" aria-hidden="true" />
               <div className="app-case-title">
-                <strong>{caseLabel}</strong>
+                <strong>{caseLabel.trim() || "New case"}</strong>
                 <span>{caseDetails.patientStage === "Not specified" ? "Patient stage not set" : caseDetails.patientStage} · {planApproved ? "Plan approved" : diagnosis.approved ? "Diagnosis approved" : planningReady ? "Ready for diagnosis" : "Draft"}</span>
               </div>
             </>
@@ -3657,8 +3569,6 @@ function ClinicalAppPage() {
               onCaseLabel={setCaseLabel}
               caseDetails={caseDetails}
               onCaseDetail={updateCaseDetail}
-              records={visibleRecords}
-              onCompleteRecord={completeRecord}
               photos={photos}
               onPhotoChange={changePhoto}
               photoError={photoError}
