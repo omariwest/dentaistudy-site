@@ -673,14 +673,14 @@ type StoredRecordsState = {
 
 const viewerViews = ["Front", "Right", "Left", "Upper", "Lower"];
 
-const requiredRecords: Array<{ key: RecordKey; title: string; detail: string }> = [
+const clinicalRecordRows: Array<{ key: RecordKey; title: string; detail: string }> = [
   { key: "history", title: "History + chief complaint", detail: "Medical, dental and treatment history" },
   { key: "exam", title: "Clinical examination", detail: "Periodontal, facial and occlusal findings" },
-  { key: "scans", title: "Upper + lower scans", detail: "STL/PLY with correct bite relationship" },
+  { key: "scans", title: "Upper + lower scans", detail: "Optional STL/PLY for the current 3D workspace" },
   { key: "photos", title: "Clinical photographs", detail: "Five intraoral photographs" },
-  { key: "pano", title: "Panoramic radiograph", detail: "Required for planning-ready status" },
-  { key: "ceph", title: "Lateral cephalogram", detail: "Required for planning-ready status" },
-  { key: "cephSummary", title: "Cephalometric summary", detail: "Clinician-entered categorical summary" },
+  { key: "pano", title: "Panoramic radiograph", detail: "Additional radiographic record" },
+  { key: "ceph", title: "Lateral cephalogram", detail: "For cephalometric tracing" },
+  { key: "cephSummary", title: "Cephalometric summary", detail: "Additional clinician-entered findings" },
 ];
 
 const outOfScopeGroups = [
@@ -780,8 +780,8 @@ function ReadinessCard({
       </div>
       <p>
         {planningReady
-          ? "Required records are complete. Continue to Diagnosis."
-          : `${missingCount} required record${missingCount === 1 ? "" : "s"} missing. Planning remains locked.`}
+          ? "Five intraoral photographs added. Continue to Diagnosis."
+          : `${missingCount} of 5 intraoral photographs missing. Add the photographs to continue.`}
       </p>
     </div>
   );
@@ -977,7 +977,7 @@ function CaseRecordsView({
           <div><h2 id="required-records-title">Other clinical records</h2></div>
         </div>
         <div className="record-list">
-          {requiredRecords.filter((record) => !["photos", "pano", "ceph"].includes(record.key)).map((record) => (
+          {clinicalRecordRows.filter((record) => !["photos", "pano", "ceph"].includes(record.key)).map((record) => (
             <div className="record-row" key={record.key}>
               <div className="record-row__copy">
                 <strong>{record.title}</strong>
@@ -2391,7 +2391,7 @@ function ClinicalAppPage() {
     pano: Boolean(photos.pano),
     ceph: Boolean(photos.ceph),
   };
-  const missingCount = requiredRecords.filter((record) => !visibleRecords[record.key]).length;
+  const missingCount = intraoralPhotoSlots.filter((slot) => !photos[slot.key]).length;
   const planningReady = missingCount === 0 && !scopeIssue;
   const userId = session?.user.id ?? null;
   const doctorProfile = session?.user.user_metadata?.bracketmotion_profile as
