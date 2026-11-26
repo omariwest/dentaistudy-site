@@ -218,25 +218,21 @@ export default function CephAnalysis({
 
   return (
     <div className="ceph-tracing">
-      <div className="ceph-tracing__heading">
-        <div>
-          <strong>Landmark tracing</strong>
-          <p>29 editable landmarks</p>
-        </div>
-        {current && (
-          <span className={current.approved ? "ceph-tracing__status is-approved" : "ceph-tracing__status"}>
-            {current.approved ? "Verified" : "Review required"}
-          </span>
-        )}
-      </div>
-
       <div className="ceph-tracing__workspace">
         <div className="ceph-tracing__image-column">
+          <div className="ceph-tracing__heading">
+            <strong>Landmark tracing</strong>
+            {current && (
+              <span className={current.approved ? "ceph-tracing__status is-approved" : "ceph-tracing__status"}>
+                {current.approved ? "Verified" : "Review required"}
+              </span>
+            )}
+          </div>
           {!photo ? (
             <div className="ceph-tracing__empty">
-              <p>Add a lateral cephalogram in Clinical Records to begin tracing.</p>
+              <p>Upload a lateral cephalogram to begin tracing.</p>
               <button className="app-quiet-button" type="button" onClick={onOpenRecords}>
-                Open Clinical Records
+                Clinical Records
               </button>
             </div>
           ) : (
@@ -362,7 +358,10 @@ export default function CephAnalysis({
               </section>
             ))
           ) : (
-            <p className="ceph-tracing__empty-result">Measurements appear after landmark detection.</p>
+            <div className="ceph-tracing__empty-result">
+              <strong>Measurements</strong>
+              <p>Available after landmark detection.</p>
+            </div>
           )}
 
           {children}
