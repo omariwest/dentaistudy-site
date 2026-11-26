@@ -864,7 +864,6 @@ function CaseRecordsView({
       />
 
       <div className="case-content-grid">
-        <div className="case-content-column">
       <section className="case-section" aria-labelledby="case-details-title">
         <div className="case-section__heading">
           <div><h2 id="case-details-title">Patient and clinical history</h2></div>
@@ -945,8 +944,6 @@ function CaseRecordsView({
           </label>
         </div>
       </section>
-        </div>
-        <div className="case-content-column">
       <section className="case-section" aria-labelledby="intraoral-photos-title">
         <div className="case-section__heading">
           <div><h2 id="intraoral-photos-title">Five intraoral photographs</h2></div>
@@ -985,7 +982,6 @@ function CaseRecordsView({
           ))}
         </div>
       </section>
-        </div>
       </div>
     </div>
   );
@@ -1170,36 +1166,7 @@ function FindingsView({
           </label>
         </div>
       </section>
-      <section className="case-section" aria-labelledby="facial-title">
-        <div className="case-section__heading">
-          <div>
-            <h2 id="facial-title">Facial + soft tissue</h2>
-          </div>
-        </div>
 
-        <div className="finding-grid">
-          <label>
-            <span>Profile</span>
-            <UiSelect value={findings.profile} onChange={(value) => onFindingChange("profile", value)} options={["Not assessed", "Convex","Straight","Concave"]} ariaLabel="Profile" />
-          </label>
-          <label>
-            <span>Lip competence</span>
-            <UiSelect value={findings.lipCompetence} onChange={(value) => onFindingChange("lipCompetence", value)} options={["Not assessed", "Competent","Incompetent"]} ariaLabel="Lip competence" />
-          </label>
-          <label>
-            <span>Facial vertical pattern</span>
-            <UiSelect value={findings.facialVerticalPattern} onChange={(value) => onFindingChange("facialVerticalPattern", value)} options={["Not assessed", "Low","Average","High"]} ariaLabel="Facial vertical pattern" />
-          </label>
-          <label>
-            <span>Facial asymmetry</span>
-            <UiSelect value={findings.facialAsymmetry} onChange={(value) => onFindingChange("facialAsymmetry", value)} options={["Not assessed", "None","Present"]} ariaLabel="Facial asymmetry" />
-          </label>
-          <label className="finding-grid__wide">
-            <span>Smile / incisor display concern</span>
-            <input value={findings.smileConcern} onChange={(event) => onFindingChange("smileConcern", event.target.value)} type="text" />
-          </label>
-        </div>
-      </section>
 
         </div>
         <div className="case-content-column">
@@ -1270,6 +1237,36 @@ function FindingsView({
           <label className="finding-grid__wide">
             <span>Important rotations / displacements</span>
             <input value={findings.rotations} onChange={(event) => onFindingChange("rotations", event.target.value)} type="text" />
+          </label>
+        </div>
+      </section>
+      <section className="case-section" aria-labelledby="facial-title">
+        <div className="case-section__heading">
+          <div>
+            <h2 id="facial-title">Facial + soft tissue</h2>
+          </div>
+        </div>
+
+        <div className="finding-grid">
+          <label>
+            <span>Profile</span>
+            <UiSelect value={findings.profile} onChange={(value) => onFindingChange("profile", value)} options={["Not assessed", "Convex","Straight","Concave"]} ariaLabel="Profile" />
+          </label>
+          <label>
+            <span>Lip competence</span>
+            <UiSelect value={findings.lipCompetence} onChange={(value) => onFindingChange("lipCompetence", value)} options={["Not assessed", "Competent","Incompetent"]} ariaLabel="Lip competence" />
+          </label>
+          <label>
+            <span>Facial vertical pattern</span>
+            <UiSelect value={findings.facialVerticalPattern} onChange={(value) => onFindingChange("facialVerticalPattern", value)} options={["Not assessed", "Low","Average","High"]} ariaLabel="Facial vertical pattern" />
+          </label>
+          <label>
+            <span>Facial asymmetry</span>
+            <UiSelect value={findings.facialAsymmetry} onChange={(value) => onFindingChange("facialAsymmetry", value)} options={["Not assessed", "None","Present"]} ariaLabel="Facial asymmetry" />
+          </label>
+          <label className="finding-grid__wide">
+            <span>Smile / incisor display concern</span>
+            <input value={findings.smileConcern} onChange={(event) => onFindingChange("smileConcern", event.target.value)} type="text" />
           </label>
         </div>
       </section>
