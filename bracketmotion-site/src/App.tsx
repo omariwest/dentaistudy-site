@@ -3267,9 +3267,9 @@ function ClinicalAppPage() {
     <main className={`clinical-app${showCaseHub || showSettings ? " is-patients" : ""}`}>
       <header className="app-topbar">
         <div className="app-topbar__brand">
-          <a className="wordmark app-wordmark" href="/" aria-label="BracketMotion home">
+          <button className="wordmark app-wordmark" type="button" onClick={() => openSection("Case")} aria-label="Open Clinical Records">
             <span className="wordmark__text">bracket<strong>motion</strong></span>
-          </a>
+          </button>
           {!showCaseHub && !showSettings && (
             <>
               <span className="app-topbar__divider" aria-hidden="true" />
