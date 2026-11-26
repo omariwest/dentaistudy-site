@@ -83,6 +83,24 @@ if (!css.includes("height: clamp(340px, calc(100dvh - 210px), 730px);") ||
     !cephWorker.includes('text: "Finishing tracing…"')) {
   throw new Error("V1 validation failed: cephalometric viewer size or inline progress has regressed.");
 }
+const diagnosisSource = app.split("function FindingsView(")[1]?.split("function TreatmentPlanView(")[0] || "";
+const planSource = app.split("function TreatmentPlanView(")[1]?.split("function AuthDialog(")[0] || "";
+for (const [label, source, busy] of [
+  ["Diagnosis", diagnosisSource, "diagnosisLoading"],
+  ["Treatment", planSource, "suggestionsLoading"],
+]) {
+  if (!source.includes(`className="ai-review-gate" aria-busy={${busy}}`) ||
+      !source.includes(`aria-busy={${busy}}`)) {
+    throw new Error(`V1 validation failed: ${label} working button must expose progress state.`);
+  }
+}
+if (!ceph.includes('aria-busy={busy} onClick={() => void run()}') ||
+    !css.includes('.ai-review-button[aria-busy="true"],') ||
+    !css.includes('.ceph-tracing__actions > .app-quiet-button[aria-busy="true"]') ||
+    !css.includes('animation: clinical-action-shimmer 1.45s linear infinite;') ||
+    !css.includes('@keyframes clinical-action-shimmer')) {
+  throw new Error("V1 validation failed: meaningful clinical action shimmer is missing.");
+}
 if (css.includes(".case-workflow-page--split") || app.includes("case-workflow-page--split")) {
   throw new Error("V1 validation failed: obsolete split-layout overrides remain.");
 }
