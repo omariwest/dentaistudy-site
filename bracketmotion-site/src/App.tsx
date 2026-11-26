@@ -1054,7 +1054,7 @@ function FindingsView({
       />
 
       <section className="ai-review-card" aria-label="Diagnosis draft">
-        <div className="ai-review-gate">
+        <div className="ai-review-gate" aria-busy={diagnosisLoading}>
           <div>
             <strong>Diagnosis draft</strong>
             <p>Reviews the five intraoral photographs and available clinical findings.</p>
@@ -1063,6 +1063,7 @@ function FindingsView({
             className="ai-review-button"
             type="button"
             disabled={diagnosisLoading || (sessionActive && !planningReady)}
+            aria-busy={diagnosisLoading}
             onClick={sessionActive ? onGenerateDiagnosis : onSignIn}
           >
             {!sessionActive ? "Sign in to prepare" : diagnosisLoading ? "Reviewing photographs…" : "Prepare diagnosis"}
@@ -1441,18 +1442,19 @@ function TreatmentPlanView({
             {planApproved ? "Approved" : "Draft"}
           </span>
         </div>
-        <div className="ai-review-gate">
+        <div className="ai-review-gate" aria-busy={suggestionsLoading}>
           <div>
-            <strong>{suggestionsLoading ? "Generating suggestions…" : "Prepare treatment options"}</strong>
+            <strong>Treatment options</strong>
             <p>Uses the approved diagnosis, clinical records and verified measurements.</p>
           </div>
           <button
             type="button"
             className="ai-review-button"
             disabled={suggestionsLoading}
+            aria-busy={suggestionsLoading}
             onClick={sessionActive ? onGenerate : onSignIn}
           >
-            {!sessionActive ? "Sign in to generate" : suggestionsLoading ? "Generating…" : "Generate AI suggestions"}
+            {!sessionActive ? "Sign in to prepare" : suggestionsLoading ? "Preparing options…" : "Prepare options"}
           </button>
         </div>
         {suggestionsError && <div className="ai-review-error" role="alert">{suggestionsError}</div>}
