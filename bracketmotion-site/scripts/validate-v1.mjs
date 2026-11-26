@@ -3,6 +3,9 @@ import fs from "node:fs";
 const read = (path) => fs.readFileSync(new URL(path, import.meta.url), "utf8");
 const app = read("../src/App.tsx");
 const scan = read("../src/ScanWorkflow.tsx");
+const ceph = read("../src/CephAnalysis.tsx");
+const cephGeometry = read("../src/cephGeometry.ts");
+const clinicalAI = read("../supabase/functions/bracketmotion-clinical-reasoning/index.ts");
 const index = read("../index.html");
 const manifest = JSON.parse(read("../public/manifest.webmanifest"));
 const serviceWorker = read("../public/sw.js");
@@ -14,7 +17,7 @@ function requireText(source, token, label) {
   }
 }
 
-const requiredRecords = [
+const clinicalRecordSurfaces = [
   "History + chief complaint",
   "Clinical examination",
   "Upper + lower scans",
@@ -23,7 +26,37 @@ const requiredRecords = [
   "Lateral cephalogram",
   "Cephalometric summary",
 ];
-requiredRecords.forEach((token) => requireText(app, token, "Gate 2 record"));
+clinicalRecordSurfaces.forEach((token) => requireText(app, token, "clinical record surface"));
+
+const photoFirstGate = [
+  'const missingCount = intraoralPhotoSlots.filter((slot) => !photos[slot.key]).length;',
+  'const planningReady = missingCount === 0 && !scopeIssue;',
+  'activeSection === "Case" ? "Findings" : activeSection === "Findings" ? "Plan" : "Setup"',
+  '(activeSection === "Findings" ? diagnosis.approved : planApproved)',
+  'if ((section === "Plan" || section === "Setup" || section === "Stages") && !diagnosis.approved)',
+  'if ((section === "Setup" || section === "Stages") && !planApproved)',
+  'if (section === "Stages" && !setupApproved)',
+  'photos: photoInputs,',
+  'onApproveDiagnosis',
+  'onApprove={approveTreatmentPlan}',
+  'onOptionChange={updateTreatmentOption}',
+];
+photoFirstGate.forEach((token) => requireText(app, token, "photo-first clinical gate"));
+["frontal", "upperOcclusal", "lowerOcclusal", "rightBuccal", "leftBuccal"].forEach((slot) => {
+  requireText(app, `{ key: "${slot}",`, "five-photo input");
+});
+["Skeletal analysis", "Dental analysis", "Soft tissue analysis"].forEach((title) => {
+  requireText(ceph, title, "cephalometric analysis group");
+});
+["SN_MP", "SN_PP", "PP_MP", "IMPA", "INTERINCISAL"].forEach((name) => {
+  requireText(cephGeometry, name, "additional cephalometric measurement");
+});
+["sanitizePhotos", "inlineData", "diagnosisSchema", "gates.diagnosis_approved"].forEach((token) => {
+  requireText(clinicalAI, token, "single Gemini clinical review");
+});
+if (ceph.includes("Initial model download") || ceph.includes("Source and attribution")) {
+  throw new Error("V1 validation failed: clinical workspace contains developer metadata.");
+}
 
 const exclusions = [
   "Mixed or primary dentition treatment",
@@ -178,5 +211,5 @@ if (serviceWorker.includes("supabase.co")) {
 }
 
 console.log(
-  `BracketMotion V1 validation passed: ${representativeFamilies.length}/6 representative family profiles, ${requiredRecords.length} Gate 2 records, ${exclusions.length} Gate 4 exclusions, clinical gates, and PWA release invariants.`,
+  `BracketMotion V1 validation passed: ${representativeFamilies.length}/6 representative family profiles, ${clinicalRecordSurfaces.length} clinical record surfaces, five-photo Diagnosis gate, ${exclusions.length} scope exclusions, approval gates, AI photo contract, ceph groups, and PWA invariants.`,
 );
