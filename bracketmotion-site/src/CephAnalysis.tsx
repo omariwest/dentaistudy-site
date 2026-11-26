@@ -126,7 +126,7 @@ export default function CephAnalysis({
     const request = ++runRef.current;
     setBusy(true);
     setError("");
-    setProgress("Preparing radiograph…");
+    setProgress("Preparing image…");
     workerRef.current?.terminate();
     workerRef.current = null;
     try {
@@ -240,7 +240,9 @@ export default function CephAnalysis({
               <div className="ceph-tracing__actions">
                 <button type="button" className="app-quiet-button" disabled={busy}
                   onClick={() => void run()}>
-                  {busy ? "Running analysis…" : current ? "Run again" : "Detect landmarks"}
+                  <span role="status" aria-live="polite">
+                    {busy ? progress || "Preparing image…" : current ? "Run again" : "Detect landmarks"}
+                  </span>
                 </button>
                 {current && (
                   <>
@@ -259,7 +261,6 @@ export default function CephAnalysis({
                   </>
                 )}
               </div>
-              {busy && <p className="ceph-tracing__progress" role="status">{progress || "Processing…"}</p>}
               {error && <p className="case-photo-error" role="alert">{error}</p>}
               <div className="ceph-tracing__viewer">
                 {imageWidth > 0 && imageHeight > 0 ? (
