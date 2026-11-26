@@ -17,16 +17,28 @@ function requireText(source, token, label) {
   }
 }
 
-const clinicalRecordSurfaces = [
-  "History + chief complaint",
-  "Clinical examination",
-  "Upper + lower scans",
-  "Clinical photographs",
-  "Panoramic radiograph",
-  "Lateral cephalogram",
-  "Cephalometric summary",
+const clinicalRecordInputs = [
+  "Patient label / case ID",
+  "Patient and clinical history",
+  "Chief complaint / treatment goal",
+  "Medical history",
+  "Dental / orthodontic history",
+  "Allergies / habits / clinical notes",
+  "Five intraoral photographs",
+  "Facial photographs",
+  "Radiographic records",
 ];
-clinicalRecordSurfaces.forEach((token) => requireText(app, token, "clinical record surface"));
+clinicalRecordInputs.forEach((token) => requireText(app, token, "clinical records input"));
+if (app.includes("Additional clinical records") || app.includes("RecordStatus") || app.includes('"Local Case"')) {
+  throw new Error("V1 validation failed: obsolete clinical record checklist or demo label remains.");
+}
+[
+  'chiefComplaint: "Improve my smile."',
+  'medicalHistory: "Not provided"',
+  'dentalHistory: "Not provided"',
+  'notes: "Not provided"',
+  'placeholder="Patient name or case ID"',
+].forEach((token) => requireText(app, token, "neutral new-case defaults"));
 
 const photoFirstGate = [
   'const missingCount = intraoralPhotoSlots.filter((slot) => !photos[slot.key]).length;',
@@ -211,5 +223,5 @@ if (serviceWorker.includes("supabase.co")) {
 }
 
 console.log(
-  `BracketMotion V1 validation passed: ${representativeFamilies.length}/6 representative family profiles, ${clinicalRecordSurfaces.length} clinical record surfaces, five-photo Diagnosis gate, ${exclusions.length} scope exclusions, approval gates, AI photo contract, ceph groups, and PWA invariants.`,
+  `BracketMotion V1 validation passed: ${representativeFamilies.length}/6 representative family profiles, ${clinicalRecordInputs.length} clinical record inputs, five-photo Diagnosis gate, ${exclusions.length} scope exclusions, approval gates, AI photo contract, ceph groups, and PWA invariants.`,
 );
