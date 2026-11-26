@@ -76,7 +76,7 @@ if (!css.includes("height: clamp(340px, calc(100dvh - 210px), 730px);") ||
     css.includes(".ceph-tracing__progress") ||
     ceph.includes('className="ceph-tracing__progress"') ||
     !ceph.includes('{busy ? progress || "Preparing image…" : current ? "Run again" : "Detect landmarks"}') ||
-    !ceph.includes('role="status" aria-live="polite"') ||
+    !ceph.includes('<span aria-live="polite">') || ceph.includes('<span role="status" aria-live="polite">') ||
     !ceph.includes('preserveAspectRatio="xMidYMid meet"') ||
     !cephWorker.includes('text: "Preparing analysis…"') ||
     !cephWorker.includes('text: "Finding landmarks…"') ||
