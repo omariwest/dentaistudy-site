@@ -97,7 +97,7 @@ self.onmessage = async (event: MessageEvent<InferenceMessage>) => {
   const { id, pixels, width, height } = event.data;
   if (event.data.kind !== "run") return;
   try {
-    self.postMessage({ kind: "status", id, text: "Loading cephalometric model…" });
+    self.postMessage({ kind: "status", id, text: "Preparing analysis…" });
     if (!sessionPromise) {
       sessionPromise = ort.InferenceSession.create(MODEL_PATH, {
         executionProviders: ["wasm"],
@@ -108,7 +108,7 @@ self.onmessage = async (event: MessageEvent<InferenceMessage>) => {
       });
     }
     const session = await sessionPromise;
-    self.postMessage({ kind: "status", id, text: "Detecting 29 landmarks…" });
+    self.postMessage({ kind: "status", id, text: "Finding landmarks…" });
     const output = await session.run({
       image: new ort.Tensor("float32", pixels, [1, 3, INPUT_SIZE, INPUT_SIZE]),
     });
@@ -117,7 +117,7 @@ self.onmessage = async (event: MessageEvent<InferenceMessage>) => {
       !(tensor.data instanceof Float32Array)) {
       throw new Error("Model output format does not match CephViT v1.");
     }
-    self.postMessage({ kind: "status", id, text: "Preparing landmark tracing…" });
+    self.postMessage({ kind: "status", id, text: "Finishing tracing…" });
     const points = darkDecode(tensor.data, width, height);
     self.postMessage({ kind: "result", id, points });
   } catch (error) {
