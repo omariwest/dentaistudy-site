@@ -67,6 +67,10 @@ for (const selector of [
     throw new Error(`V1 validation failed: workflow width is inconsistent (${selector}).`);
   }
 }
+if (!css.includes(".ceph-tracing__viewer {\n  display: grid;\n  grid-template-rows: minmax(0, 1fr);") ||
+    !css.includes(".ceph-tracing__svg {\n  display: block;\n  width: 100%;\n  min-width: 0;\n  height: 100%;\n  min-height: 0;")) {
+  throw new Error("V1 validation failed: cephalogram SVG must fit the bounded viewer without clipping.");
+}
 if (css.includes(".case-workflow-page--split") || app.includes("case-workflow-page--split")) {
   throw new Error("V1 validation failed: obsolete split-layout overrides remain.");
 }
