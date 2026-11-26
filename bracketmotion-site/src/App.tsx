@@ -12,7 +12,7 @@ import {
 import type { ClinicalViewerHandle } from "./ClinicalViewer";
 import UiSelect from "./UiSelect";
 import NumberInput from "./NumberInput";
-import { cephAngles, cephAngleSummary, type CephTrace } from "./cephGeometry";
+import { cephAngles, type CephTrace } from "./cephGeometry";
 import type {
   ScanPersistenceState,
   StageAiReviewResult,
@@ -512,6 +512,26 @@ const intraoralPhotoSlots: Array<{ key: PhotoKey; title: string }> = [
   { key: "rightBuccal", title: "Right buccal" },
   { key: "leftBuccal", title: "Left buccal" },
 ];
+// Images remain in the tab and are converted only for an explicit AI draft request.
+// Canvas strips file metadata and keeps the five-image request small.
+async function prepareDiagnosisPhoto(file: File) {
+  const image = await createImageBitmap(file);
+  try {
+    const scale = Math.min(1, 960 / Math.max(image.width, image.height));
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.round(image.width * scale));
+    canvas.height = Math.max(1, Math.round(image.height * scale));
+    const context = canvas.getContext("2d");
+    if (!context) throw new Error("IMAGE_PROCESSING_UNAVAILABLE");
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+    const encoded = canvas.toDataURL("image/jpeg", 0.7).split(",")[1] || "";
+    if (!encoded || encoded.length > 440_000) throw new Error("IMAGE_TOO_LARGE");
+    return { mime_type: "image/jpeg", data: encoded };
+  } finally {
+    image.close();
+  }
+}
+
 const facialPhotoSlots: Array<{ key: PhotoKey; title: string }> = [
   { key: "faceFront", title: "Frontal face" },
   { key: "smile", title: "Smile" },
@@ -1005,7 +1025,7 @@ function CaseRecordsView({
             />
           ))}
         </div>
-        <p className="case-photo-note">JPG, PNG or WebP, up to 12 MB each. Images stay in this browser tab; they are not saved to your case yet.</p>
+        <p className="case-photo-note">JPG, PNG or WebP, up to 12 MB each. Photos stay in this tab and are sent for AI analysis only when you generate a draft.</p>
         {photoError && <p className="case-photo-error" role="alert">{photoError}</p>}
       </section>
       <section className="case-section" aria-labelledby="facial-photos-title">
@@ -1149,7 +1169,7 @@ function FindingsView({
         <div className="ai-review-gate">
           <div>
             <strong>AI-assisted draft</strong>
-            <p>Generate from entered case details and findings; images are not sent.</p>
+            <p>Uses the five intraoral photos, clinical findings and verified cephalometric measurements.</p>
           </div>
           <button
             className="ai-review-button"
@@ -1439,6 +1459,10 @@ function TreatmentPlanView({
   onApprove: () => void;
 }) {
   const selected = plan.selectedOption === null ? null : plan.options[plan.selectedOption];
+  const [manualOptions, setManualOptions] = useState(false);
+  const hasDraftOptions = plan.options.some((option) =>
+    Object.values(option).some((value) => value.trim()),
+  );
   const canApprove = Boolean(
     planningReady && plan.problemList.trim() && plan.goals.trim() &&
     selected && Object.values(selected).every((value) => value.trim()),
@@ -1475,7 +1499,7 @@ function TreatmentPlanView({
         <div className="ai-review-card__header">
           <div>
             <span>Clinical planning</span>
-            <h2 id="ai-treatment-suggestions">Three editable treatment suggestions</h2>
+            <h2 id="ai-treatment-suggestions">Up to three editable treatment suggestions</h2>
           </div>
           <span className={"ai-review-status" + (planApproved ? " is-ready" : "")}>
             {planApproved ? "Approved" : "Draft"}
@@ -1484,7 +1508,7 @@ function TreatmentPlanView({
         <div className="ai-review-gate">
           <div>
             <strong>{suggestionsLoading ? "Generating suggestions…" : "Prepare treatment options"}</strong>
-            <p>Uses entered clinical findings and approved diagnosis, not the uploaded images.</p>
+            <p>Uses the approved diagnosis, clinical records and verified measurements.</p>
           </div>
           <button
             type="button"
@@ -1524,8 +1548,19 @@ function TreatmentPlanView({
         </div>
       </section>
 
+      {!hasDraftOptions && !manualOptions && (
+        <div className="case-section">
+          <p>Generate treatment options from the approved diagnosis, or enter your own.</p>
+          <button className="app-quiet-button" type="button" onClick={() => setManualOptions(true)}>
+            Enter manually
+          </button>
+        </div>
+      )}
+
+      {(hasDraftOptions || manualOptions) && (
       <div className="plan-strategy-grid" aria-label="Treatment suggestion options">
         {plan.options.map((option, index) => {
+          if (!manualOptions && !Object.values(option).some((value) => value.trim())) return null;
           const isSelected = plan.selectedOption === index;
           const label = String.fromCharCode(65 + index);
           return (
@@ -1590,6 +1625,13 @@ function TreatmentPlanView({
           );
         })}
       </div>
+      )}
+
+      {hasDraftOptions && !manualOptions && plan.options.some((option) => !option.title.trim()) && (
+        <button type="button" className="app-quiet-button" onClick={() => setManualOptions(true)}>
+          Add an alternative manually
+        </button>
+      )}
 
       {plan.informationGaps && (
         <section className="case-section" aria-labelledby="treatment-evidence-title">
@@ -3056,13 +3098,13 @@ function ClinicalAppPage() {
         occlusal: [
           `Molar R/L: ${findings.molarRight}/${findings.molarLeft}`,
           `Canine R/L: ${findings.canineRight}/${findings.canineLeft}`,
-          `Overjet: ${findings.overjet} mm`,
-          `Overbite: ${findings.overbite}%`,
-          `Maxillary crowding/spacing: ${findings.maxillaryCrowding} mm`,
-          `Mandibular crowding/spacing: ${findings.mandibularCrowding} mm`,
+          findings.overjet.trim() ? `Overjet: ${findings.overjet} mm` : "Overjet: not measured",
+          findings.overbite.trim() ? `Overbite: ${findings.overbite}%` : "Overbite: not measured",
+          findings.maxillaryCrowding.trim() ? `Maxillary crowding/spacing: ${findings.maxillaryCrowding} mm` : "Maxillary crowding/spacing: not measured",
+          findings.mandibularCrowding.trim() ? `Mandibular crowding/spacing: ${findings.mandibularCrowding} mm` : "Mandibular crowding/spacing: not measured",
           `Upper midline: ${findings.upperMidline}`,
           `Lower midline: ${findings.lowerMidline}`,
-          `Interarch midline discrepancy: ${findings.midlineDiscrepancy} mm`,
+          findings.midlineDiscrepancy.trim() ? `Interarch midline discrepancy: ${findings.midlineDiscrepancy} mm` : "Interarch midline discrepancy: not measured",
           `Curve of Spee: ${findings.curveOfSpee}`,
           `Crossbite: ${findings.crossbite}`,
           `Scissor bite: ${findings.scissorBite}`,
@@ -3075,7 +3117,10 @@ function ClinicalAppPage() {
           `Mandibular incisors: ${findings.mandibularIncisors}`,
           `Concern: ${findings.cephConcern}`,
           ...(cephTrace?.approved && cephAngles(cephTrace.points)
-            ? [`Clinician-verified numeric measurements: ${cephAngleSummary(cephAngles(cephTrace.points)!)}`]
+            ? [`Clinician-verified numeric measurements: ${Object.entries(cephAngles(cephTrace.points)!)
+                .filter((entry): entry is [string, number] => typeof entry[1] === "number")
+                .map(([name, value]) => `${name.replaceAll("_", "–")} ${value.toFixed(1)}°`)
+                .join(", ")}`]
             : []),
         ].join("; "),
       },
@@ -3120,7 +3165,7 @@ function ClinicalAppPage() {
       return;
     }
     if (!planningReady) {
-      setDiagnosisError("Complete the required clinical records first.");
+      setDiagnosisError("Add all five intraoral photographs first.");
       return;
     }
     const request = ++diagnosisRequestRef.current;
@@ -3128,8 +3173,15 @@ function ClinicalAppPage() {
     setDiagnosisError("");
 
     try {
+      const photoInputs = await Promise.all(intraoralPhotoSlots.map(async (slot) => {
+        const photo = photos[slot.key];
+        if (!photo) throw new Error("MISSING_INTRAORAL_PHOTO");
+        return { slot: slot.key, ...await prepareDiagnosisPhoto(photo.file) };
+      }));
+      if (request !== diagnosisRequestRef.current) return;
       const result = await invokeBracketMotionClinicalReview({
         ...buildAiPayload("diagnosis_draft"),
+        photos: photoInputs,
         plan: {},
         setup: {},
         mechanics: {},
@@ -3153,7 +3205,7 @@ function ClinicalAppPage() {
       setSetupApproved(false);
     } catch {
       if (request === diagnosisRequestRef.current) {
-        setDiagnosisError("The draft could not be generated. Your entered findings remain unchanged.");
+        setDiagnosisError("Could not analyze the photographs. Check the five images and try again.");
       }
     } finally {
       if (request === diagnosisRequestRef.current) setDiagnosisLoading(false);
