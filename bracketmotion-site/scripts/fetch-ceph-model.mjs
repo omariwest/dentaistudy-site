@@ -28,7 +28,7 @@ if (!(await valid(file))) {
   try {
     const response = await fetch(release, { headers: { "User-Agent": "BracketMotion-build" } });
     if (!response.ok || !response.body) {
-      throw new Error(\`CephViT model release not available (\${response.status})\`);
+      throw new Error(`CephViT model release not available (${response.status})`);
     }
     await pipeline(Readable.fromWeb(response.body), createWriteStream(temp));
     if (!(await valid(temp))) throw new Error("CephViT model SHA256/size mismatch");
