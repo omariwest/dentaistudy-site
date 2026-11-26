@@ -5,6 +5,7 @@ const app = read("../src/App.tsx");
 const css = read("../src/styles.css");
 const scan = read("../src/ScanWorkflow.tsx");
 const ceph = read("../src/CephAnalysis.tsx");
+const cephWorker = read("../src/cephInference.worker.ts");
 const cephGeometry = read("../src/cephGeometry.ts");
 const clinicalAI = read("../supabase/functions/bracketmotion-clinical-reasoning/index.ts");
 const index = read("../index.html");
@@ -70,6 +71,17 @@ for (const selector of [
 if (!css.includes(".ceph-tracing__viewer {\n  display: grid;\n  grid-template-rows: minmax(0, 1fr);") ||
     !css.includes(".ceph-tracing__svg {\n  display: block;\n  width: 100%;\n  min-width: 0;\n  height: 100%;\n  min-height: 0;")) {
   throw new Error("V1 validation failed: cephalogram SVG must fit the bounded viewer without clipping.");
+}
+if (!css.includes("height: clamp(340px, calc(100dvh - 210px), 730px);") ||
+    css.includes(".ceph-tracing__progress") ||
+    ceph.includes('className="ceph-tracing__progress"') ||
+    !ceph.includes('{busy ? progress || "Preparing image…" : current ? "Run again" : "Detect landmarks"}') ||
+    !ceph.includes('role="status" aria-live="polite"') ||
+    !ceph.includes('preserveAspectRatio="xMidYMid meet"') ||
+    !cephWorker.includes('text: "Preparing analysis…"') ||
+    !cephWorker.includes('text: "Finding landmarks…"') ||
+    !cephWorker.includes('text: "Finishing tracing…"')) {
+  throw new Error("V1 validation failed: cephalometric viewer size or inline progress has regressed.");
 }
 if (css.includes(".case-workflow-page--split") || app.includes("case-workflow-page--split")) {
   throw new Error("V1 validation failed: obsolete split-layout overrides remain.");
