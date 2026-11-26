@@ -4704,6 +4704,22 @@ a {
   opacity: 0.62;
 }
 
+/* UIORI-style shimmer, only while the existing clinical action is working. */
+.ai-review-button[aria-busy="true"],
+.ceph-tracing__actions > .app-quiet-button[aria-busy="true"] {
+  color: #43388b;
+  background: linear-gradient(100deg, #e6e3f5 20%, #f7f6ff 40%, #e6e3f5 60%);
+  background-size: 200% 100%;
+  animation: clinical-action-shimmer 1.45s linear infinite;
+  opacity: 1;
+  cursor: progress;
+}
+
+@keyframes clinical-action-shimmer {
+  from { background-position: 100% 0; }
+  to { background-position: -100% 0; }
+}
+
 .ai-review-error {
   margin-top: 9px;
   padding: 9px 10px;
