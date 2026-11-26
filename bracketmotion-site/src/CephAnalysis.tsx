@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import type { PointerEvent as ReactPointerEvent } from "react";
+import type { PointerEvent as ReactPointerEvent, ReactNode } from "react";
 import UiSelect from "./UiSelect";
 import {
   cephAngles,
-  cephAngleSummary,
   cephLandmarks,
   type CephLandmark,
   type CephPoint,
@@ -17,7 +16,6 @@ type WorkerResult =
   | { kind: "error"; id: number; message: string };
 
 const keyLandmarks: CephLandmark[] = ["S", "N", "A", "B", "Po", "Or", "Go", "Me"];
-const modelBytes = 90.5;
 
 async function prepareCephInput(file: File): Promise<{
   input: Float32Array;
@@ -56,12 +54,14 @@ export default function CephAnalysis({
   onTraceChange,
   onApprove,
   onOpenRecords,
+  children,
 }: {
   photo?: SourcePhoto;
   trace: CephTrace | null;
   onTraceChange: (next: CephTrace | null) => void;
   onApprove: (next: CephTrace) => void;
   onOpenRecords: () => void;
+  children?: ReactNode;
 }) {
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState("");
@@ -188,159 +188,167 @@ export default function CephAnalysis({
   const lines: Array<[CephLandmark, CephLandmark]> = [
     ["S", "N"], ["N", "A"], ["N", "B"], ["Po", "Or"], ["Go", "Me"],
   ];
-  const pointRadius = Math.max(4, imageWidth / 230);
+  const pointRadius = Math.max(3, imageWidth / 250);
+  const hitRadius = Math.max(16, imageWidth / 58);
 
   return (
     <div className="ceph-tracing">
       <div className="ceph-tracing__heading">
         <div>
-          <strong>Automatic landmark tracing</strong>
-          <p>CephViT · 29 landmarks · processed in your browser</p>
+          <strong>Landmark tracing</strong>
+          <p>29 editable landmarks</p>
         </div>
-        {current && <span className={current.approved ? "ceph-tracing__status is-approved" : "ceph-tracing__status"}>
-          {current.approved ? "Clinician verified" : "Review required"}
-        </span>}
+        {current && (
+          <span className={current.approved ? "ceph-tracing__status is-approved" : "ceph-tracing__status"}>
+            {current.approved ? "Verified" : "Review required"}
+          </span>
+        )}
       </div>
 
-      {!photo ? (
-        <div className="ceph-tracing__empty">
-          <p>Add a lateral cephalogram to Clinical Records to start tracing.</p>
-          <button className="app-quiet-button" type="button" onClick={onOpenRecords}>
-            Open Clinical Records
-          </button>
-        </div>
-      ) : (
-        <>
-          <div className="ceph-tracing__actions">
-            <button type="button" className="app-quiet-button" disabled={busy}
-              onClick={() => void run()}>
-              {busy ? "Running analysis…" : current ? "Run again" : "Detect landmarks"}
-            </button>
-            {current && (
-              <>
-                <button className="app-quiet-button" type="button"
-                  onClick={() => setShowAll((value) => !value)}>
-                  {showAll ? "Key landmarks" : "All 29 landmarks"}
-                </button>
-                <div className="ceph-tracing__selector">
-                  <UiSelect
-                    ariaLabel="Select cephalometric landmark"
-                    value={selected}
-                    options={cephLandmarks.map((landmark) => landmark)}
-                    onChange={(value) => setSelected(value as CephLandmark)}
-                  />
-                </div>
-              </>
-            )}
-          </div>
-
-          {busy && <p className="ceph-tracing__progress" role="status">{progress || "Processing…"}</p>}
-          {error && <p className="case-photo-error" role="alert">{error}</p>}
-          <div className="ceph-tracing__viewer">
-            {imageWidth > 0 && imageHeight > 0 ? (
-              <svg
-                ref={svgRef}
-                viewBox={`0 0 ${imageWidth} ${imageHeight}`}
-                preserveAspectRatio="xMidYMid meet"
-                className="ceph-tracing__svg"
-                aria-label="Lateral cephalogram with editable landmark positions"
-                onPointerMove={onMove}
-                onPointerUp={onStop}
-                onPointerCancel={onStop}
-              >
-                <image href={photo.previewUrl} width={imageWidth} height={imageHeight} />
-                {current && lines.map(([a, b]) => {
-                  const from = pointAt(a), to = pointAt(b);
-                  return from && to ? (
-                    <line key={a + b} x1={from.x} y1={from.y}
-                      x2={to.x} y2={to.y} className="ceph-tracing__line" />
-                  ) : null;
-                })}
-                {current?.points.map((point, index) => {
-                  const landmark = cephLandmarks[index];
-                  if (!showAll && !keyLandmarks.includes(landmark) && selected !== landmark) return null;
-                  return (
-                    <g key={landmark} className="ceph-tracing__landmark">
-                      <circle
-                        cx={point.x} cy={point.y}
-                        r={landmark === selected ? pointRadius * 1.8 : pointRadius * 1.3}
-                        className={landmark === selected ? "is-selected" : ""}
-                        role="button" tabIndex={0}
-                        aria-label={`Move ${landmark} landmark`}
-                        onPointerDown={(event) => {
-                          setSelected(landmark);
-                          dragRef.current = index;
-                          event.currentTarget.setPointerCapture(event.pointerId);
-                        }}
-                        onKeyDown={(event) => {
-                          const delta = event.shiftKey ? 5 : 1;
-                          const shifts: Record<string, [number, number]> = {
-                            ArrowUp: [0, -delta], ArrowDown: [0, delta],
-                            ArrowLeft: [-delta, 0], ArrowRight: [delta, 0],
-                          };
-                          const shift = shifts[event.key];
-                          if (!shift) return;
-                          event.preventDefault();
-                          setSelected(landmark);
-                          moveLandmark(index, { x: point.x + shift[0], y: point.y + shift[1] });
-                        }}
-                      />
-                      <text x={point.x + pointRadius * 1.7} y={point.y - pointRadius * 1.4}
-                        fontSize={Math.max(14, imageWidth / 70)}>
-                        {landmark}
-                      </text>
-                    </g>
-                  );
-                })}
-              </svg>
-            ) : (
-              <img
-                src={photo.previewUrl}
-                alt="Uploaded lateral cephalogram awaiting landmark tracing"
-                onLoad={(event) => setDimensions({
-                  width: event.currentTarget.naturalWidth,
-                  height: event.currentTarget.naturalHeight,
-                })}
-              />
-            )}
-          </div>
-          <p className="ceph-tracing__caption">Drag each landmark to correct it. Use arrow keys for fine adjustment.</p>
-          {current && (
+      <div className="ceph-tracing__workspace">
+        <div className="ceph-tracing__image-column">
+          {!photo ? (
+            <div className="ceph-tracing__empty">
+              <p>Add a lateral cephalogram in Clinical Records to begin tracing.</p>
+              <button className="app-quiet-button" type="button" onClick={onOpenRecords}>
+                Open Clinical Records
+              </button>
+            </div>
+          ) : (
             <>
-              <div className="ceph-tracing__measurements" aria-label="Calculated cephalometric angles">
-                {(["SNA", "SNB", "ANB", "FMA"] as const).map((name) => (
-                  <div key={name}>
-                    <span>{name}</span>
-                    <strong>{currentAngles ? currentAngles[name].toFixed(1) + "°" : "—"}</strong>
-                  </div>
-                ))}
-              </div>
-              <div className="ceph-tracing__approval">
-                <small>Verify landmarks.</small>
-                <button
-                  type="button"
-                  className="app-primary-action"
-                  disabled={!currentAngles || current.approved || busy}
-                  onClick={() => onApprove({ ...current, approved: true })}
-                >
-                  {current.approved ? "Measurements verified" : "Approve measurements"}
+              <div className="ceph-tracing__actions">
+                <button type="button" className="app-quiet-button" disabled={busy}
+                  onClick={() => void run()}>
+                  {busy ? "Running analysis…" : current ? "Run again" : "Detect landmarks"}
                 </button>
+                {current && (
+                  <>
+                    <button className="app-quiet-button" type="button"
+                      onClick={() => setShowAll((value) => !value)}>
+                      {showAll ? "Key landmarks" : "All 29 landmarks"}
+                    </button>
+                    <div className="ceph-tracing__selector">
+                      <UiSelect
+                        ariaLabel="Select cephalometric landmark"
+                        value={selected}
+                        options={cephLandmarks.map((landmark) => landmark)}
+                        onChange={(value) => setSelected(value as CephLandmark)}
+                      />
+                    </div>
+                  </>
+                )}
               </div>
-              {current.approved && currentAngles && (
-                <p className="ceph-tracing__confirmed" role="status">
-                  {cephAngleSummary(currentAngles)} · Reviewed by clinician
-                </p>
-              )}
+              {busy && <p className="ceph-tracing__progress" role="status">{progress || "Processing…"}</p>}
+              {error && <p className="case-photo-error" role="alert">{error}</p>}
+              <div className="ceph-tracing__viewer">
+                {imageWidth > 0 && imageHeight > 0 ? (
+                  <svg
+                    ref={svgRef}
+                    viewBox={`0 0 ${imageWidth} ${imageHeight}`}
+                    preserveAspectRatio="xMidYMid meet"
+                    className="ceph-tracing__svg"
+                    aria-label="Lateral cephalogram with editable landmark positions"
+                    onPointerMove={onMove}
+                    onPointerUp={onStop}
+                    onPointerCancel={onStop}
+                  >
+                    <image href={photo.previewUrl} width={imageWidth} height={imageHeight} />
+                    {current && lines.map(([a, b]) => {
+                      const from = pointAt(a), to = pointAt(b);
+                      return from && to ? (
+                        <line key={a + b} x1={from.x} y1={from.y}
+                          x2={to.x} y2={to.y} className="ceph-tracing__line" />
+                      ) : null;
+                    })}
+                    {current?.points.map((point, index) => {
+                      const landmark = cephLandmarks[index];
+                      if (!showAll && !keyLandmarks.includes(landmark) && selected !== landmark) return null;
+                      return (
+                        <g key={landmark} className="ceph-tracing__landmark">
+                          <circle
+                            cx={point.x} cy={point.y} r={hitRadius}
+                            className="ceph-tracing__hit"
+                            role="button" tabIndex={0}
+                            aria-label={`Move ${landmark} landmark`}
+                            onPointerDown={(event) => {
+                              setSelected(landmark);
+                              dragRef.current = index;
+                              event.currentTarget.setPointerCapture(event.pointerId);
+                            }}
+                            onKeyDown={(event) => {
+                              const delta = event.shiftKey ? 5 : 1;
+                              const shifts: Record<string, [number, number]> = {
+                                ArrowUp: [0, -delta], ArrowDown: [0, delta],
+                                ArrowLeft: [-delta, 0], ArrowRight: [delta, 0],
+                              };
+                              const shift = shifts[event.key];
+                              if (!shift) return;
+                              event.preventDefault();
+                              setSelected(landmark);
+                              moveLandmark(index, { x: point.x + shift[0], y: point.y + shift[1] });
+                            }}
+                          />
+                          <circle
+                            cx={point.x} cy={point.y}
+                            r={landmark === selected ? pointRadius * 1.18 : pointRadius}
+                            className={`ceph-tracing__point${landmark === selected ? " is-selected" : ""}`}
+                            aria-hidden="true"
+                          />
+                          <text x={point.x + hitRadius * 0.45} y={point.y - hitRadius * 0.45}
+                            fontSize={Math.max(14, imageWidth / 68)}>
+                            {landmark}
+                          </text>
+                        </g>
+                      );
+                    })}
+                  </svg>
+                ) : (
+                  <img
+                    src={photo.previewUrl}
+                    alt="Uploaded lateral cephalogram awaiting landmark tracing"
+                    onLoad={(event) => setDimensions({
+                      width: event.currentTarget.naturalWidth,
+                      height: event.currentTarget.naturalHeight,
+                    })}
+                  />
+                )}
+              </div>
+              <p className="ceph-tracing__caption">Drag a point to adjust it. Use arrow keys for fine movement.</p>
             </>
           )}
-          <p className="ceph-tracing__credit">
-            CephViT research model, NIH/NLM · <a href="https://huggingface.co/nlm-dir/CephViT"
-              target="_blank" rel="noreferrer">Source and attribution</a>
-            {" · "}OpenMDW 1.1
-            {" · "}Initial model download {modelBytes.toFixed(1)} MB
-          </p>
-        </>
-      )}
+        </div>
+
+        <div className="ceph-tracing__analysis-column">
+          <h3>Skeletal analysis</h3>
+          {current ? (
+            <div className="ceph-tracing__measurements" aria-label="Calculated cephalometric angles">
+              {(["SNA", "SNB", "ANB", "FMA"] as const).map((name) => (
+                <div key={name}>
+                  <span>{name}</span>
+                  <strong>{currentAngles ? currentAngles[name].toFixed(1) + "°" : "—"}</strong>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="ceph-tracing__empty-result">Measurements appear after landmark detection.</p>
+          )}
+
+          {children}
+
+          {current && (
+            <div className="ceph-tracing__approval">
+              <button
+                type="button"
+                className="app-primary-action"
+                disabled={!currentAngles || current.approved || busy}
+                onClick={() => onApprove({ ...current, approved: true })}
+              >
+                {current.approved ? "Measurements verified" : "Approve measurements"}
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
