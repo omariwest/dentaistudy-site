@@ -952,7 +952,7 @@ a {
   align-items: flex-end;
   justify-content: space-between;
   gap: 18px;
-  width: min(980px, 100%);
+  width: min(1280px, 100%);
   margin: 0 auto 14px;
 }
 
@@ -1006,7 +1006,7 @@ a {
   display: grid;
   grid-template-columns: minmax(130px, 0.34fr) minmax(0, 1fr);
   gap: 14px;
-  width: min(980px, 100%);
+  width: min(1280px, 100%);
   margin: 0 auto 10px;
   padding: 12px 14px;
   border: 1px solid #cdd2da;
@@ -1056,16 +1056,11 @@ a {
 }
 
 .case-section {
-  width: min(980px, 100%);
+  width: min(1280px, 100%);
   margin: 0 auto 8px;
   padding: 12px 14px;
   border-bottom: 1px solid #d5dae1;
   background: #ffffff;
-}
-
-.case-workflow-page--split .case-workflow-page__header,
-.case-workflow-page--split .readiness-card {
-  width: min(1280px, 100%);
 }
 
 .case-content-grid {
@@ -4596,7 +4591,7 @@ a {
 
 /* Controlled clinical AI review */
 .ai-review-card {
-  width: min(980px, 100%);
+  width: min(1280px, 100%);
   margin: 0 auto 14px;
   padding: 16px 18px;
   border: 1px solid #dfe3e9;
@@ -4838,7 +4833,7 @@ a {
 
 /* Treatment plan + approval */
 .plan-blocked-card {
-  width: min(980px, 100%);
+  width: min(1280px, 100%);
   margin: 0 auto;
   padding: 18px;
   border: 1px solid #efcccc;
@@ -4903,7 +4898,7 @@ a {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 244px), 1fr));
   gap: 9px;
-  width: min(980px, 100%);
+  width: min(1280px, 100%);
   margin: 0 auto 8px;
 }
 
@@ -4950,7 +4945,7 @@ a {
 
 .plan-approval-panel {
   display: flex;
-  width: min(980px, 100%);
+  width: min(1280px, 100%);
   align-items: center;
   justify-content: space-between;
   gap: 24px;
