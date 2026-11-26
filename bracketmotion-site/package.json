@@ -5,12 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm run validate:v1 && tsc -b && vite build",
+    "build": "npm run validate:v1 && tsc -b && node scripts/fetch-ceph-model.mjs && vite build",
     "preview": "vite preview",
     "validate:v1": "node scripts/validate-v1.mjs"
   },
   "dependencies": {
     "@react-three/fiber": "^9.7.0",
+    "onnxruntime-web": "1.31.1",
     "@supabase/supabase-js": "2.119.2",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

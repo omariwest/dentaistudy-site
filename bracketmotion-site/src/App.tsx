@@ -12,6 +12,7 @@ import {
 import type { ClinicalViewerHandle } from "./ClinicalViewer";
 import UiSelect from "./UiSelect";
 import NumberInput from "./NumberInput";
+import { cephAngles, cephAngleSummary, type CephTrace } from "./cephGeometry";
 import type {
   ScanPersistenceState,
   StageAiReviewResult,
@@ -33,6 +34,7 @@ import {
 
 const ClinicalViewer = lazy(() => import("./ClinicalViewer"));
 const ScanWorkflow = lazy(() => import("./ScanWorkflow"));
+const CephAnalysis = lazy(() => import("./CephAnalysis"));
 
 type Platform = "Windows" | "macOS";
 
@@ -1089,6 +1091,11 @@ function FindingsView({
   diagnosisError,
   planningReady,
   missingCount,
+  cephPhoto,
+  cephTrace,
+  onCephTraceChange,
+  onApproveCeph,
+  onOpenRecords,
 }: {
   scopeIssue: string;
   onScopeIssue: (value: string) => void;
@@ -1105,6 +1112,11 @@ function FindingsView({
   diagnosisError: string;
   planningReady: boolean;
   missingCount: number;
+  cephPhoto?: CasePhoto;
+  cephTrace: CephTrace | null;
+  onCephTraceChange: (next: CephTrace | null) => void;
+  onApproveCeph: (next: CephTrace) => void;
+  onOpenRecords: () => void;
 }) {
   return (
     <div className="case-workflow-page case-workflow-page--split">
@@ -1373,6 +1385,15 @@ function FindingsView({
             <input value={findings.cephConcern} onChange={(event) => onFindingChange("cephConcern", event.target.value)} type="text" />
           </label>
         </div>
+        <Suspense fallback={<p className="ceph-tracing__progress">Opening tracing workspace…</p>}>
+          <CephAnalysis
+            photo={cephPhoto}
+            trace={cephTrace}
+            onTraceChange={onCephTraceChange}
+            onApprove={onApproveCeph}
+            onOpenRecords={onOpenRecords}
+          />
+        </Suspense>
       </section>
       <section className="case-section" aria-labelledby="scope-screen-title">
         <div className="case-section__heading">
@@ -2383,6 +2404,7 @@ function ClinicalAppPage() {
   const [plan, setPlan] = useState<TreatmentPlanState>(demoPlan);
   const [records, setRecords] = useState<Record<RecordKey, boolean>>(demoRecords);
   const [photos, setPhotos] = useState<Partial<Record<PhotoKey, CasePhoto>>>({});
+  const [cephTrace, setCephTrace] = useState<CephTrace | null>(null);
   const [photoError, setPhotoError] = useState("");
   const photoUrlsRef = useRef<Partial<Record<PhotoKey, string>>>({});
   const photoGenerationRef = useRef(0);
@@ -2529,6 +2551,7 @@ function ClinicalAppPage() {
     });
     photoUrlsRef.current = {};
     setPhotos({});
+    setCephTrace(null);
     setPhotoError("");
   }, [cancelSuggestions]);
 
@@ -2675,6 +2698,7 @@ function ClinicalAppPage() {
       else delete next[key];
       return next;
     });
+    if (key === "ceph") setCephTrace(null);
     setPhotoError("");
     setDiagnosis((current) => ({ ...current, approved: false }));
     diagnosisRequestRef.current += 1;
@@ -3088,6 +3112,9 @@ function ClinicalAppPage() {
           `Maxillary incisors: ${findings.maxillaryIncisors}`,
           `Mandibular incisors: ${findings.mandibularIncisors}`,
           `Concern: ${findings.cephConcern}`,
+          ...(cephTrace?.approved && cephAngles(cephTrace.points)
+            ? [`Clinician-verified numeric measurements: ${cephAngleSummary(cephAngles(cephTrace.points)!)}`]
+            : []),
         ].join("; "),
       },
       plan: {
@@ -3631,6 +3658,25 @@ function ClinicalAppPage() {
               }}
               findings={findings}
               onFindingChange={updateFinding}
+              cephPhoto={photos.ceph}
+              cephTrace={cephTrace}
+              onCephTraceChange={(next) => {
+                if (cephTrace?.approved) {
+                  setDiagnosis((current) => ({ ...current, approved: false }));
+                  setPlanApproved(false);
+                  setSetupApproved(false);
+                  invalidateTreatmentSelection();
+                }
+                setCephTrace(next);
+              }}
+              onApproveCeph={(next) => {
+                setCephTrace(next);
+                setDiagnosis((current) => ({ ...current, approved: false }));
+                setPlanApproved(false);
+                setSetupApproved(false);
+                invalidateTreatmentSelection();
+              }}
+              onOpenRecords={() => setActiveSection("Case")}
               diagnosis={diagnosis}
               onDiagnosisChange={updateDiagnosis}
               onApproveDiagnosis={() => setDiagnosis((current) => ({ ...current, approved: true }))}
@@ -3885,7 +3931,7 @@ function TermsPage() {
 
       <h2>8. Intellectual property</h2>
       <p>
-        BracketMotion owns or licenses the software, interface, branding, internally authored rules and original content that make up the service. You retain ownership of your uploaded case content. Third-party software, publications, trademarks and open-source components remain the property of their respective owners and are governed by their applicable licenses.
+        BracketMotion owns or licenses the software, interface, branding, internally authored rules and original content that make up the service. You retain ownership of your uploaded case content. Third-party software, publications, trademarks and open-source components remain the property of their respective owners and are governed by their applicable licenses. Its optional cephalometric tracing feature includes the <a href="https://huggingface.co/nlm-dir/CephViT" target="_blank" rel="noreferrer">CephViT</a> research model by Hou and colleagues (NIH/NLM research), distributed under OpenMDW 1.1; attribution does not imply NIH endorsement.
       </p>
 
       <h2>9. Free service and changes</h2>
@@ -3939,7 +3985,7 @@ function ClinicalDisclaimerPage() {
 
       <h2>3. AI limitations</h2>
       <p>
-        AI-assisted outputs can contain errors, omissions or unsuitable suggestions. BracketMotion restricts AI to a clinician-reviewed decision-support role, but no control system eliminates every error. Do not approve a treatment strategy solely because the software generated it.
+        AI-assisted outputs can contain errors, omissions or unsuitable suggestions. BracketMotion restricts AI to a clinician-reviewed decision-support role, but no control system eliminates every error. Do not approve a treatment strategy solely because the software generated it. Automatic cephalometric points and calculated angles depend on image quality and detected landmarks. The treating clinician must correct the positions and review the measurements before accepting them; the research model is not independently cleared as an autonomous diagnostic device.
       </p>
 
       <h2>4. Clinical records remain essential</h2>
