@@ -999,6 +999,7 @@ function FindingsView({
   onGenerateDiagnosis,
   onSignIn,
   onOpenPlan,
+  canOpenTreatment,
   sessionActive,
   diagnosisLoading,
   diagnosisError,
@@ -1020,6 +1021,7 @@ function FindingsView({
   onGenerateDiagnosis: () => void;
   onSignIn: () => void;
   onOpenPlan: () => void;
+  canOpenTreatment: boolean;
   sessionActive: boolean;
   diagnosisLoading: boolean;
   diagnosisError: string;
@@ -1040,7 +1042,7 @@ function FindingsView({
         <button
           className="app-primary-action case-page-primary"
           type="button"
-          disabled={!diagnosis.approved}
+          disabled={!canOpenTreatment}
           onClick={onOpenPlan}
         >
           Continue to Treatment Plans
@@ -2367,6 +2369,8 @@ function ClinicalAppPage() {
 
   const missingCount = intraoralPhotoSlots.filter((slot) => !photos[slot.key]).length;
   const planningReady = missingCount === 0 && !scopeIssue;
+  const cephVerified = Boolean(photos.ceph && cephTrace?.approved && cephAngles(cephTrace.points));
+  const canOpenTreatment = planningReady && diagnosis.approved && cephVerified;
   const userId = session?.user.id ?? null;
   const doctorProfile = session?.user.user_metadata?.bracketmotion_profile as
     | BracketMotionDoctorProfile | undefined;
@@ -2634,7 +2638,10 @@ function ClinicalAppPage() {
     });
     if (key === "ceph") setCephTrace(null);
     setPhotoError("");
-    setDiagnosis((current) => ({ ...current, approved: false }));
+    // First cephalogram upload does not invalidate an already-approved dental diagnosis.
+    if (key !== "ceph" || photos.ceph) {
+      setDiagnosis((current) => ({ ...current, approved: false }));
+    }
     diagnosisRequestRef.current += 1;
     setDiagnosisLoading(false);
     setPlanApproved(false);
@@ -2700,7 +2707,7 @@ function ClinicalAppPage() {
   };
 
   const approveTreatmentPlan = () => {
-    if (!diagnosis.approved || !planningReady || !plan.problemList.trim() || !plan.goals.trim()) return;
+    if (!canOpenTreatment || !plan.problemList.trim() || !plan.goals.trim()) return;
     const option = plan.selectedOption === null ? null : plan.options[plan.selectedOption];
     if (!option || !Object.values(option).every((value) => value.trim())) return;
     setPlan((current) => ({
@@ -2720,7 +2727,7 @@ function ClinicalAppPage() {
     setShowCaseHub(false);
     setShowSettings(false);
 
-    if ((section === "Plan" || section === "Setup" || section === "Stages") && !diagnosis.approved) {
+    if ((section === "Plan" || section === "Setup" || section === "Stages") && !canOpenTreatment) {
       setActiveSection("Findings");
       return;
     }
@@ -3135,8 +3142,8 @@ function ClinicalAppPage() {
       setSuggestionsError("Reconnect to generate treatment suggestions.");
       return;
     }
-    if (!planningReady || !diagnosis.approved) {
-      setSuggestionsError("Complete and approve the clinical diagnosis first.");
+    if (!canOpenTreatment) {
+      setSuggestionsError("Approve the diagnosis and verify cephalometric measurements first.");
       return;
     }
 
@@ -3259,7 +3266,7 @@ function ClinicalAppPage() {
     activeSection === "Case" ? "Findings" : activeSection === "Findings" ? "Plan" : "Setup";
   const inspectorCanAdvance = planningReady && (
     activeSection === "Case" ||
-    (activeSection === "Findings" ? diagnosis.approved : planApproved)
+    (activeSection === "Findings" ? canOpenTreatment : planApproved)
   );
   const inspectorActionLabel = activeSection === "Case"
     ? "Continue to Diagnosis"
@@ -3606,7 +3613,6 @@ function ClinicalAppPage() {
               }}
               onApproveCeph={(next) => {
                 setCephTrace(next);
-                setDiagnosis((current) => ({ ...current, approved: false }));
                 setPlanApproved(false);
                 setSetupApproved(false);
                 invalidateTreatmentSelection();
@@ -3618,6 +3624,7 @@ function ClinicalAppPage() {
               onGenerateDiagnosis={() => void runDiagnosisDraft()}
               onSignIn={() => setAccountOpen(true)}
               onOpenPlan={() => openSection("Plan")}
+              canOpenTreatment={canOpenTreatment}
               sessionActive={Boolean(session)}
               diagnosisLoading={diagnosisLoading}
               diagnosisError={diagnosisError}
@@ -3626,7 +3633,7 @@ function ClinicalAppPage() {
             />
           ) : activeSection === "Plan" ? (
             <TreatmentPlanView
-              planningReady={planningReady}
+              planningReady={canOpenTreatment}
               scopeIssue={scopeIssue}
               plan={plan}
               planApproved={planApproved}
