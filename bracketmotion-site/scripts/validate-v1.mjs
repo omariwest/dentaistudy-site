@@ -212,7 +212,7 @@ const representativeFamilies = [
     name: "Selected Class II Division 1",
     checks: [
       [app, '"Class II"'],
-      [app, '"Proclined"'],
+      [app, "overjet"],
       [scan, 'title: "Interarch correction"'],
       [scan, "elastics"],
     ],
