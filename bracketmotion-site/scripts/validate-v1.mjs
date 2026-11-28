@@ -265,9 +265,46 @@ if (manifest.id !== "/app") {
 if (manifest.theme_color !== "#000000") {
   throw new Error("V1 validation failed: final BracketMotion PWA theme color regressed.");
 }
-requireText(index, "/favicon.ico", "final favicon ICO");
-requireText(index, "/icons/favicon-32.png", "final 32px favicon");
-requireText(index, "/icons/favicon-16.png", "final 16px favicon");
+const approvedIconVersion = "?v=black-20261128";
+const approvedFiles = [
+  ["../public/favicon.ico", "../assets/BracketMotion-Icon-Kit/black/favicon.ico"],
+  ["../public/icons/bracketmotion-icon.svg", "../assets/BracketMotion-Icon-Kit/black/bracketmotion-black.svg"],
+  ["../public/icons/favicon-16.png", "../assets/BracketMotion-Icon-Kit/black/favicon-16x16.png"],
+  ["../public/icons/favicon-32.png", "../assets/BracketMotion-Icon-Kit/black/favicon-32x32.png"],
+  ["../public/icons/favicon-48.png", "../assets/BracketMotion-Icon-Kit/black/favicon-48x48.png"],
+  ["../public/icons/icon-180.png", "../assets/BracketMotion-Icon-Kit/black/app-icon-180x180.png"],
+  ["../public/icons/icon-192.png", "../assets/BracketMotion-Icon-Kit/black/app-icon-192x192.png"],
+  ["../public/icons/icon-512.png", "../assets/BracketMotion-Icon-Kit/black/app-icon-512x512.png"],
+];
+for (const [served, approved] of approvedFiles) {
+  const actual = fs.readFileSync(new URL(served, import.meta.url));
+  const source = fs.readFileSync(new URL(approved, import.meta.url));
+  if (!actual.equals(source)) {
+    throw new Error(`V1 validation failed: published icon does not match approved black kit (${served}).`);
+  }
+}
+for (const iconPath of [
+  "/manifest.webmanifest", "/favicon.ico", "/icons/bracketmotion-icon.svg",
+  "/icons/favicon-16.png", "/icons/favicon-32.png", "/icons/icon-180.png",
+]) {
+  requireText(index, `href="${iconPath}${approvedIconVersion}"`, "current favicon/manifest link");
+}
+if (serviceWorker.includes('bracketmotion-shell-v3') ||
+    !serviceWorker.includes('const CACHE_NAME = "bracketmotion-shell-v4";')) {
+  throw new Error("V1 validation failed: stale icon service worker cache.");
+}
+for (const iconPath of [
+  "/manifest.webmanifest", "/favicon.ico", "/icons/bracketmotion-icon.svg",
+  "/icons/favicon-16.png", "/icons/favicon-32.png", "/icons/favicon-48.png",
+  "/icons/icon-180.png", "/icons/icon-192.png", "/icons/icon-512.png",
+]) {
+  requireText(serviceWorker, `"${iconPath}${approvedIconVersion}"`, "versioned cached icon");
+}
+for (const icon of manifest.icons) {
+  if (!icon.src.endsWith(approvedIconVersion)) {
+    throw new Error(`V1 validation failed: stale manifest icon URL (${icon.src}).`);
+  }
+}
 requireText(finalBrandMark, "BracketMotion black standalone mark", "final BracketMotion brand mark");
 if (finalBrandMark.includes("#6d4cf5")) {
   throw new Error("V1 validation failed: temporary purple favicon artwork is still active.");
@@ -296,5 +333,5 @@ if (serviceWorker.includes("supabase.co")) {
 }
 
 console.log(
-  `BracketMotion V1 validation passed: ${representativeFamilies.length}/6 representative family profiles, ${clinicalRecordInputs.length} clinical record inputs, balanced workflow cards, five-photo Diagnosis gate, ${exclusions.length} scope exclusions, approval gates, AI photo contract, ceph groups, and PWA invariants.`,
+  `BracketMotion V1 validation passed: ${representativeFamilies.length}/6 representative family profiles, ${clinicalRecordInputs.length} clinical record inputs, balanced workflow cards, five-photo Diagnosis gate, approved icon assets, approval gates, AI photo contract, ceph groups, and PWA invariants.`,
 );
