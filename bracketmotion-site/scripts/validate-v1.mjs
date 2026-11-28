@@ -108,17 +108,37 @@ if (css.includes(".case-workflow-page--split") || app.includes("case-workflow-pa
 const photoFirstGate = [
   'const missingCount = intraoralPhotoSlots.filter((slot) => !photos[slot.key]).length;',
   'const planningReady = missingCount === 0 && !scopeIssue;',
+  'const cephVerified = Boolean(photos.ceph && cephTrace?.approved && cephAngles(cephTrace.points));',
+  'const canOpenTreatment = planningReady && diagnosis.approved && cephVerified;',
   'activeSection === "Case" ? "Findings" : activeSection === "Findings" ? "Plan" : "Setup"',
-  '(activeSection === "Findings" ? diagnosis.approved : planApproved)',
-  'if ((section === "Plan" || section === "Setup" || section === "Stages") && !diagnosis.approved)',
+  '(activeSection === "Findings" ? canOpenTreatment : planApproved)',
+  'if ((section === "Plan" || section === "Setup" || section === "Stages") && !canOpenTreatment)',
   'if ((section === "Setup" || section === "Stages") && !planApproved)',
   'if (section === "Stages" && !setupApproved)',
   'photos: photoInputs,',
   'onApproveDiagnosis',
+  'canOpenTreatment={canOpenTreatment}',
+  'disabled={!canOpenTreatment}',
+  'if (!canOpenTreatment || !plan.problemList.trim() || !plan.goals.trim()) return;',
+  'if (!canOpenTreatment) {',
+  'planningReady={canOpenTreatment}',
   'onApprove={approveTreatmentPlan}',
   'onOptionChange={updateTreatmentOption}',
 ];
 photoFirstGate.forEach((token) => requireText(app, token, "photo-first clinical gate"));
+const cephChanges = app.split('onCephTraceChange={(next) => {')[1]?.split('onOpenRecords={() =>', 1)[0] || "";
+const cephReapproval = cephChanges.split('onApproveCeph={(next) => {')[1] || "";
+const cephEdits = cephChanges.split('onApproveCeph={(next) => {')[0] || "";
+if (!cephEdits.includes('if (cephTrace?.approved) {') ||
+    !cephEdits.includes('setDiagnosis((current) => ({ ...current, approved: false }));') ||
+    !cephEdits.includes('setPlanApproved(false);') ||
+    !cephReapproval.includes('setCephTrace(next);') ||
+    cephReapproval.includes('setDiagnosis((current) => ({ ...current, approved: false }));') ||
+    !ceph.includes('corrected: true, approved: false') ||
+    !app.includes('if (key !== "ceph" || photos.ceph) {')) {
+  throw new Error("V1 validation failed: cephalometric approval and edited-landmark invalidation must preserve the review flow.");
+}
+
 ["frontal", "upperOcclusal", "lowerOcclusal", "rightBuccal", "leftBuccal"].forEach((slot) => {
   requireText(app, `{ key: "${slot}",`, "five-photo input");
 });
