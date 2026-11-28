@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type { PointerEvent as ReactPointerEvent, ReactNode } from "react";
+import type { PointerEvent as ReactPointerEvent } from "react";
 import UiSelect from "./UiSelect";
 import {
   cephAngles,
@@ -79,14 +79,12 @@ export default function CephAnalysis({
   onTraceChange,
   onApprove,
   onOpenRecords,
-  children,
 }: {
   photo?: SourcePhoto;
   trace: CephTrace | null;
   onTraceChange: (next: CephTrace | null) => void;
   onApprove: (next: CephTrace) => void;
   onOpenRecords: () => void;
-  children?: ReactNode;
 }) {
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState("");
@@ -360,13 +358,11 @@ export default function CephAnalysis({
               </section>
             ))
           ) : (
-            <div className="ceph-tracing__empty-result">
-              <strong>Measurements</strong>
+            <section className="ceph-tracing__empty-result" aria-label="Measurements">
+              <h3>Measurements</h3>
               <p>Available after landmark detection.</p>
-            </div>
+            </section>
           )}
-
-          {children}
 
           {current && (
             <div className="ceph-tracing__approval">
