@@ -532,7 +532,7 @@ Deno.serve(async (req: Request) => {
   }
   const { data: auth, error: authError } = authContext;
 
-  if (authError || !auth?.userClaims?.sub) {
+  if (authError || !auth?.userClaims?.id) {
     return json(
       {
         error: "AUTH_REQUIRED",
