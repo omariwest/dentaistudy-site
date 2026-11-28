@@ -681,53 +681,6 @@ type StoredRecordsState = {
 
 const viewerViews = ["Front", "Right", "Left", "Upper", "Lower"];
 
-const outOfScopeGroups = [
-  {
-    label: "Unsupported case types",
-    options: [
-      "Mixed or primary dentition treatment",
-      "Class III correction",
-      "Orthognathic surgery",
-      "Severe skeletal Class II correction",
-      "Major facial asymmetry",
-      "Asymmetric extraction strategy",
-      "Impacted tooth requiring surgical exposure / traction",
-      "Ankylosed tooth",
-      "Complex missing-tooth / prosthetic space management",
-      "Severe periodontal attachment / bone loss",
-      "Craniofacial syndrome or cleft-related treatment",
-      "Significant transverse correction requiring expansion",
-      "Severe anterior / posterior crossbite as primary problem",
-      "Complex retreatment with major root / periodontal limitations",
-      "TMD treatment planning",
-      "Main treatment depends on CBCT / root-bone simulation",
-      "Severe skeletal deep bite / short-face correction",
-      "Growth modification as primary deep-bite treatment",
-      "Severe skeletal long-face open bite",
-      "Open bite requiring posterior molar intrusion with TADs",
-      "Open bite with unresolved etiologic habit",
-      "Complex unilateral / asymmetric open bite",
-    ],
-  },
-  {
-    label: "Unsupported mechanics",
-    options: [
-      "TAD / miniscrew-supported mechanics",
-      "Molar intrusion with skeletal anchorage",
-      "Functional appliance treatment",
-      "Headgear",
-      "Palatal expansion / MARPE / surgically assisted expansion",
-      "Orthognathic-surgical mechanics",
-      "Impacted-tooth traction",
-      "Lingual appliance treatment",
-      "Clear-aligner treatment",
-      "Fully customized printed bracket system",
-      "Robotic / custom wire manufacturing",
-      "Manufacturer-specific prescription / workflow",
-    ],
-  },
-] as const;
-
 function ReadinessCard({
   planningReady,
   missingCount,
@@ -742,9 +695,9 @@ function ReadinessCard({
       <div className="readiness-card is-blocked" role="status">
         <div>
           <span>Records status</span>
-          <strong>Out of V1 scope</strong>
+          <strong>Planning restricted</strong>
         </div>
-        <p>{scopeIssue} is outside the frozen BracketMotion V1 boundary. Treatment-plan generation is blocked.</p>
+        <p>{scopeIssue}. Treatment planning remains unavailable for this saved case.</p>
       </div>
     );
   }
@@ -990,7 +943,6 @@ function CaseRecordsView({
 
 function FindingsView({
   scopeIssue,
-  onScopeIssue,
   findings,
   onFindingChange,
   diagnosis,
@@ -1012,7 +964,6 @@ function FindingsView({
   onOpenRecords,
 }: {
   scopeIssue: string;
-  onScopeIssue: (value: string) => void;
   findings: FindingsState;
   onFindingChange: (field: keyof FindingsState, value: string) => void;
   diagnosis: DiagnosisState;
@@ -1077,7 +1028,7 @@ function FindingsView({
 
       <div className="case-content-grid">
         <div className="case-content-column">
-      <section className="case-section" aria-labelledby="diagnosis-draft-title">
+      <section className="case-section" aria-labelledby="diagnosis-draft-title" aria-busy={diagnosisLoading}>
         <div className="case-section__heading">
           <div>
             <h2 id="diagnosis-draft-title">Clinical diagnosis</h2>
@@ -1134,7 +1085,7 @@ function FindingsView({
           </button>
         </div>
       </section>
-      <section className="case-section" aria-labelledby="oral-title">
+      <section className="case-section" aria-labelledby="oral-title" aria-busy={diagnosisLoading}>
         <div className="case-section__heading">
           <div>
             <h2 id="oral-title">Oral + periodontal</h2>
@@ -1176,7 +1127,7 @@ function FindingsView({
 
         </div>
         <div className="case-content-column">
-      <section className="case-section" aria-labelledby="occlusion-title">
+      <section className="case-section" aria-labelledby="occlusion-title" aria-busy={diagnosisLoading}>
         <div className="case-section__heading">
           <div>
             <h2 id="occlusion-title">Occlusion</h2>
@@ -1246,7 +1197,7 @@ function FindingsView({
           </label>
         </div>
       </section>
-      <section className="case-section" aria-labelledby="facial-title">
+      <section className="case-section" aria-labelledby="facial-title" aria-busy={diagnosisLoading}>
         <div className="case-section__heading">
           <div>
             <h2 id="facial-title">Facial + soft tissue</h2>
@@ -1276,78 +1227,19 @@ function FindingsView({
           </label>
         </div>
       </section>
-      <section className="case-section" aria-labelledby="scope-screen-title">
-        <div className="case-section__heading">
-          <div>
-            <h2 id="scope-screen-title">V1 scope screen</h2>
-          </div>
-        </div>
-
-        <label className="scope-select">
-          <span>Primary unsupported treatment need</span>
-          <UiSelect
-            value={scopeIssue}
-            onChange={onScopeIssue}
-            ariaLabel="Primary unsupported treatment need"
-            options={[
-              { value: "", label: "None — within current V1 scope" },
-              ...outOfScopeGroups.flatMap((group) =>
-                group.options.map((option) => ({
-                  value: option,
-                  label: option,
-                  group: group.label,
-                })),
-              ),
-            ]}
-          />
-        </label>
-
-        {scopeIssue && (
-          <div className="scope-warning" role="alert">
-            <strong>Planning blocked</strong>
-            <p>{scopeIssue} is not supported in BracketMotion V1. The clinician can keep the case as a record, but treatment-plan generation stays unavailable.</p>
-          </div>
-        )}
-      </section>
         </div>
       <section className="case-section case-ceph-section" aria-labelledby="ceph-title">
         <div className="case-section__heading">
           <div><h2 id="ceph-title">Cephalometric analysis</h2></div>
         </div>
-        <Suspense fallback={<p className="ceph-tracing__progress">Opening tracing workspace…</p>}>
+        <Suspense fallback={<p role="status">Opening cephalometric analysis…</p>}>
           <CephAnalysis
             photo={cephPhoto}
             trace={cephTrace}
             onTraceChange={onCephTraceChange}
             onApprove={onApproveCeph}
             onOpenRecords={onOpenRecords}
-          >
-            <div className="ceph-tracing__clinical-fields">
-              <h3>Clinical findings</h3>
-              <div className="finding-grid">
-                <label>
-                  <span>Skeletal AP pattern</span>
-                  <UiSelect value={findings.skeletalAp} onChange={(value) => onFindingChange("skeletalAp", value)} options={["Not assessed", "Class I","Class II","Class III"]} ariaLabel="Skeletal AP pattern" />
-                </label>
-                <label>
-                  <span>Vertical skeletal pattern</span>
-                  <UiSelect value={findings.skeletalVertical} onChange={(value) => onFindingChange("skeletalVertical", value)} options={["Not assessed", "Low","Average","High"]} ariaLabel="Vertical skeletal pattern" />
-                </label>
-                <label>
-                  <span>Maxillary incisors</span>
-                  <UiSelect value={findings.maxillaryIncisors} onChange={(value) => onFindingChange("maxillaryIncisors", value)} options={["Not assessed", "Retroclined","Normal","Proclined"]} ariaLabel="Maxillary incisors" />
-                </label>
-                <label>
-                  <span>Mandibular incisors</span>
-                  <UiSelect value={findings.mandibularIncisors} onChange={(value) => onFindingChange("mandibularIncisors", value)} options={["Not assessed", "Retroclined","Normal","Proclined"]} ariaLabel="Mandibular incisors" />
-                </label>
-                <label className="finding-grid__wide">
-                  <span>Important cephalometric concern</span>
-                  <input value={findings.cephConcern} onChange={(event) => onFindingChange("cephConcern", event.target.value)} type="text" />
-                </label>
-              </div>
-            </div>
-          </CephAnalysis>
+          />
         </Suspense>
       </section>
       </div>
@@ -1417,10 +1309,10 @@ function TreatmentPlanView({
           </div>
         </div>
         <div className="plan-blocked-card" role="status">
-          <strong>{scopeIssue ? "Out of V1 scope" : "Case not planning-ready"}</strong>
+          <strong>{scopeIssue ? "Planning restricted" : "Case not planning-ready"}</strong>
           <p>
             {scopeIssue
-              ? scopeIssue + " is outside the frozen BracketMotion V1 boundary."
+              ? scopeIssue + " remains restricted for this saved case."
               : "Complete the required clinical records in Clinical Records and Diagnosis."}
           </p>
         </div>
@@ -3589,15 +3481,6 @@ function ClinicalAppPage() {
           ) : activeSection === "Findings" ? (
             <FindingsView
               scopeIssue={scopeIssue}
-              onScopeIssue={(value) => {
-                setScopeIssue(value);
-                setDiagnosis((current) => ({ ...current, approved: false }));
-                diagnosisRequestRef.current += 1;
-                setDiagnosisLoading(false);
-                setPlanApproved(false);
-                setSetupApproved(false);
-                invalidateTreatmentSelection();
-              }}
               findings={findings}
               onFindingChange={updateFinding}
               cephPhoto={photos.ceph}
