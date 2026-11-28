@@ -1,10 +1,26 @@
 import { createSupabaseContext } from "npm:@supabase/server@1.9.2";
 
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY") ?? "";
-const MODEL = "gemini-3.6-flash";
+const MODEL = "gemini-3.5-flash-lite";
 const FALLBACK_MODEL = "gemini-2.5-flash-lite";
 const MAX_BODY_CHARS = 2_600_000;
 const MAX_TEXT_CHARS = 4_000;
+const PRIMARY_TIMEOUT_MS = 35_000;
+const FALLBACK_TIMEOUT_MS = 25_000;
+
+async function withDeadline<T>(operation: Promise<T>, timeoutMs: number, label: string): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      operation,
+      new Promise<T>((_, reject) => {
+        timer = setTimeout(() => reject(new Error(label)), timeoutMs);
+      }),
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -433,7 +449,7 @@ ${JSON.stringify(clinicalCase)}`;
     contents: [{ role: "user", parts }],
     generationConfig: {
       maxOutputTokens: 5000,
-      thinkingConfig: { thinkingLevel: "medium" },
+      thinkingConfig: model.startsWith("gemini-3") ? { thinkingLevel: "low" } : { thinkingBudget: 0 },
       responseMimeType: "application/json",
       responseJsonSchema: input.mode === "diagnosis_draft" ? diagnosisSchema
         : input.mode === "treatment_suggestions" ? treatmentSuggestionsSchema : responseSchema,
@@ -449,7 +465,7 @@ ${JSON.stringify(clinicalCase)}`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify(body),
-      signal: AbortSignal.timeout(model === MODEL ? 55_000 : 45_000),
+      signal: AbortSignal.timeout(model === MODEL ? PRIMARY_TIMEOUT_MS : FALLBACK_TIMEOUT_MS),
     },
   );
 
@@ -475,11 +491,13 @@ ${JSON.stringify(clinicalCase)}`;
 
 async function generateReview(input: ReturnType<typeof sanitizeInput>) {
   try {
-    return await callGemini(MODEL, input);
+    return await withDeadline(callGemini(MODEL, input), PRIMARY_TIMEOUT_MS + 1_000, "GEMINI_TIMEOUT");
   } catch (error: any) {
     const status = Number(error?.status ?? 0);
-    if (error?.name === "TimeoutError" || error?.name === "AbortError" || status === 404 || status === 429 || status >= 500) {
-      return await callGemini(FALLBACK_MODEL, input);
+    if (error?.message === "GEMINI_TIMEOUT" || error?.name === "TimeoutError" ||
+        error?.name === "AbortError" || status === 404 || status === 429 || status >= 500) {
+      console.warn("BRACKETMOTION_GEMINI_FALLBACK", String(error?.message || "unknown").slice(0, 100));
+      return await withDeadline(callGemini(FALLBACK_MODEL, input), FALLBACK_TIMEOUT_MS + 1_000, "GEMINI_TIMEOUT");
     }
     throw error;
   }
@@ -505,9 +523,14 @@ Deno.serve(async (req: Request) => {
     return json({ error: "METHOD_NOT_ALLOWED" }, 405);
   }
 
-  const { data: auth, error: authError } = await createSupabaseContext(req, {
-    auth: "user",
-  });
+  let authContext;
+  try {
+    authContext = await withDeadline(createSupabaseContext(req, { auth: "user" }), 12_000, "AUTH_TIMEOUT");
+  } catch (error: any) {
+    console.error("BRACKETMOTION_AUTH_CONTEXT_ERROR", String(error?.message || "unknown").slice(0, 100));
+    return json({ error: "AUTH_UNAVAILABLE", message: "Sign-in verification is temporarily unavailable." }, 503);
+  }
+  const { data: auth, error: authError } = authContext;
 
   if (authError || !auth?.userClaims?.sub) {
     return json(
@@ -553,7 +576,9 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
+    console.info("BRACKETMOTION_AI_START", input.mode);
     const generated = await generateReview(input);
+    console.info("BRACKETMOTION_AI_DONE", input.mode);
     if (input.mode === "treatment_suggestions") {
       return json({
         suggestions: normalizeTreatmentSuggestions(generated),
