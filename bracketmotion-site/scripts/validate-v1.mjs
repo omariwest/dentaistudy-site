@@ -53,9 +53,19 @@ if (cardPositions.some((position) => position < 0) ||
 }
 const rightColumn = diagnosisPage.lastIndexOf('className="case-content-column"');
 const facial = diagnosisPage.indexOf('aria-labelledby="facial-title"');
-const scope = diagnosisPage.indexOf('aria-labelledby="scope-screen-title"');
-if (rightColumn < 0 || facial <= rightColumn || scope <= facial) {
-  throw new Error("V1 validation failed: Diagnosis facial and scope cards are not balanced in the right column.");
+const ceph = diagnosisPage.indexOf('aria-labelledby="ceph-title"');
+if (rightColumn < 0 || facial <= rightColumn || ceph <= facial) {
+  throw new Error("V1 validation failed: Diagnosis facial and cephalometry sections must keep their layout order.");
+}
+for (const removed of [
+  'aria-labelledby="scope-screen-title"',
+  'onScopeIssue',
+  'ceph-tracing__clinical-fields',
+  'Primary unsupported treatment need',
+]) {
+  if (diagnosisPage.includes(removed)) {
+    throw new Error(`V1 validation failed: removed clinical UI returned (${removed}).`);
+  }
 }
 for (const selector of [
   ".case-workflow-page__header {", ".readiness-card {", ".case-section {",
@@ -101,6 +111,21 @@ if (!ceph.includes('aria-busy={busy} onClick={() => void run()}') ||
     !css.includes('@keyframes clinical-action-shimmer')) {
   throw new Error("V1 validation failed: meaningful clinical action shimmer is missing.");
 }
+for (const id of ["diagnosis-draft-title", "occlusion-title", "oral-title", "facial-title"]) {
+  requireText(diagnosisPage, `aria-labelledby="${id}" aria-busy={diagnosisLoading}`, "draft heading shimmer state");
+}
+if (!css.includes('.case-section[aria-busy="true"] .case-section__heading h2 {') ||
+    !css.includes('background-clip: text;') ||
+    !css.includes('animation: clinical-action-shimmer 1.45s linear infinite;') ||
+    !css.includes('@media (prefers-reduced-motion: reduce)') ||
+    css.includes(".scope-select") || css.includes(".scope-warning") ||
+    css.includes(".ceph-tracing__clinical-fields") ||
+    !ceph.includes('<section className="ceph-tracing__empty-result" aria-label="Measurements">') ||
+    ceph.includes("ReactNode") || ceph.includes("{children}") ||
+    !app.includes('Clinician-verified numeric measurements:')) {
+  throw new Error("V1 validation failed: diagnosis shimmer and uncluttered measured cephalometry have regressed.");
+}
+
 if (css.includes(".case-workflow-page--split") || app.includes("case-workflow-page--split")) {
   throw new Error("V1 validation failed: obsolete split-layout overrides remain.");
 }
@@ -155,44 +180,6 @@ if (!cephEdits.includes('if (cephTrace?.approved) {') ||
 if (ceph.includes("Initial model download") || ceph.includes("Source and attribution")) {
   throw new Error("V1 validation failed: clinical workspace contains developer metadata.");
 }
-
-const exclusions = [
-  "Mixed or primary dentition treatment",
-  "Class III correction",
-  "Orthognathic surgery",
-  "Severe skeletal Class II correction",
-  "Major facial asymmetry",
-  "Asymmetric extraction strategy",
-  "Impacted tooth requiring surgical exposure / traction",
-  "Ankylosed tooth",
-  "Complex missing-tooth / prosthetic space management",
-  "Severe periodontal attachment / bone loss",
-  "Craniofacial syndrome or cleft-related treatment",
-  "Significant transverse correction requiring expansion",
-  "Severe anterior / posterior crossbite as primary problem",
-  "Complex retreatment with major root / periodontal limitations",
-  "TMD treatment planning",
-  "Main treatment depends on CBCT / root-bone simulation",
-  "Severe skeletal deep bite / short-face correction",
-  "Growth modification as primary deep-bite treatment",
-  "Severe skeletal long-face open bite",
-  "Open bite requiring posterior molar intrusion with TADs",
-  "Open bite with unresolved etiologic habit",
-  "Complex unilateral / asymmetric open bite",
-  "TAD / miniscrew-supported mechanics",
-  "Molar intrusion with skeletal anchorage",
-  "Functional appliance treatment",
-  "Headgear",
-  "Palatal expansion / MARPE / surgically assisted expansion",
-  "Orthognathic-surgical mechanics",
-  "Impacted-tooth traction",
-  "Lingual appliance treatment",
-  "Clear-aligner treatment",
-  "Fully customized printed bracket system",
-  "Robotic / custom wire manufacturing",
-  "Manufacturer-specific prescription / workflow",
-];
-exclusions.forEach((token) => requireText(app, token, "Gate 4 exclusion"));
 
 const representativeFamilies = [
   {
