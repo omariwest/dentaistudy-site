@@ -53,8 +53,8 @@ if (cardPositions.some((position) => position < 0) ||
 }
 const rightColumn = diagnosisPage.lastIndexOf('className="case-content-column"');
 const facial = diagnosisPage.indexOf('aria-labelledby="facial-title"');
-const ceph = diagnosisPage.indexOf('aria-labelledby="ceph-title"');
-if (rightColumn < 0 || facial <= rightColumn || ceph <= facial) {
+const cephSection = diagnosisPage.indexOf('aria-labelledby="ceph-title"');
+if (rightColumn < 0 || facial <= rightColumn || cephSection <= facial) {
   throw new Error("V1 validation failed: Diagnosis facial and cephalometry sections must keep their layout order.");
 }
 for (const removed of [
