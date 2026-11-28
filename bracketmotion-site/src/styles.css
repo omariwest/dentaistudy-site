@@ -1126,6 +1126,16 @@ a {
   letter-spacing: -0.025em;
 }
 
+.case-section[aria-busy="true"] .case-section__heading h2 {
+  color: #6258a5;
+  background: linear-gradient(100deg, #5f6476 20%, #a596f2 44%, #5f6476 65%);
+  background-size: 200% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: clinical-action-shimmer 1.45s linear infinite;
+}
+
 .case-form-grid,
 .finding-grid {
   display: grid;
@@ -1234,7 +1244,6 @@ a {
 
 .case-form-grid label,
 .finding-grid label,
-.scope-select,
 .number-field {
   display: grid;
   gap: 6px;
@@ -1243,7 +1252,6 @@ a {
 
 .case-form-grid label > span,
 .finding-grid label > span,
-.scope-select > span,
 .number-field > label {
   color: #616975;
   font-size: 0.65rem;
@@ -1288,8 +1296,7 @@ a {
   margin-bottom: 10px;
 }
 
-.ceph-tracing__heading strong,
-.ceph-tracing__empty-result strong {
+.ceph-tracing__heading strong {
   display: block;
   color: #1e2837;
   font-size: 0.82rem;
@@ -1330,8 +1337,7 @@ a {
   min-width: 0;
 }
 
-.ceph-tracing__analysis-column > section h3,
-.ceph-tracing__clinical-fields h3 {
+.ceph-tracing__analysis-column > section h3 {
   margin: 0 0 8px;
   color: #1e2837;
   font-size: 0.78rem;
@@ -1469,13 +1475,6 @@ a {
   color: #263144;
   font-size: 0.82rem;
   font-variant-numeric: tabular-nums;
-}
-
-.ceph-tracing__clinical-fields {
-  min-width: 0;
-  margin-top: 16px;
-  padding-top: 14px;
-  border-top: 1px solid #e1e5eb;
 }
 
 .ceph-tracing__approval {
@@ -1784,31 +1783,6 @@ a {
   color: #8a919e;
   font-size: 0.62rem;
   font-weight: 700;
-}
-
-.scope-select {
-  max-width: 520px;
-}
-
-.scope-warning {
-  margin-top: 12px;
-  padding: 12px 13px;
-  border: 1px solid #efcccc;
-  border-radius: 9px;
-  background: #fff8f8;
-}
-
-.scope-warning strong {
-  display: block;
-  color: #a53b3b;
-  font-size: 0.72rem;
-}
-
-.scope-warning p {
-  margin: 5px 0 0;
-  color: #755656;
-  font-size: 0.67rem;
-  line-height: 1.5;
 }
 
 .case-hub {
