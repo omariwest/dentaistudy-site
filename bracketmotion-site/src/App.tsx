@@ -2924,11 +2924,6 @@ function ClinicalAppPage() {
           `Rotations/displacements: ${findings.rotations}`,
         ].join("; "),
         cephalometric: [
-          `Skeletal AP: ${findings.skeletalAp}`,
-          `Skeletal vertical: ${findings.skeletalVertical}`,
-          `Maxillary incisors: ${findings.maxillaryIncisors}`,
-          `Mandibular incisors: ${findings.mandibularIncisors}`,
-          `Concern: ${findings.cephConcern}`,
           ...(cephTrace?.approved && cephAngles(cephTrace.points)
             ? [`Clinician-verified numeric measurements: ${Object.entries(cephAngles(cephTrace.points)!)
                 .filter((entry): entry is [string, number] => typeof entry[1] === "number")
