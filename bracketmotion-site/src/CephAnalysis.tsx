@@ -123,6 +123,7 @@ export default function CephAnalysis({
 
   const run = async () => {
     if (!photo || busy) return;
+    if (current?.approved) onTraceChange({ ...current, approved: false });
     const request = ++runRef.current;
     setBusy(true);
     setError("");
