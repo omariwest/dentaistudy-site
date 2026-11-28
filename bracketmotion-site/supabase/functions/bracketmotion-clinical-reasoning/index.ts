@@ -504,6 +504,7 @@ async function generateReview(input: ReturnType<typeof sanitizeInput>) {
 }
 
 Deno.serve(async (req: Request) => {
+  console.info("BM_STAGE handler_entry");
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: corsHeaders });
   }
@@ -523,6 +524,7 @@ Deno.serve(async (req: Request) => {
     return json({ error: "METHOD_NOT_ALLOWED" }, 405);
   }
 
+  console.info("BM_STAGE auth_start");
   let authContext;
   try {
     authContext = await withDeadline(createSupabaseContext(req, { auth: "user" }), 12_000, "AUTH_TIMEOUT");
@@ -542,7 +544,10 @@ Deno.serve(async (req: Request) => {
     );
   }
 
+  console.info("BM_STAGE auth_ok");
+  console.info("BM_STAGE body_start");
   const rawBody = await req.text();
+  console.info("BM_STAGE body_done");
 
   if (!rawBody || rawBody.length > MAX_BODY_CHARS) {
     return json(
