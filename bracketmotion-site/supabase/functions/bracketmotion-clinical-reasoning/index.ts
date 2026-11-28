@@ -535,6 +535,11 @@ Deno.serve(async (req: Request) => {
   const { data: auth, error: authError } = authContext;
 
   if (authError || !auth?.userClaims?.id) {
+    console.warn("BM_AUTH_REJECT", {
+      code: authError?.code ?? null,
+      status: authError?.status ?? null,
+      hasUserId: Boolean(auth?.userClaims?.id),
+    });
     return json(
       {
         error: "AUTH_REQUIRED",
