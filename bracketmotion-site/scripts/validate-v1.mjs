@@ -135,6 +135,7 @@ if (!cephEdits.includes('if (cephTrace?.approved) {') ||
     !cephReapproval.includes('setCephTrace(next);') ||
     cephReapproval.includes('setDiagnosis((current) => ({ ...current, approved: false }));') ||
     !ceph.includes('corrected: true, approved: false') ||
+    !ceph.includes('if (current?.approved) onTraceChange({ ...current, approved: false });') ||
     !app.includes('if (key !== "ceph" || photos.ceph) {')) {
   throw new Error("V1 validation failed: cephalometric approval and edited-landmark invalidation must preserve the review flow.");
 }
