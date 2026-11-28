@@ -1,15 +1,15 @@
-const CACHE_NAME = "bracketmotion-shell-v3";
+const CACHE_NAME = "bracketmotion-shell-v4";
 const STATIC_SHELL = [
   "/",
-  "/manifest.webmanifest",
-  "/favicon.ico",
-  "/icons/bracketmotion-icon.svg",
-  "/icons/favicon-16.png",
-  "/icons/favicon-32.png",
-  "/icons/favicon-48.png",
-  "/icons/icon-180.png",
-  "/icons/icon-192.png",
-  "/icons/icon-512.png",
+  "/manifest.webmanifest?v=black-20261128",
+  "/favicon.ico?v=black-20261128",
+  "/icons/bracketmotion-icon.svg?v=black-20261128",
+  "/icons/favicon-16.png?v=black-20261128",
+  "/icons/favicon-32.png?v=black-20261128",
+  "/icons/favicon-48.png?v=black-20261128",
+  "/icons/icon-180.png?v=black-20261128",
+  "/icons/icon-192.png?v=black-20261128",
+  "/icons/icon-512.png?v=black-20261128",
 ];
 
 async function precacheApplicationShell() {
